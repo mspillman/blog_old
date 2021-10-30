@@ -1,1 +1,1 @@
-Sitemap: https://mspillman.github.io/site/sitemap.xml
+Sitemap: https://mspillman.github.io/blog/sitemap.xml
