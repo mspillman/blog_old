@@ -128,9 +128,9 @@ window.onload = wrap_img;
 </li>
 <li class="toc-entry toc-h1"><a href="#The-GALLOP-algorithm">The GALLOP algorithm </a>
 <ul>
-<li class="toc-entry toc-h2"><a href="#Local-optimisation-with-Adam">Local optimisation with Adam </a>
+<li class="toc-entry toc-h2"><a href="#Local-optimisation">Local optimisation </a>
 <ul>
-<li class="toc-entry toc-h3"><a href="#Adam-equations">Adam equations </a></li>
+<li class="toc-entry toc-h3"><a href="#Adam">Adam </a></li>
 <li class="toc-entry toc-h3"><a href="#Learning-rate-finder">Learning rate finder </a></li>
 </ul>
 </li>
@@ -153,14 +153,13 @@ window.onload = wrap_img;
 <h1 id="Introduction">
 <a class="anchor" href="#Introduction" aria-hidden="true"><span class="octicon octicon-link"></span></a>Introduction<a class="anchor-link" href="#Introduction"> </a>
 </h1>
-<p>This post is intended to give an overview of <a href="https://github.com/mspillman/gallop"><em>GALLOP</em></a>, an algorithm I recently <a href="https://pubs.rsc.org/en/content/articlelanding/2021/ce/d1ce00978h">published</a> alongside my friend, PhD supervisor and colleague, <a href="https://www.reading.ac.uk/pharmacy/staff/professor-kenneth-shankland">Prof. Kenneth Shankland</a>. I assume you have some familiarity with global optimisation (GO) methods for crystal structure determination from powder diffraction data (SDPD). If you need a quick primer, I recommend the following resources:</p>
+<p>This post is intended to give an overview of <a href="https://github.com/mspillman/gallop"><em>GALLOP</em></a>, an algorithm I recently <a href="https://pubs.rsc.org/en/content/articlelanding/2021/ce/d1ce00978h">published</a> alongside my friend, PhD supervisor and colleague, <a href="https://www.reading.ac.uk/pharmacy/staff/professor-kenneth-shankland">Prof. Kenneth Shankland</a>. In the next post, I'll go over how to use <em>GALLOP</em> to solve the crystal structure of a small molecule. This post assumes you have some familiarity with global optimisation (GO) methods for crystal structure determination from powder diffraction data (SDPD). If you need a quick primer, I recommend the following resources:</p>
 <ul>
 <li><a href="https://www.worldscientific.com/doi/epdf/10.1142/9789811204579_0001">Experimental Analysis of Powder Diﬀraction Data</a></li>
 <li><a href="https://it.iucr.org/Ha/ch4o1v0001/">An overview of currently used structure determination methods for powder diffraction data</a></li>
 <li><a href="https://onlinelibrary.wiley.com/doi/abs/10.1107/S0108270113028643">The principles underlying the use of powder diffraction data in solving pharmaceutical crystal structures</a></li>
 <li><a href="https://it.iucr.org/Ha/ch4o3v0001/">Real-space methods for structure solution from powder-diffraction data: application to molecular structures</a></li>
 </ul>
-<p>In the next post, I'll go over how to use <em>GALLOP</em> to solve the crystal structure of a small molecule.</p>
 <p>Abbreviations I'll be using:</p>
 <ul>
 <li>SDPD = Crystal structure determination from powder diffraction data</li>
@@ -181,20 +180,20 @@ window.onload = wrap_img;
 <p><img src="/blog/images/copied_from_nb/images/qNRM-famot.png" alt="Shankland et al, 2010"></p>
 <p>I carried on investigating this method as part of my PhD, and my results confirmed that this approach is effective at solving crystal structures, even of high-complexity. However, despite the intriguing results, the approach was not adopted on a wide scale by the SDPD community, perhaps because the performance is approximately the same existing GO-based programs. The code I was using was written in C++, a language I do not know at all well, so I was unable to contribute much to its further development.</p>
 <p>A few years after finishing my PhD, I decided I wanted to try writing my own SDPD code in Python. Whilst Python is notoriously slow, my rationale was that Python is much easier to learn than C++, so should provide a lower barrier to entry for PhD students seeking to try out new ideas for SDPD. My first prototype used <a href="https://numpy.org/">numpy</a> to try to speed up the code, and borrowed heavily from <a href="https://pymatgen.org/">pymatgen</a>, a fantastic open-source library with lots of crystallographic functionality. Eventually with some help from Kenneth, I had a system which allowed me to easily try out lots of different algorithms, such as those included in <a href="https://docs.scipy.org/doc/scipy/reference/optimize.html">scipy.optimize</a>, which features a variety of local and global optimisation algorithms.</p>
-<p>In parallel to this, it seemed like every day incredible new results from the field of <em>deep learning</em> were coming out, showing state-of-the-art performance in wide variety of domains. Most neural networks are trained using <a href="https://en.wikipedia.org/wiki/Backpropagation">backpropagation</a>, an algorithm which makes use of <a href="https://en.wikipedia.org/wiki/Automatic_differentiation">automatic differentiation</a> to calculate the gradient of the cost function with respect to the parameters of the neural network. Variants of stochastic gradient descent are then used to modify the parameters of the neural network in order to improve the performance of the neural network as measured by the cost function. Whilst neural networks have been in use <a href="https://arxiv.org/abs/1404.7828">for over half a century</a>, part of the reason for the explosion in activity was the availability of GPUs and tools to leverage their parallel processing capabilities.</p>
-<p>I took an interest in this, and quickly realised that most of the libraries used for this work had well supported python APIs. Some of them, such as <a href="https://pytorch.org/">PyTorch</a>, are so similar to numpy that it seemed logical to try to port my code to make use of these libraries. This would give both GPU-acceleration and automatic differentiation capabilities for very little effort!</p>
+<p>In parallel to this, it seemed like every day incredible new results from the field of <em>deep learning</em> were coming out, showing state-of-the-art performance in wide variety of domains. Most neural networks are trained using <a href="https://en.wikipedia.org/wiki/Backpropagation">backpropagation</a>, an algorithm which makes use of <a href="https://en.wikipedia.org/wiki/Automatic_differentiation">automatic differentiation</a> to calculate the gradient of the cost function (which provides a measure of how well the neural network is performing its task) with respect to the parameters of the neural network. Variants of stochastic gradient descent are then used to modify the parameters of the neural network in order to improve the performance of the neural network as measured by the cost function. Whilst neural networks have been in use <a href="https://arxiv.org/abs/1404.7828">for over half a century</a>, part of the reason for the explosion in activity was the availability of GPUs and tools to leverage their parallel processing capabilities.</p>
+<p>I took an interest in this, and quickly realised that most of the libraries used for this work had well supported python APIs. Some of them, such as <a href="https://pytorch.org/">PyTorch</a>, are so similar to numpy that it seemed logical to try to port my code to make use of these libraries. This would give both GPU-acceleration and automatic differentiation capabilities for relatively little effort!</p>
 <h2 id="Rationale-for-GALLOP">
 <a class="anchor" href="#Rationale-for-GALLOP" aria-hidden="true"><span class="octicon octicon-link"></span></a>Rationale for GALLOP<a class="anchor-link" href="#Rationale-for-GALLOP"> </a>
 </h2>
 <p>With my code now capable of running on GPUs, it might seem obvious to implement GPU-versions of commonly used existing algorithms for SDPD such as simulated annealing (SA), parallel tempering and others. However, despite the parallel processing capabilities of GPUs, I found that the performance with GO methods is not particularly good (at least with my code!). Using SA as an example, then yes, it's possible to run thousands of simultaneous runs on a single GPU, but the number of iterations that can be performed per second is laughably slow in comparison to performance on a CPU. Therefore, because algorithms like SA take a large number of iterations converge, the performance benefits of parallel processing are offset by the sheer amount of time needed to process the number of iterations required to reach the global minimum - you end up waiting a long time for a result!</p>
 <p>In contrast to GO algorithms, LO algorithms with access to gradients converge much more rapidly. The automatic differentiation capabilities provided by PyTorch allow gradients to be calculated rapidly, without any additional code to be written. The gradients so obtained are exactly equivalent to the analytical gradient, and are obtained much more rapidly than the <em>approximate</em> gradient that would be obtained via the method of finite differences. Therefore, when processing large numbers of LO runs on a GPU, because they converge much more rapidly than GO methods, you don't need to wait for a long time to know if any of the runs have been successful!</p>
-<p>The next piece of the puzzle is the idea that even if the global minimum is not located (<em>i.e.</em> the structure hasn't yet been solved), the previously optimised positions may contain some useful information about the crystal structure. This might not be obvious at first, but let's try to convince ourselves by taking a look at the hypersurface of verapamil hydrochloride, a structure with 23 degrees of freedom. This figure shows a 2D slice through the hypersurface of verapamil with all degrees of freedom set to their correct crystallographic values apart from the fractional coordinates of the verapamil molecule along <em>a</em> and <em>b</em>, which form the axes plotted here.</p>
+<p>The next piece of the puzzle is the idea that even if the global minimum is not located (<em>i.e.</em> the structure hasn't yet been solved), the previously optimised positions may contain some useful information about the crystal structure. This might not be obvious at first, but let's try to convince ourselves by taking a look at the hypersurface of verapamil hydrochloride, a structure with 23 degrees of freedom. This figure shows a 2D slice through the hypersurface with all degrees of freedom set to their correct crystallographic values, apart from the fractional coordinates of the verapamil molecule along <em>a</em> and <em>b</em>, which form the axes plotted here.</p>
 <p><img src="/blog/images/copied_from_nb/images/verap_ab_slice.png" alt="Verapmil hypersurface"></p>
 <p>As you can see, the global minimum is located in the upper left of the image. There are 3 local minima present, each of which represents an incorrect structure that has either 21 or 22 of its 23 degrees of freedom correctly determined. Despite this, the $\chi^{2}$ at each local minimum gives no indication that the result is so close to correct. I'll write another blog post in the future showing how to use the <em>GALLOP</em> code to generate plots like this.</p>
 <p>I tried a few things to attempt to recycle information from "failed" local optimisation attempts, including using <a href="https://en.wikipedia.org/wiki/Kernel_density_estimation">kernel density estimation</a> to try to resample various degrees of freedom depending based on the density of solutions that ended up with particular coordinates. This definitely showed an improvement relative to random sampling, but proved inconsistent in terms of the level of improvement offered. Perhaps I'll revisit this in a future blog post as I still think there's something there that may be of use.</p>
 <p>Eventually, I ended trying particle swarm optimisation (PSO) to attempt to recycle the optimised positions. A few things attracted me to PSO:</p>
 <ol>
-<li>It's a simple algorithm to implement - literally just a couple of lines of code to get it working as a proof of concept</li>
+<li>It's a simple algorithm to implement - just a few lines of code got it working as a proof of concept</li>
 <li>The algorithm maintains a memory of "good" solutions so there's less risk of the algorithm moving in a bad direction and getting stuck there</li>
 <li>It's shown great performance in a wide variety of domains</li>
 </ol>
@@ -218,20 +217,18 @@ window.onload = wrap_img;
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Local-optimisation-with-Adam">
-<a class="anchor" href="#Local-optimisation-with-Adam" aria-hidden="true"><span class="octicon octicon-link"></span></a>Local optimisation with Adam<a class="anchor-link" href="#Local-optimisation-with-Adam"> </a>
+<h2 id="Local-optimisation">
+<a class="anchor" href="#Local-optimisation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Local optimisation<a class="anchor-link" href="#Local-optimisation"> </a>
 </h2>
 <p>The local optimisation algorithm used in <em>GALLOP</em> by default is <a href="https://arxiv.org/abs/1412.6980">Adam</a>. This algorithm is very popular for training neural networks, and efficient implementations are available in almost every deep learning library.</p>
 <p>Adam incorporates two distinct innovations that improve its performance relative to (stochastic) gradient descent.</p>
 <ol>
 <li>Adam has a per-parameter adaptive step size rather than a single global step size used for all parameters. This is useful as different degrees of freedom will have different effects on $\chi^2$ for the same percentage change in the parameter value. For example, the translation of a whole molecule within a unit cell affects the position of more scattering atoms than changing a torsion angle. What's nice is that Adam automatically adjusts the step size for each parameter as it goes, meaning that a suitable step size is used throughout optimisation.</li>
-</ol>
-<ol>
 <li>Adam incorporates momentum, which helps it to escape shallow local minima, pass rapidly through flat regions of the hypersurface and dampens uncesessary oscillations in the optimisation trajectory. For an <em>excellent</em> overview of momentum (with a focus on ML applications), see this article: <a href="https://distill.pub/2017/momentum/">https://distill.pub/2017/momentum/</a>
 </li>
 </ol>
-<h3 id="Adam-equations">
-<a class="anchor" href="#Adam-equations" aria-hidden="true"><span class="octicon octicon-link"></span></a>Adam equations<a class="anchor-link" href="#Adam-equations"> </a>
+<h3 id="Adam">
+<a class="anchor" href="#Adam" aria-hidden="true"><span class="octicon octicon-link"></span></a>Adam<a class="anchor-link" href="#Adam"> </a>
 </h3>
 <p>Using the gradient obtained by automatic differentiation, $\bold{g}_t$, Adam stores exponentially decaying averages of the gradients, $\bold{m}_t$, and squared gradients, $\bold{ν}_t$, which are then used in conjunction with the overall step size, $\alpha$, to give a suitable step size for each parameter being optimised. The parameters $\beta_1$ and $\beta_2$ are numbers less than one that control the rate at which the past gradients and squared gradients respectively decay.</p>
 <p>
@@ -252,7 +249,7 @@ $$ \hat{\bold{v}}_t = \frac{\bold{v}_t}{1-\beta_2}$$
 $$ \bold{\theta}_{t+1} = \bold{\theta}_t - \frac{\alpha}{\sqrt{\hat{\bold{v}}_t} + \epsilon}\hat{\bold{m}}_t $$
 </p>
 <p>The authors of Adam suggest default parameters of $\beta_1 = 0.9$, $\beta_2 = 0.999$ and $\epsilon = 1 \times 10^{-8}$. The step size, $\alpha$, must be set by the user.
-By default GALLOP sets $\beta_2 = 0.9$ which decays the past squared gradients more rapidly, and was found in our testing to be more effective than the default value.</p>
+By default <em>GALLOP</em> sets $\beta_2 = 0.9$ which decays the past squared gradients more rapidly, and was found in our testing to be more effective than the default value.</p>
 
 </div>
 </div>
@@ -265,11 +262,11 @@ By default GALLOP sets $\beta_2 = 0.9$ which decays the past squared gradients m
 </h3>
 <p>To make life easy for end users (and myself), I wanted a way to avoid having to experiment to find a suitable step size ($\alpha$) to use in <em>GALLOP</em>.</p>
 <p>The deep learning library, <a href="https://www.fast.ai/">fast.ai</a> includes a heuristic known as the <a href="https://fastai1.fast.ai/callbacks.lr_finder.html">learning rate finder</a>, which is used to set the step size (referred to as the learning rate in ML-parlance) for deep learning experiments automatically. This is used in conjunction with a step-size alteration policy which is carried out during optimisation, as described <a href="https://arxiv.org/abs/1708.07120">here</a>.</p>
-<p>After some testing and experimentation, GALLOP makes use of a slightly modified version, as described below.</p>
-<p>A set of 200 log-linearly spaced learning rates are initialised, ranging from $1 \times 10^{-4}$ and 0.15. Starting with the smallest, GALLOP is run on the structure of interest, and the step size increased to the next value after every iteration. The sum of the $\chi^2$ values is recorded after each iteration, and subsequently plotted.</p>
+<p>After some testing and experimentation, <em>GALLOP</em> now makes use of a slightly modified version, as described below.</p>
+<p>A set of 200 log-linearly spaced learning rates are initialised, ranging from $1 \times 10^{-4}$ and 0.15. Starting with the smallest, <em>GALLOP</em> is run on the structure of interest, and the step size increased to the next value after every iteration. The sum of the $\chi^2$ values is recorded after each iteration, and subsequently plotted.</p>
 <p>The minimum point on this plot, $\alpha_{min}$, is then used to give the step size. It may be scaled after considering the gradient of the line as the step size is increased beyond $\alpha_{min}$.</p>
-<p>To do this, the step sizes and $\chi^2$ values are rescaled into the range 0-1. The x-axis is shifted such that $\alpha_{min}$ sits at 0, and the data plotted. If the gradient of the resultant curve (approximated by the red straight line below) is &gt; 1, then this is considered steep. A steep gradient implies a high sensitivity to the step size, and hence $\alpha_{min}$ is scaled by a factor of 0.5. A medium gradient (between 0.5 and 1) results in multiplication factor of 0.75, whilst a shallow gradient (less than 0.5) implies relative insensitivity to the step size, and hence results in a scaling factor of 1.0.</p>
-<p>In the <em>GALLOP</em> browser interface, this is provided as a plot:</p>
+<p>To do this, the step sizes and $\chi^2$ values are rescaled into the range 0-1. The x-axis is shifted such that $\alpha_{min}$ sits at 0, and the data plotted. If the gradient of the resultant curve (approximated by the red straight line below) is &gt; 0.5, then this is considered steep. A steep gradient implies a high sensitivity to the step size, and hence $\alpha_{min}$ is scaled by a factor of 0.5. A medium gradient (between 0.25 and 0.5) results in multiplication factor of 0.75, whilst a shallow gradient (less than 0.25) implies relative insensitivity to the step size, and hence results in a multiplication factor of 1.0.</p>
+<p>In the <em>GALLOP</em> browser interface, this information is provided in a plot:</p>
 <p><img src="/blog/images/copied_from_nb/images/lr_finder_output.png" alt="Step size finder"></p>
 <p>In my testing, the learning rates obtained in this manner provide a good first attempt for GALLOP and provide reasonable performance over a wide variety of structures. However, this doesn't mean that they are optimal, and if a structure isn't solving, it is one thing that might merit adjustment.</p>
 
@@ -282,29 +279,28 @@ By default GALLOP sets $\beta_2 = 0.9$ which decays the past squared gradients m
 <h2 id="Particle-Swarm-optimisation">
 <a class="anchor" href="#Particle-Swarm-optimisation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Particle Swarm optimisation<a class="anchor-link" href="#Particle-Swarm-optimisation"> </a>
 </h2>
-<p><a href="https://en.wikipedia.org/wiki/Particle_swarm_optimization">Particle Swarm Optimisation</a> has previously been used in the context of SDPD in the program <a href="http://scripts.iucr.org/cgi-bin/paper?S0021889809034207">PeckCryst</a>. The algorithm used in GALLOP is different to that used in PeckCryst in a number of ways which I'll try to highlight below.</p>
-<p>The equations for the PSO are simple. The velocity of the particles at step $t+1$, $\bold{v}_{t+1}$, is calculated from the velocity at the previous step $\bold{v}_{t}$ and the position of the particles $\bold{x}_t$ using the following equation:</p>
+<p><a href="https://en.wikipedia.org/wiki/Particle_swarm_optimization">Particle Swarm Optimisation</a> has previously been used in the context of SDPD in the program <a href="http://scripts.iucr.org/cgi-bin/paper?S0021889809034207">PeckCryst</a>. The algorithm used in <em>GALLOP</em> is different to that used in PeckCryst in a number of ways which I'll try to highlight below.</p>
+<p>The equations for the PSO are simple. The velocity of a particle at step $t+1$, $\bold{v}_{t+1}$, is calculated from the velocity at the previous step $\bold{v}_{t}$ and the position of the particle $\bold{x}_t$ using the following equation:</p>
 <p>
 $$\bold{v}_{t+1} = \omega_{t} \bold{v}_{t} + c_{1}\bold{R}_1(\bold{g}_{best} - \bold{x}_t) + c_2\bold{R}_2(\bold{x}_{best} - \bold{x}_t)$$
 </p>
-<p>Where $\omega_{t}$ is the inertia of the particle which controls how much the previous velocity influences the next velocity. $c_1$ and $c_2$ control the maximum step size in the direction of the best particle in the swarm, $\bold{g}_{best}$ and best position previously visited by the particle, \bold{x}_{best}. In contrast to PeckCryst which uses scalars, in $GALLOP$, by default $\bold{R}_1$ and $\bold{R}_2$ are diagonal matrices with their elements drawn independently from a standard uniform distribution. This provides more variability in how the particles move which helps to improve the exploration.</p>
-<p><em>GALLOP</em> calculates $\omega_{t}$ for each particle by randing all of the particles in the swarm in terms of their $\chi^2$ value, and then doing the following:</p>
+<p>Where $\omega_{t}$ is the inertia of the particle (which controls how much the previous velocity influences the next velocity) and $c_1$ and $c_2$ control the maximum step size in the direction of the best particle in the swarm, $\bold{g}_{best}$ and best position previously visited by the particle, \bold{x}_{best}. In contrast to PeckCryst which uses scalars, in <em>GALLOP</em>, by default $\bold{R}_1$ and $\bold{R}_2$ are diagonal matrices with their elements drawn independently from a standard uniform distribution. This provides more variability in how the particles move which helps to improve the exploration. By default, the maximum absolute velocity in <em>GALLOP</em> is limited to 1.0.</p>
+<p><em>GALLOP</em> calculates $\omega$ for particle $i$ by ranking all of the particles in the swarm in terms of their $\chi^2$ value, and then using the following equation:</p>
 <p>
 $$ \omega_i = 0.4 + \frac{Rank_i}{2N} $$
 </p>
-<p>This gives values in the range 0.4 - 0.9, and means that the best particles (lowest rank) slow down, whilst the worst particles in the swarm have higher inertias and hence are able to continue moving more rapidly.</p>
-<p>By default, the maximum absolute velocity is limited to 1.0.</p>
-<p>The parameters are then updated using the velocity and previous parameters according to:</p>
+<p>This gives inertia values in the range 0.4 - 0.9, and means that the best particles slow down, whilst the worst particles in the swarm have higher inertias and hence are able to continue moving more rapidly.</p>
+<p>The degrees of freedom are then updated using the velocity and previous parameters according to:</p>
 <p>
 $$\bold{x}_{t+1} = \bold{x}_t + \bold{v}_{t+1} $$
 </p>
-<p>Another difference to PeckCryst is the coordinate transform that is performed in <em>GALLOP</em>. The fractional coordinates are transformed to account for the repeating unit cell and hence coordinates of -0.1 and 0.9 are eqivalent. In addition to this, the torsion angles are also transformed to ensure that the PSO treats angles of +180 and -180 degrees as equivalent. GALLOP makes use of quaternions to represent molecular orientations, which do not require any transformation. For local optimisation, the degrees of freedom are:</p>
+<p>Another difference to PeckCryst is the coordinate transform that is performed in <em>GALLOP</em>. The fractional coordinates are transformed to account for the repeating unit cell and the fact that coordinates of -0.1 and 0.9 are equivalent. The torsion angles are also transformed to ensure that the PSO treats angles of +180 and -180 degrees as equivalent. Molecular orientations, represented in <em>GALLOP</em> with quaternions do not require any transformation. For local optimisation, the degrees of freedom that are optimised are:</p>
 <p>
-$$ DoF_{LO} = [\bold{x}_{pos}, \bold{x}_{quaternions}, \bold{x}_{torsions}] $$
+$$ DOF_{LO} = [\bold{x}_{positions}, \bold{x}_{quaternions}, \bold{x}_{torsions}] $$
 </p>
 <p>These are then transformed as follows for use in the PSO:</p>
 <p>
-$$ DoF_{PSO} = [\sin{2\pi\bold{x}_{pos}}, \cos{2\pi\bold{x}_{pos}}, \bold{x}_{quaternions}, \sin{\bold{x}_{torsions}}, \cos{\bold{x}_{torsions}}] $$
+$$ DoF_{PSO} = [\sin{2\pi\bold{x}_{positions}}, \cos{2\pi\bold{x}_{positions}}, \bold{x}_{quaternions}, \sin{\bold{x}_{torsions}}, \cos{\bold{x}_{torsions}}] $$
 </p>
 <p>Following the PSO update, these are transformed back for use in LO using the <a href="https://en.wikipedia.org/wiki/Atan2">two-argument arctangent function</a> which gives values in the range $-\pi$ to $\pi$, and additional scaling by a factor of $1/2\pi$ for the positions.</p>
 
