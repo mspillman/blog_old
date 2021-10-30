@@ -227,14 +227,14 @@ window.onload = wrap_img;
 <h3 id="Adam">
 <a class="anchor" href="#Adam" aria-hidden="true"><span class="octicon octicon-link"></span></a>Adam<a class="anchor-link" href="#Adam"> </a>
 </h3>
-<p>Using the gradient obtained by automatic differentiation, $\bold{g}_t$, Adam stores exponentially decaying averages of the gradients, $\bold{m}_t$, and squared gradients, $\bold{ν}_t$, which are then used in conjunction with the overall step size, $\alpha$, to give a suitable step size for each parameter being optimised. The parameters $\beta_1$ and $\beta_2$ are numbers less than one that control the rate at which the past gradients and squared gradients respectively decay.</p>
+<p>Using the gradient obtained by automatic differentiation, $\bold{g}_t$, Adam stores exponentially decaying averages of the gradients, $\bold{m}_t$, and squared gradients, $\bold{v}_{t}$, which are then used in conjunction with the overall step size, $\alpha$, to give a suitable step size for each parameter being optimised. The parameters $\beta_1$ and $\beta_2$ are numbers less than one that control the rate at which the past gradients and squared gradients respectively decay.</p>
 <p>
 $$ \bold{m}_t = \beta_{1} \bold{m}_{t-1} + (1-\beta_{1})\bold{g}_t $$
 </p>
 <p>
 $$\bold{v}_t = \beta_{2} \bold{v}_{t-1} + (1-\beta_2)\bold{g}_t^2$$
 </p>
-<p>Because $\bold{m}_t$ and $\bold{ν}_t$ are initialised as vectors of zeros, the authors of Adam use the following corrective terms to reduce the effect of this biasing, which can be particularly problematic in the early stages of training:</p>
+<p>Because $\bold{m}_t$ and $\bold{v}_{t}$ are initialised as vectors of zeros, the authors of Adam use the following corrective terms to reduce the effect of this biasing, which can be particularly problematic in the early stages of training:</p>
 <p>
 $$ \hat{\bold{m}}_t = \frac{\bold{m}_t}{1-\beta_1}$$
 </p>
