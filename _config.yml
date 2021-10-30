@@ -7,7 +7,7 @@
 # https://learnxinyminutes.com/docs/yaml/
 
 title: Mark Spillman
-description: Musings on crystallography, powder diffraction and AI. All opinions my own.
+description: Musings on crystallography, powder diffraction and machine learning. All opinions my own.
 github_username: mspillman
 # you can comment the below line out if your repo name is not different than your baseurl
 github_repo: "blog"
