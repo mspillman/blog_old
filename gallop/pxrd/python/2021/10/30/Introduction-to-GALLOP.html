@@ -293,11 +293,11 @@ $$\bold{x}_{t+1} = \bold{x}_t + \bold{v}_{t+1} $$
 </p>
 <p>Another difference to PeckCryst is the coordinate transform that is performed in <em>GALLOP</em>. The fractional coordinates are transformed to account for the repeating unit cell and the fact that coordinates of -0.1 and 0.9 are equivalent. The torsion angles are also transformed to ensure that the PSO treats angles of +180 and -180 degrees as equivalent. Molecular orientations, represented in <em>GALLOP</em> with quaternions do not require any transformation. For local optimisation, the degrees of freedom that are optimised are:</p>
 <p>
-$$ DOF_{LO} = [\bold{x}_{positions}, \bold{x}_{quaternions}, \bold{x}_{torsions}] $$
+$$ DoF_{(LO)} = [\bold{x}_{positions}, \bold{x}_{quaternions}, \bold{x}_{torsions}] $$
 </p>
 <p>These are then transformed as follows for use in the PSO:</p>
 <p>
-$$ DoF_{PSO} = [\sin{2\pi\bold{x}_{positions}}, \cos{2\pi\bold{x}_{positions}}, \bold{x}_{quaternions}, \sin{\bold{x}_{torsions}}, \cos{\bold{x}_{torsions}}] $$
+$$ DoF_{(PSO)} = [\sin{2\pi\bold{x}_{positions}}, \cos{2\pi\bold{x}_{positions}}, \bold{x}_{quaternions}, \sin{\bold{x}_{torsions}}, \cos{\bold{x}_{torsions}}] $$
 </p>
 <p>Following the PSO update, these are transformed back for use in LO using the <a href="https://en.wikipedia.org/wiki/Atan2">two-argument arctangent function</a> which gives values in the range $-\pi$ to $\pi$, and additional scaling by a factor of $1/2\pi$ for the positions.</p>
 
