@@ -1,9 +1,9 @@
 ---
 layout: page
 title: Publications
+toc: true
 permalink: /publications/
 ---
-# Publications
 
 ## Journal articles
 
