@@ -7,7 +7,7 @@ permalink: /publications/
 
 ## Journal articles
 
-Mark J. Spillman and Kenneth Shankland. “GALLOP: accelerated molecular crystal structure determination from powder diffraction data.” CrystEngComm (2021) doi: [10.1039/d1ce00978h](https://doi.org/10.1039/d1ce00978h)
+**Mark J. Spillman** and Kenneth Shankland. “GALLOP: accelerated molecular crystal structure determination from powder diffraction data.” CrystEngComm (2021) doi: [10.1039/d1ce00978h](https://doi.org/10.1039/d1ce00978h)
 
 Okba Al Rahal, Mridul Majumder, **Mark J. Spillman**, Jacco van de Streek and Kenneth Shankland. "Co-Crystal Structures of Furosemide:Urea and Carbamazepine:Indomethacin Determined from Powder X-Ray Diffraction Data." Crystals (2020). doi: [10.3390/cryst10010042](https://doi.org/10.3390/cryst10010042)
 
