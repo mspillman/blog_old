@@ -166,12 +166,11 @@ window.onload = wrap_img;
 <h1 id="Introduction">
 <a class="anchor" href="#Introduction" aria-hidden="true"><span class="octicon octicon-link"></span></a>Introduction<a class="anchor-link" href="#Introduction"> </a>
 </h1>
-<p>This post is intended to give an overview of <a href="https://github.com/mspillman/gallop"><em>GALLOP</em></a>, an algorithm I recently <a href="https://pubs.rsc.org/en/content/articlelanding/2021/ce/d1ce00978h">published</a> alongside my friend, PhD supervisor and colleague, <a href="https://www.reading.ac.uk/pharmacy/staff/professor-kenneth-shankland">Prof. Kenneth Shankland</a>. In the next post, I'll go over how to use <em>GALLOP</em> to solve the crystal structure of a small molecule. This post assumes you have some familiarity with global optimisation (GO) methods for crystal structure determination from powder diffraction data (SDPD). If you need a quick primer, I recommend the following resources:</p>
+<p>This post is intended to give an overview of <a href="https://github.com/mspillman/gallop"><em>GALLOP</em></a>, an algorithm I recently <a href="https://pubs.rsc.org/en/content/articlelanding/2021/ce/d1ce00978h">published</a> alongside my friend, PhD supervisor and colleague, <a href="https://www.reading.ac.uk/pharmacy/staff/professor-kenneth-shankland">Prof. Kenneth Shankland</a>. If you don't have some familiarity with global optimisation (GO) methods for crystal structure determination from powder diffraction data (SDPD), I recommend the following resources:</p>
 <ul>
 <li><a href="https://www.worldscientific.com/doi/epdf/10.1142/9789811204579_0001">Experimental Analysis of Powder Diﬀraction Data</a></li>
 <li><a href="https://it.iucr.org/Ha/ch4o1v0001/">An overview of currently used structure determination methods for powder diffraction data</a></li>
 <li><a href="https://onlinelibrary.wiley.com/doi/abs/10.1107/S0108270113028643">The principles underlying the use of powder diffraction data in solving pharmaceutical crystal structures</a></li>
-<li><a href="https://it.iucr.org/Ha/ch4o3v0001/">Real-space methods for structure solution from powder-diffraction data: application to molecular structures</a></li>
 </ul>
 <p>Abbreviations I'll be using:</p>
 <ul>
@@ -421,6 +420,7 @@ $$ DoF_{(PSO)} = [\sin{2\pi\bold{x}_{positions}}, \cos{2\pi\bold{x}_{positions}}
 <p><img src="/blog/images/copied_from_nb/images/flowchart.png" alt="Gallop flow chart"></p>
 <p>Typically, 500 LO steps are performed prior to a single PSO step.</p>
 <p>The results reported <a href="https://pubs.rsc.org/en/content/articlelanding/2021/ce/d1ce00978h">here</a> demonstrate a significant improvement in performance relative to <em>DASH</em>, both in terms of the success-rate with which the global minimum is located, as well as the time taken to process the runs.</p>
+<p>In the next post, I'll go over how to use <em>GALLOP</em> to solve crystal structures.</p>
 
 </div>
 </div>
