@@ -108,7 +108,7 @@ window.onload = wrap_img;
        • <span class="read-time" title="Estimated read time">
     
     
-      14 min read
+      15 min read
     
 </span></p>
 
@@ -166,7 +166,7 @@ window.onload = wrap_img;
 <h1 id="Introduction">
 <a class="anchor" href="#Introduction" aria-hidden="true"><span class="octicon octicon-link"></span></a>Introduction<a class="anchor-link" href="#Introduction"> </a>
 </h1>
-<p>This post is intended to give an overview of <a href="https://github.com/mspillman/gallop"><em>GALLOP</em></a>, an algorithm I recently <a href="https://pubs.rsc.org/en/content/articlelanding/2021/ce/d1ce00978h">published</a> alongside my friend, PhD supervisor and colleague, <a href="https://www.reading.ac.uk/pharmacy/staff/professor-kenneth-shankland">Prof. Kenneth Shankland</a>. If you don't have some familiarity with global optimisation (GO) methods for crystal structure determination from powder diffraction data (SDPD), I recommend the following resources:</p>
+<p>This post is intended to give an overview of <a href="https://github.com/mspillman/gallop"><em>GALLOP</em></a>, an algorithm I recently <a href="https://pubs.rsc.org/en/content/articlelanding/2021/ce/d1ce00978h">published</a> alongside my friend, PhD supervisor and colleague, <a href="https://www.reading.ac.uk/pharmacy/staff/professor-kenneth-shankland">Prof. Kenneth Shankland</a>. If you aren't familiar with global optimisation (GO) methods for crystal structure determination from powder diffraction data (SDPD), I recommend the following resources:</p>
 <ul>
 <li><a href="https://www.worldscientific.com/doi/epdf/10.1142/9789811204579_0001">Experimental Analysis of Powder Diﬀraction Data</a></li>
 <li><a href="https://it.iucr.org/Ha/ch4o1v0001/">An overview of currently used structure determination methods for powder diffraction data</a></li>
@@ -292,8 +292,9 @@ var n,i=t("./lib/build-log"),a=t("./lib/epsilon"),o=t("./lib/intersecter"),s=t("
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>There are local minima present, each of which represents an incorrect structure that has either 21 or 22 of its 23 degrees of freedom correctly determined. Despite this, the $\chi^{2}$ at each local minimum gives no indication that the result is so close to correct. I'll write another blog post in the future showing how to use the <em>GALLOP</em> code to generate plots like this.</p>
-<p>I tried a few things to attempt to recycle information from "failed" local optimisation attempts, including using <a href="https://en.wikipedia.org/wiki/Kernel_density_estimation">kernel density estimation</a> to try to resample various degrees of freedom depending based on the density of solutions that ended up with particular coordinates. This definitely showed an improvement relative to random sampling, but proved inconsistent in terms of the level of improvement offered. Perhaps I'll revisit this in a future blog post as I still think there's something there that may be of use.</p>
+<p>I'll write another blog post in the future showing how to use the <em>GALLOP</em> code to generate plots like this.</p>
+<p>There are several local minima present, each of which represents an incorrect structure that has either 21 or 22 of its 23 degrees of freedom correctly determined. Despite this, the $\chi^{2}$ at each local minimum gives no indication that the result is so close to correct. This means that even failed runs with high values of $\chi^{2}$ may be close to the global minimum. If we could accumulate and exploit this information to influence where the next set of local optimisations start, then it might be possible to save time in searching for the global minimum.</p>
+<p>With this idea in mind, I tried a few things to attempt to recycle information from "failed" local optimisation attempts, including using <a href="https://en.wikipedia.org/wiki/Kernel_density_estimation">kernel density estimation</a> to try to resample various degrees of freedom depending based on the density of solutions that ended up with particular coordinates. This definitely showed an improvement relative to random sampling, but proved inconsistent in terms of the level of improvement obtained. Perhaps I'll revisit this in a future blog post as I still think there's something there that may be of use.</p>
 <p>Eventually, I ended trying particle swarm optimisation (PSO) to attempt to recycle the optimised positions. A few things attracted me to PSO:</p>
 <ol>
 <li>It's a simple algorithm to implement - just a few lines of code got it working as a proof of concept</li>
@@ -340,7 +341,7 @@ $$ \bold{m}_t = \beta_{1} \bold{m}_{t-1} + (1-\beta_{1})\bold{g}_t $$
 <p>
 $$\bold{v}_t = \beta_{2} \bold{v}_{t-1} + (1-\beta_2)\bold{g}_t^2$$
 </p>
-<p>Because $\bold{m}_t$ and $\bold{v}_{t}$ are initialised as vectors of zeros, the authors of Adam use the following corrective terms to reduce the effect of this biasing, which can be particularly problematic in the early stages of training:</p>
+<p>Because $\bold{m}_t$ and $\bold{v}_{t}$ are initialised as vectors of zeros, the authors of Adam use the following corrective terms to reduce the effect of this biasing, which can be particularly problematic in the early stages of optimisation:</p>
 <p>
 $$ \hat{\bold{m}}_t = \frac{\bold{m}_t}{1-\beta_1}$$
 </p>
@@ -364,14 +365,14 @@ By default <em>GALLOP</em> sets $\beta_2 = 0.9$ which decays the past squared gr
 <a class="anchor" href="#Learning-rate-finder" aria-hidden="true"><span class="octicon octicon-link"></span></a>Learning rate finder<a class="anchor-link" href="#Learning-rate-finder"> </a>
 </h3>
 <p>To make life easy for end users (and myself), I wanted a way to avoid having to experiment to find a suitable step size ($\alpha$) to use in <em>GALLOP</em>.</p>
-<p>The deep learning library, <a href="https://www.fast.ai/">fast.ai</a> includes a heuristic known as the <a href="https://fastai1.fast.ai/callbacks.lr_finder.html">learning rate finder</a>, which is used to set the step size (referred to as the learning rate in ML-parlance) for deep learning experiments automatically. This is used in conjunction with a step-size alteration policy which is carried out during optimisation, as described <a href="https://arxiv.org/abs/1708.07120">here</a>.</p>
+<p>The deep learning library, <a href="https://www.fast.ai/">fast.ai</a> includes a heuristic known as the <a href="https://fastai1.fast.ai/callbacks.lr_finder.html">learning rate finder</a>, which is used to set the step size (referred to as the <em>learning rate</em> in ML-parlance) for deep learning experiments automatically. This is used in conjunction with a step-size alteration policy which is carried out during optimisation, as described <a href="https://arxiv.org/abs/1708.07120">here</a>.</p>
 <p>After some testing and experimentation, <em>GALLOP</em> now makes use of a slightly modified version, as described below.</p>
-<p>A set of 200 log-linearly spaced learning rates are initialised, ranging from $1 \times 10^{-4}$ and 0.15. Starting with the smallest, <em>GALLOP</em> is run on the structure of interest, and the step size increased to the next value after every iteration. The sum of the $\chi^2$ values is recorded after each iteration, and subsequently plotted.</p>
+<p>A set of 200 log-linearly spaced learning rates are initialised, ranging from $1 \times 10^{-4}$ and $0.15$. Starting with the smallest, <em>GALLOP</em> is run on the structure of interest, and the step size increased to the next value after every iteration. The sum of the $\chi^2$ values is recorded after each iteration, and subsequently plotted.</p>
 <p>The minimum point on this plot, $\alpha_{min}$, is then used to give the step size. It may be scaled after considering the gradient of the line as the step size is increased beyond $\alpha_{min}$.</p>
-<p>To do this, the step sizes and $\chi^2$ values are rescaled into the range 0-1. The x-axis is shifted such that $\alpha_{min}$ sits at 0, and the data plotted. If the gradient of the resultant curve (approximated by the red straight line below) is &gt; 0.5, then this is considered steep. A steep gradient implies a high sensitivity to the step size, and hence $\alpha_{min}$ is scaled by a factor of 0.5. A medium gradient (between 0.25 and 0.5) results in multiplication factor of 0.75, whilst a shallow gradient (less than 0.25) implies relative insensitivity to the step size, and hence results in a multiplication factor of 1.0.</p>
+<p>To do this, the step sizes and $\chi^2$ values are rescaled into the range 0-1. The x-axis is shifted such that $\alpha_{min}$ sits at 0, and the data plotted. If the gradient of the resultant curve (approximated by the red straight line below) is &gt; 0.5, then this is considered steep. A steep gradient implies a high sensitivity to the step size, and hence $\alpha_{min}$ is scaled by a factor of 0.5, <em>i.e. GALLOP</em> runs with a step size of $0.5\alpha_{min}$. A medium gradient (between 0.25 and 0.5) results in multiplication factor of 0.75, whilst a shallow gradient (less than 0.25) implies relative insensitivity to the step size, and hence results in a multiplication factor of 1.0.</p>
 <p>In the <em>GALLOP</em> browser interface, this information is provided in a plot:</p>
 <p><img src="/blog/images/copied_from_nb/images/lr_finder_output.png" alt="Step size finder"></p>
-<p>In my testing, the learning rates obtained in this manner provide a good first attempt for GALLOP and provide reasonable performance over a wide variety of structures. However, this doesn't mean that they are optimal, and if a structure isn't solving, it is one thing that might merit adjustment.</p>
+<p>In my testing, the learning rates obtained in this manner provide a good first attempt for GALLOP and provide reasonable performance over a wide variety of structures. However, this doesn't mean that they are optimal, and if a structure isn't solving, it might be worth looking at this parameter more closely. I tend to find that a learning rate of 0.03 - 0.05 tends to work well as a first attempt for most structures.</p>
 
 </div>
 </div>
@@ -383,21 +384,21 @@ By default <em>GALLOP</em> sets $\beta_2 = 0.9$ which decays the past squared gr
 <a class="anchor" href="#Particle-Swarm-optimisation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Particle Swarm optimisation<a class="anchor-link" href="#Particle-Swarm-optimisation"> </a>
 </h2>
 <p><a href="https://en.wikipedia.org/wiki/Particle_swarm_optimization">Particle Swarm Optimisation</a> has previously been used in the context of SDPD in the program <a href="http://scripts.iucr.org/cgi-bin/paper?S0021889809034207">PeckCryst</a>. The algorithm used in <em>GALLOP</em> is different to that used in PeckCryst in a number of ways which I'll try to highlight below.</p>
-<p>The equations for the PSO are simple. The velocity of a particle at step $t+1$, $\bold{v}_{t+1}$, is calculated from the velocity at the previous step $\bold{v}_{t}$ and the position of the particle $\bold{x}_t$ using the following equation:</p>
+<p>The equations for the PSO are simple. The velocity of a particle at step $t+1$ $(\bold{v}_{t+1})$, is calculated from the velocity at the previous step $(\bold{v}_{t})$ and the position of the particle $(\bold{x}_t)$ using the following equation:</p>
 <p>
 $$\bold{v}_{t+1} = \omega_{t} \bold{v}_{t} + c_{1}\bold{R}_1(\bold{g}_{best} - \bold{x}_t) + c_2\bold{R}_2(\bold{x}_{best} - \bold{x}_t)$$
 </p>
-<p>Where $\omega_{t}$ is the inertia of the particle (which controls how much the previous velocity influences the next velocity) and $c_1$ and $c_2$ control the maximum step size in the direction of the best particle in the swarm, $\bold{g}_{best}$ and best position previously visited by the particle, $\bold{x}_{best}$. In contrast to PeckCryst which uses scalars, in <em>GALLOP</em>, by default $\bold{R}_1$ and $\bold{R}_2$ are diagonal matrices with their elements drawn independently from a standard uniform distribution. This provides more variability in how the particles move which helps to improve the exploration. By default, the maximum absolute velocity in <em>GALLOP</em> is limited to 1.0.</p>
-<p><em>GALLOP</em> calculates $\omega$ for particle $i$ by ranking all of the $N$ particles in the swarm in terms of their $\chi^2$ value, and then performs the following equation:</p>
+<p>Where $\omega_{t}$ is the inertia of the particle (which controls how much the previous velocity influences the next velocity) and $c_1$ and $c_2$ control the maximum step size in the direction of the best particle in the swarm $(\bold{g}_{best})$ and best position previously visited by the particle $(\bold{x}_{best})$ respectively. In contrast to PeckCryst which uses scalars, in <em>GALLOP</em>, by default $\bold{R}_1$ and $\bold{R}_2$ are diagonal matrices with their elements drawn independently from a standard uniform distribution. This provides more variability in how the particles move which helps to improve the exploration. In addition, the maximum absolute velocity in <em>GALLOP</em> is limited to 1.0.</p>
+<p><em>GALLOP</em> calculates $\omega$ for particle $i$ by ranking all of the $N$ particles in the swarm in terms of their $\chi^2$ value, and the calculating their inertia using the following equation:</p>
 <p>
 $$ \omega_i = 0.4 + \frac{Rank_i}{2N} $$
 </p>
-<p>This gives inertia values in the range 0.4 - 0.9, and means that the best particles slow down, whilst the worst particles in the swarm have higher inertias and hence are able to continue moving more rapidly.</p>
+<p>This gives inertia values in the range 0.4 - 0.9, and means that the best particles slow down, whilst the worst particles in the swarm have higher inertias and hence are able to continue moving more rapidly towards (hopefully) promising areas of the hypersurface.</p>
 <p>The degrees of freedom are then updated using the velocity and previous parameters according to:</p>
 <p>
 $$\bold{x}_{t+1} = \bold{x}_t + \bold{v}_{t+1} $$
 </p>
-<p>Another difference to PeckCryst is the coordinate transform that is performed in <em>GALLOP</em>. The fractional coordinates are transformed to account for the repeating unit cell and the fact that coordinates of -0.1 and 0.9 are equivalent. The torsion angles are also transformed to ensure that the PSO treats angles of +180 and -180 degrees as equivalent. Molecular orientations, represented in <em>GALLOP</em> with quaternions do not require any transformation. For local optimisation, the degrees of freedom that are optimised are:</p>
+<p>Another difference to PeckCryst is the coordinate transform that is performed in <em>GALLOP</em>. The fractional coordinates are transformed to account for the repeating unit cell and the fact that coordinates of -0.1 and 0.9 are equivalent. The torsion angles are also transformed to ensure that the PSO treats angles of +180 and -180 degrees as equivalent. Molecular orientations, represented in <em>GALLOP</em> with quaternions, do not require any transformation. For local optimisation, the degrees of freedom that are optimised are:</p>
 <p>
 $$ DoF_{(LO)} = [\bold{x}_{positions}, \bold{x}_{quaternions}, \bold{x}_{torsions}] $$
 </p>
@@ -405,7 +406,7 @@ $$ DoF_{(LO)} = [\bold{x}_{positions}, \bold{x}_{quaternions}, \bold{x}_{torsion
 <p>
 $$ DoF_{(PSO)} = [\sin{2\pi\bold{x}_{positions}}, \cos{2\pi\bold{x}_{positions}}, \bold{x}_{quaternions}, \sin{\bold{x}_{torsions}}, \cos{\bold{x}_{torsions}}] $$
 </p>
-<p>Following the PSO update, these are transformed back for use in LO using the <a href="https://en.wikipedia.org/wiki/Atan2">two-argument arctangent function</a> which gives values in the range $-\pi$ to $\pi$, and additional scaling by a factor of $1/2\pi$ for the positions.</p>
+<p>Following the PSO update, these are transformed back for use in LO using the <a href="https://en.wikipedia.org/wiki/Atan2">two-argument arctangent function</a> which gives values in the range $-\pi$ to $\pi$, which therefore necessitates additional scaling by a factor of $1/2\pi$ for the positions.</p>
 
 </div>
 </div>
@@ -416,11 +417,11 @@ $$ DoF_{(PSO)} = [\sin{2\pi\bold{x}_{positions}}, \cos{2\pi\bold{x}_{positions}}
 <h2 id="GALLOP">
 <a class="anchor" href="#GALLOP" aria-hidden="true"><span class="octicon octicon-link"></span></a>GALLOP<a class="anchor-link" href="#GALLOP"> </a>
 </h2>
-<p>Bringing it all together, this flow chart shows how <em>GALLOP</em> works:</p>
+<p>Bringing it all together, this flow chart shows how the <em>GALLOP</em> algorithm operates:</p>
 <p><img src="/blog/images/copied_from_nb/images/flowchart.png" alt="Gallop flow chart"></p>
 <p>Typically, 500 LO steps are performed prior to a single PSO step.</p>
-<p>The results reported <a href="https://pubs.rsc.org/en/content/articlelanding/2021/ce/d1ce00978h">here</a> demonstrate a significant improvement in performance relative to <em>DASH</em>, both in terms of the success-rate with which the global minimum is located, as well as the time taken to process the runs.</p>
-<p>In the next post, I'll go over how to use <em>GALLOP</em> to solve crystal structures.</p>
+<p>The results reported <a href="https://pubs.rsc.org/en/content/articlelanding/2021/ce/d1ce00978h">here</a> demonstrate a significant improvement in performance relative to <em>DASH</em>. The success rate is &gt;30 times that of DASH, and the GPU-acceleration means that the time taken to process the runs is also significantly lower than can be accomplished without distributed computing for the <em>DASH</em> jobs.</p>
+<p>In my next post, I'll go over how to use <em>GALLOP</em> to solve crystal structures.</p>
 
 </div>
 </div>
