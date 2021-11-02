@@ -41,6 +41,8 @@ minima:
   social_links:
     twitter: gallop_sdpd
     github: mspillman
+  author: Mark Spillman
+  email: markspillman@gmail.com
 
 # Set this to true to get LaTeX math equation support
 use_math: true
