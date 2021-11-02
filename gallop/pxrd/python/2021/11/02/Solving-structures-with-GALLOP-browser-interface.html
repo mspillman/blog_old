@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="twitter:card" content="summary_large_image" /><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>Solving structures with the GALLOP browser interface | Mark Spillman</title>
+<meta name="generator" content="Jekyll v4.1.1" />
+<meta property="og:title" content="Solving structures with the GALLOP browser interface" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="A walkthrough for using GALLOP to solve the crystal structures of small molecules" />
+<meta property="og:description" content="A walkthrough for using GALLOP to solve the crystal structures of small molecules" />
+<link rel="canonical" href="https://mspillman.github.io/blog/gallop/pxrd/python/2021/11/02/Solving-structures-with-GALLOP-browser-interface.html" />
+<meta property="og:url" content="https://mspillman.github.io/blog/gallop/pxrd/python/2021/11/02/Solving-structures-with-GALLOP-browser-interface.html" />
+<meta property="og:site_name" content="Mark Spillman" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-11-02T00:00:00-05:00" />
+<script type="application/ld+json">
+{"url":"https://mspillman.github.io/blog/gallop/pxrd/python/2021/11/02/Solving-structures-with-GALLOP-browser-interface.html","@type":"BlogPosting","headline":"Solving structures with the GALLOP browser interface","dateModified":"2021-11-02T00:00:00-05:00","datePublished":"2021-11-02T00:00:00-05:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://mspillman.github.io/blog/gallop/pxrd/python/2021/11/02/Solving-structures-with-GALLOP-browser-interface.html"},"description":"A walkthrough for using GALLOP to solve the crystal structures of small molecules","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/blog/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://mspillman.github.io/blog/feed.xml" title="Mark Spillman" /><!-- the google_analytics_id gets auto inserted from the config file -->
+
+
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-EVMREB130B"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-EVMREB130B');
+</script>
+
+
+<link rel="shortcut icon" type="image/x-icon" href="/blog/images/favicon.ico"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Primer/15.2.0/primer.css" integrity="sha512-xTz2ys4coGAOz8vuV1NcQBkgVmKhsSEtjbqyMJbBHRplFuvKIUo6xhLHpAyPt9mfR6twHJgn9OgVLuqOvjeBhg==" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog==" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/katex.min.css" integrity="sha512-h7nl+xz8wgDlNM4NqKEM4F1NkIRS17M9+uJwIGwuo8vGqIl4BhuCKdxjWEINm+xyrUjNCnK5dCrhM0sj+wTIXw==" crossorigin="anonymous" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/katex.min.js" integrity="sha512-/CMIhXiDA3m2c9kzRyd97MTb3MC6OVnx4TElQ7fkkoRghwDf6gi41gaT1PwF270W6+J60uTmwgeRpNpJdRV6sg==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/contrib/auto-render.min.js" integrity="sha512-Do7uJAaHZm5OLrIv/yN4w0iG1dbu01kzdMNnFfu/mAqgUk6Nniv2JYHcwH+cNwjqgLcqcuBBk+JRvprLVI8azg==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha512-0doc9hKxR3PYwso42RD1p5ySZpzzuDiOwMrdCEh2WdJZCjcmFKc/wEnL+z8fBQrnHoiNWbo+3fiGkOYXBdQp4A==" crossorigin="anonymous"></script>
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement( document.body, {
+        delimiters: [
+            {left: "$$", right: "$$", display: true},
+            {left: "[%", right: "%]", display: true},
+            {left: "$", right: "$", display: false}
+        ]}
+        );
+    });
+    </script>
+
+
+<script>
+function wrap_img(fn) {
+    if (document.attachEvent ? document.readyState === "complete" : document.readyState !== "loading") {
+        var elements = document.querySelectorAll(".post img");
+        Array.prototype.forEach.call(elements, function(el, i) {
+            if (el.getAttribute("title") && (el.className != "emoji")) {
+                const caption = document.createElement('figcaption');
+                var node = document.createTextNode(el.getAttribute("title"));
+                caption.appendChild(node);
+                const wrapper = document.createElement('figure');
+                wrapper.className = 'image';
+                el.parentNode.insertBefore(wrapper, el);
+                el.parentNode.removeChild(el);
+                wrapper.appendChild(el);
+                wrapper.appendChild(caption);
+            }
+        });
+    } else { document.addEventListener('DOMContentLoaded', fn); }
+}
+window.onload = wrap_img;
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function(){
+    // add link icon to anchor tags
+    var elem = document.querySelectorAll(".anchor-link")
+    elem.forEach(e => (e.innerHTML = '<i class="fas fa-link fa-xs"></i>'));
+    });
+</script>
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/blog/">Mark Spillman</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/blog/about/">About</a><a class="page-link" href="/blog/publications/">Publications</a><a class="page-link" href="/blog/search/">Search</a><a class="page-link" href="/blog/categories/">Tags</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Solving structures with the *GALLOP* browser interface</h1><p class="page-description">A walkthrough for using *GALLOP* to solve the crystal structures of small molecules</p><p class="post-meta post-meta-title"><time class="dt-published" datetime="2021-11-02T00:00:00-05:00" itemprop="datePublished">
+        Nov 2, 2021
+      </time>
+       • <span class="read-time" title="Estimated read time">
+    
+    
+      9 min read
+    
+</span></p>
+
+    
+      <p class="category-tags"><i class="fas fa-tags category-tags-icon"></i></i> 
+      
+        <a class="category-tags-link" href="/blog/categories/#GALLOP">GALLOP</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/blog/categories/#PXRD">PXRD</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/blog/categories/#Python">Python</a>
+        
+      
+      </p>
+    
+
+    
+      </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <ul class="section-nav">
+<li class="toc-entry toc-h1"><a href="#Introduction">Introduction </a></li>
+<li class="toc-entry toc-h1"><a href="#Fitting-PXRD-data">Fitting PXRD data </a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#Fitting-data-with-DASH">Fitting data with DASH </a></li>
+<li class="toc-entry toc-h3"><a href="#Fitting-data-with-GSAS-II">Fitting data with GSAS-II </a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h1"><a href="#Solving-structures-with-the-browser-interface">Solving structures with the browser interface </a>
+<ul>
+<li class="toc-entry toc-h2"><a href="#1.-Uploading-files">1. Uploading files </a></li>
+<li class="toc-entry toc-h2"><a href="#2.-Modify-GALLOP-parameters">2. Modify GALLOP parameters </a></li>
+<li class="toc-entry toc-h2"><a href="#3.-Solve-the-structure">3. Solve the structure </a></li>
+<li class="toc-entry toc-h2"><a href="#4.-Download-solutions-and-close-GALLOP">4. Download solutions and close GALLOP </a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h1"><a href="#Conclusions">Conclusions </a></li>
+</ul><!--
+#################################################
+### THIS FILE WAS AUTOGENERATED! DO NOT EDIT! ###
+#################################################
+# file to edit: _notebooks/2021-11-02-Solving-structures-with-GALLOP-browser-interface.ipynb
+-->
+
+<div class="container" id="notebook-container">
+        
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Introduction">
+<a class="anchor" href="#Introduction" aria-hidden="true"><span class="octicon octicon-link"></span></a>Introduction<a class="anchor-link" href="#Introduction"> </a>
+</h1>
+<p>In my <a href="https://mspillman.github.io/blog/gallop/pxrd/python/2021/10/30/Introduction-to-GALLOP.html">previous post</a>, I went over the rationale behind <em>GALLOP</em> and some details about the algorithm. These details will be relevant later on in this post when we go over some of the settings used to control <em>GALLOP</em>.</p>
+<p>In this post, I'll go over how to use <em>GALLOP</em> to solve the crystal structure of verapamil hydrochloride, a calcium channel blocker used in the treatment of arryhythmias. If you want to have a go yourself, you can download the diffraction data in xye format <a href="Verap.xye">here</a> or my complete set of fit files in a zip archive <a href="verapamil_hydrochloride.zip">here</a>. If you don't have access to <em>DASH</em>, I recommend downloading the full set of fit files so you have access to the Z-matrices which may otherwise be tedious to generate by hand.</p>
+<p>Whilst not relevant for verapamil hydrochloride which crystallises in $P\bar{1}$, note that currently <em>GALLOP</em> requires the space group to be in the standard setting so if you have a known unit cell in a particular non-standard space group, you should transform it to the standard setting before fitting your diffraction data for <em>GALLOP</em>.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Fitting-PXRD-data">
+<a class="anchor" href="#Fitting-PXRD-data" aria-hidden="true"><span class="octicon octicon-link"></span></a>Fitting PXRD data<a class="anchor-link" href="#Fitting-PXRD-data"> </a>
+</h1>
+<h3 id="Fitting-data-with-DASH">
+<a class="anchor" href="#Fitting-data-with-DASH" aria-hidden="true"><span class="octicon octicon-link"></span></a>Fitting data with <em>DASH</em><a class="anchor-link" href="#Fitting-data-with-DASH"> </a>
+</h3>
+<p>Follow the procedure laid out in the <a href="https://www.ccdc.cam.ac.uk/support-and-resources/ccdcresources/dash.pdf"><em>DASH</em> user guide tutorial section [pdf warning]</a> to fit the diffraction data. You should also use DASH to generate your Z-matrices if you do not have them already. To do this, you will need a 3D molecular representation of verapamil hydrochloride which can be read in by <em>DASH</em> and converted to a Z-matrix (ZM). If you don't want to generate one yourself, I recommend using the CSD reference code CURHOM as the basis for your ZMs.</p>
+<p>Once the Pawley refinement has finished, save the files as normal, and ensure you have access to the resultant <code>.sdi, .dsl, .hcv, .pik</code> and <code>.tic</code> files. If you do not want to include <a href="">Mogul Distribution Bias</a> to bias the starting points for the torsion angles, and you already have ZMs available, you can close <em>DASH</em> at this stage.</p>
+<p>If you wish to make use of MDB information and/or need to generate ZMs, continue on through the wizard to the settings for solving the structure with simulated annealing. Read in your molecule file to generate ZMs if required. If you wish to use MDB in your SDPD attempt, follow the instructions in section 10.3.4 in the <em>DASH</em> user guide (linked above). You will then need to generate a single <em>DASH</em> batch file using the Create batch file option highlighted in the figure below:</p>
+<p><img src="/blog/images/copied_from_nb/images/dbf_write.png" alt=""></p>
+<p>The resultant <code>.dbf</code> file should be made available along with the Pawley fit files produced earlier and ZMs ready for use in <em>GALLOP</em>.</p>
+<h3 id="Fitting-data-with-GSAS-II">
+<a class="anchor" href="#Fitting-data-with-GSAS-II" aria-hidden="true"><span class="octicon octicon-link"></span></a>Fitting data with <em>GSAS-II</em><a class="anchor-link" href="#Fitting-data-with-GSAS-II"> </a>
+</h3>
+<p>As mentioned in the introduction, I recommend having the <em>DASH</em> produced Z-matrices (ZMs) available to save time generating one in the correct format from scratch. Eventually, I'd like to include the ability to generate ZMs natively in <em>GALLOP</em>, but that's a few updates down the line at the moment!</p>
+<p>For a reference of the format expected if you do want to have a go at making your own, please see <a href="https://github.com/mspillman/gallop#z-matrices">here</a> for an overview.</p>
+<p><a href="https://subversion.xray.aps.anl.gov/pyGSAS/trunk/help/Tutorials.html">The <em>GSAS-II</em> tutorials</a> should be used as a guide for how to proceed with <a href="https://subversion.xray.aps.anl.gov/pyGSAS/Tutorials/FitPeaks/Fit%20Peaks.htm">indexing data</a> and subsequent <a href="https://subversion.xray.aps.anl.gov/pyGSAS/Tutorials/FitPeaks/Fit%20Peaks.htm">Pawley refinement - follow to end of Step 2</a></p>
+<p>GSAS-II by default uses the <em>Analytic Hessian</em> optimisation method. According to the documentation:
+<em>"It uses a custom-developed least-squares minimizer that uses singular-value decomposition (SVD) to reduce the errors caused by correlated variables and the Levenberg-Marquardt algorithm to up-weight diagonal Hessian terms when refinements fail to lower $\chi^{2}$"</em>. The alterations to the Pawley covariance matrix this introduces causes errors when used in GALLOP (for example, the covariance matrix cannot be inverted or the inverse covariance matrix is not positive-definite, resulting in the potential for negative values of $\chi^2$). To fix this issue, I suggest the following procedure:</p>
+<ol>
+<li>Pawley fit the data as directed in the GSAS-II Tutorials - the analytic Hessian method can be used for this.</li>
+<li>One happy with the fit, set <strong>all</strong> refined parameters apart from peak intensities (e.g. peak shape, background etc) as unrefineable.</li>
+<li>See figure below: i. Reset all intensities using Pawley create, ii. The intensities will be set back to 100, but not flagged for refinement. iii. Set all intensities to refine (highlight column, press Y), iii. Go to Controls and select <em>Analytic Jacobian</em> from the drop-down menu.</li>
+<li>Refine</li>
+<li>Once refinement is complete, save the project file, and ensure that the .gpx GSAS-II project file and the ZMs are available for use in <em>GALLOP</em>.</li>
+</ol>
+<p><img src="/blog/images/copied_from_nb/images/gsas_pawley.png" alt=""></p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Solving-structures-with-the-browser-interface">
+<a class="anchor" href="#Solving-structures-with-the-browser-interface" aria-hidden="true"><span class="octicon octicon-link"></span></a>Solving structures with the browser interface<a class="anchor-link" href="#Solving-structures-with-the-browser-interface"> </a>
+</h1>
+<p>Below is a video showing the browser interface in use solving CT-DMF2, a structure with 42 degrees of freedom:
+
+</p>
+<center class="youtube-iframe-wrapper">
+    <iframe width="730" height="315" src="https://www.youtube.com/embed/watch?v=n0aovGUS4JU" frameborder="0" allowfullscreen=""></iframe>
+</center>
+
+The video covers a few of the main features we'll be looking at.
+<p>If you have installed <em>GALLOP</em> locally, then to open the program interface, open a command prompt and type the following commands:</p>
+
+<pre><code>C:\Users\Username&gt; conda activate gallop
+(gallop) C:\Users\Username&gt; gallop</code></pre>
+<p>Your web browser will automatically open and the following interface should appear:</p>
+<p><img src="/blog/images/copied_from_nb/images/gallop_main_screen.png" alt=""></p>
+<p>If you are running GALLOP on a cloud environment, then follow the general procedure laid out in the notebooks linked <a href="https://github.com/mspillman/gallop#try-gallop-on-a-free-cloud-gpu">here</a></p>
+<p>I will write another blog post in the future showing how to deploy GALLOP on the Google Compute Engine cloud environment.</p>
+<p>Once GALLOP is running, we will be using the following steps to solve the crystal structure of verapamil hydrochloride:</p>
+<ol>
+<li>Upload files</li>
+<li>Modify <em>GALLOP</em> parameters</li>
+<li>Solve the structure</li>
+<li>Download solutions and close <em>GALLOP</em>
+</li>
+</ol>
+<h2 id="1.-Uploading-files">
+<a class="anchor" href="#1.-Uploading-files" aria-hidden="true"><span class="octicon octicon-link"></span></a>1. Uploading files<a class="anchor-link" href="#1.-Uploading-files"> </a>
+</h2>
+<p>The radio button in the above screen shot already has "Upload files" selected, which then has an additional context menu to choose the Pawley refinement program you have used.</p>
+<p>Select the program you used to fit the diffraction data, and then either drag and drop your <em>DASH</em> or <em>GSAS-II</em> fit files and Z-matrices (ZMs) onto the uploader widget, or select "Browse files" and navigate to the folder containing your fit files and ZMs and select them all for upload.</p>
+<p>You should end up with something that looks like this:</p>
+<p><img src="/blog/images/copied_from_nb/images/gallop_files_uploaded.png" alt=""></p>
+<h2 id="2.-Modify-GALLOP-parameters">
+<a class="anchor" href="#2.-Modify-GALLOP-parameters" aria-hidden="true"><span class="octicon octicon-link"></span></a>2. Modify <em>GALLOP</em> parameters<a class="anchor-link" href="#2.-Modify-GALLOP-parameters"> </a>
+</h2>
+<p>With only 23 degrees of freedom, verapamil hydrochloride is a relatively simple crystal structure for <em>GALLOP</em> to solve and the default settings should be sufficient to solve it. However, we will make a small change to increase our chances of success.</p>
+<p>Click on the Particle Swarm menu in the side bar to expand it. We will then increase the number of swarms from 10 to 20 either by using the + symbol to increment the number, or by deleting the 10 and typing in 20:</p>
+<p><img src="/blog/images/copied_from_nb/images/gallop_particle_swarm_20.png" alt=""></p>
+<p>We should also decrease the number of iterations GALLOP will do - 10 should be sufficient. Open the General menu in the side bar, and change the Total number of iterations per run to 10.</p>
+<p><img src="/blog/images/copied_from_nb/images/gallop_particle_general_10.png" alt=""></p>
+<p>Once we've done this, then we are ready to solve the structure!</p>
+<h2 id="3.-Solve-the-structure">
+<a class="anchor" href="#3.-Solve-the-structure" aria-hidden="true"><span class="octicon octicon-link"></span></a>3. Solve the structure<a class="anchor-link" href="#3.-Solve-the-structure"> </a>
+</h2>
+<p>Once you are happy that all the files needed have been uploaded, and you are satisified with the settings for <em>GALLOP</em> to use, press the Solve button. Note that from this point forward, changing any of the settings whilst <em>GALLOP</em> is running will stop the run. You can still open the expandable menus to view settings or extra information provided by <em>GALLOP</em>.</p>
+<p>A number of expandable data menus will appear, and a progress bar will appear that tracks the progress of the <em>learning rate finder</em> discussed in my previous post. Once this has finished, the main <em>GALLOP</em> iterations will begin, with their own progress bar to track their progress. Once the first iteration has finished, some additional items will appear on screen. Two expandable boxes (discussed below) will appear, followed by a download link. Lastly, a table of results for each iteration is displayed, as is an interactive figure showing the $\chi^2$ value found by each of the particles in each of the swarms. You can use your scroll wheel to zoom in, and click to drag to explore this plot without interrupting <em>GALLOP</em>.</p>
+<p><img src="/blog/images/copied_from_nb/images/gallop_solving.png" alt=""></p>
+<p>The Show structure expandable item allows you to view an interactive plot of the structure found during the last iteration. Click to rotate, and use your scroll wheel to zoom in and out.
+This figure will automatically update after each iteration.</p>
+<p><img src="/blog/images/copied_from_nb/images/gallop_show_structure.png" alt=""></p>
+<p>If you are using <em>DASH</em> for Pawley fitting, the Show profile expandable item will also be visible. This allows you to see the fit to the diffraction data obtained in the last iteration.</p>
+<p><img src="/blog/images/copied_from_nb/images/gallop_show_profile.png" alt=""></p>
+<p>For the data fit files I have provided, a solution has $\chi^2$ &lt; 60. If you fitted your own data, this will differ.</p>
+<h2 id="4.-Download-solutions-and-close-GALLOP">
+<a class="anchor" href="#4.-Download-solutions-and-close-GALLOP" aria-hidden="true"><span class="octicon octicon-link"></span></a>4. Download solutions and close <em>GALLOP</em><a class="anchor-link" href="#4.-Download-solutions-and-close-GALLOP"> </a>
+</h2>
+<p>You can download CIFs at any time using the link. If you wish to stop <em>GALLOP</em> at any point, you can press the Stop button that appears in the top right corner of the browser window when <em>GALLOP</em> is running.</p>
+<p>This link will give you a zip archive containing a CIF of the best solution found after each iteration, and a <code>.json</code> file which gives details of the settings used for the <em>GALLOP</em> run.</p>
+<p>Once you are finished, you can safely close the browser window. If running on your local machine, you can then close down the command line window you opened earlier. If running on a cloud notebook, you may wish to shut down the notebook (if using Colab or Kaggle) to conserve your useage quota, or if using a paid service, you may wish to shut down your VM in order to reduce costs.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Conclusions">
+<a class="anchor" href="#Conclusions" aria-hidden="true"><span class="octicon octicon-link"></span></a>Conclusions<a class="anchor-link" href="#Conclusions"> </a>
+</h1>
+<p>We've covered the general process of how to use <em>GALLOP</em> to solve crystal structures. There are many more settings that can be adjusted to tweak how <em>GALLOP</em> runs. I encourage you to have a poke about the side-bar menus to see if anything jumps out at you. In future blog posts, I'll highlight some of the advanced settings that can be used, which can provide performance improvements for certain types of crystal structure.</p>
+<p>In my next post, I will cover how to use the Python API to solve crystal structures. Whilst this requires a bit of Python knowledge, it gives more flexibility than the browser interface and can be used to do some cool stuff!</p>
+
+</div>
+</div>
+</div>
+</div>
+
+
+
+  </div><!-- from https://github.com/utterance/utterances -->
+<script src="https://utteranc.es/client.js"
+        repo="mspillman/blog"
+        issue-term="title"
+        label="blogpost-comment"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script><a class="u-url" href="/blog/gallop/pxrd/python/2021/11/02/Solving-structures-with-GALLOP-browser-interface.html" hidden></a>
+</article>
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/blog/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/blog/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/blog/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+      </div>
+      <div class="footer-col">
+        <p>Various musings, mostly on crystallography, powder diffraction and machine learning. All opinions my own.</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li><a rel="me" href="https://github.com/mspillman" title="mspillman"><svg class="svg-icon grey"><use xlink:href="/blog/assets/minima-social-icons.svg#github"></use></svg></a></li><li><a rel="me" href="https://twitter.com/gallop_sdpd" title="gallop_sdpd"><svg class="svg-icon grey"><use xlink:href="/blog/assets/minima-social-icons.svg#twitter"></use></svg></a></li></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
