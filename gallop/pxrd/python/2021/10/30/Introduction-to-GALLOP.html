@@ -348,9 +348,9 @@ $$ \hat{\bold{m}}_t = \frac{\bold{m}_t}{1-\beta_1}$$
 <p>
 $$ \hat{\bold{v}}_t = \frac{\bold{v}_t}{1-\beta_2}$$
 </p>
-<p>These bias corrected terms are then used to update the parameters to be optimised, $\bold{\theta}_t$, where $\epsilon$ is included to prevent numerical errors:</p>
+<p>These bias corrected terms are then used to update the parameters to be optimised, $\bold{x}_t$, where $\epsilon$ is included to prevent numerical errors:</p>
 <p>
-$$ \bold{\theta}_{t+1} = \bold{\theta}_t - \frac{\alpha}{\sqrt{\hat{\bold{v}}_t} + \epsilon}\hat{\bold{m}}_t $$
+$$ \bold{x}_{t+1} = \bold{x}_t - \frac{\alpha}{\sqrt{\hat{\bold{v}}_t} + \epsilon}\hat{\bold{m}}_t $$
 </p>
 <p>The authors of Adam suggest default parameters of $\beta_1 = 0.9$, $\beta_2 = 0.999$ and $\epsilon = 1 \times 10^{-8}$. The step size, $\alpha$, must be set by the user.
 By default <em>GALLOP</em> sets $\beta_2 = 0.9$ which decays the past squared gradients more rapidly, and was found in our testing to be more effective than the default value.</p>
