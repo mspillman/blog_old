@@ -31,9 +31,7 @@ Mridul Majumder, Graham Buckton, Clare F. Rawlinson-Malone, Adrian C Williams, *
 
 ## Books
 
+Matthew J. Almond, **Mark J. Spillman** and Elizabeth M. Page. "Workbook in Inorganic Chemistry", Oxford University Press (2017). ISBN: 9780198729501. [Publisher](https://global.oup.com/ukhe/product/workbook-in-inorganic-chemistry-9780198729501?cc=gb&lang=en&)
 ### Chapter
 
 **Mark J. Spillman**, Daniel Nicholls and Kenneth Shankland. “Experimental Analysis of Powder Diffraction Data.” (2020). doi: [10.1142/9789811204579_0001](https://doi.org/10.1142/9789811204579_0001), chapter in "Handbook on Big Data and Machine Learning in the Physical Sciences", World Scientific (2020)
-
-### Full book
-Matthew J. Almond, **Mark J. Spillman** and Elizabeth M. Page. "Workbook in Inorganic Chemistry", Oxford University Press (2017). ISBN: 9780198729501. [Publisher](https://global.oup.com/ukhe/product/workbook-in-inorganic-chemistry-9780198729501?cc=gb&lang=en&)g
