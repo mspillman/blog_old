@@ -112,7 +112,7 @@ window.onload = wrap_img;
        • <span class="read-time" title="Estimated read time">
     
     
-      9 min read
+      10 min read
     
 </span></p>
 
@@ -168,8 +168,8 @@ window.onload = wrap_img;
 <h1 id="Introduction">
 <a class="anchor" href="#Introduction" aria-hidden="true"><span class="octicon octicon-link"></span></a>Introduction<a class="anchor-link" href="#Introduction"> </a>
 </h1>
-<p>An <a href="http://scripts.iucr.org/cgi-bin/paper?S0108768101021814">article</a> published in 2001 by D. W. M. Hofmann describes how crystallographic databases can be used to derive the average volume occupied by atoms of each element in crystal structures. Using his tabulated values, it's possible to rapidly estimate the volume occupied by a given molecule, and use this to aid indexing of powder diffraction data. This is particularly useful for labotartory diffraction data, which is generally associated with lower figures of merit such as de Wolff's $M_{20}$ and Smith and Snyder's $F_N$, which can make discriminating between alternative options more challenging. Other volume estimation methods, notably the 18 Å rule are also commonly used, though Hofmann's volumes give generally more accurate results.</p>
-<p>I've put together a freely available web-app, <em>HofCalc</em>, which should display reasonably well on mobile devices as well as PCs/laptops. You can access it at the following address:</p>
+<p>An <a href="http://scripts.iucr.org/cgi-bin/paper?S0108768101021814">article</a> published in 2001 by D. W. M. Hofmann describes how crystallographic databases can be used to derive the average volume occupied by atoms of each element in crystal structures. Using his tabulated values, it's possible to rapidly estimate the volume occupied by a given molecule, and use this to aid indexing of powder diffraction data. This is particularly useful for laboratory diffraction data, which is generally associated with lower figures of merit such as de Wolff's $M_{20}$ and Smith and Snyder's $F_N$, which can make discriminating between alternative options more challenging. Other volume estimation methods, notably the 18 Å rule are also commonly used, though Hofmann's volumes give generally more accurate results.</p>
+<p>I've put together a freely available web-app, <em>HofCalc</em>, which can be used to conveniently obtain these estimates. It should display reasonably well on mobile devices as well as PCs/laptops. You can access it at the following address:</p>
 <p><a href="https://hofcalc.herokuapp.com">https://hofcalc.herokuapp.com</a></p>
 <p><img src="/blog/images/copied_from_nb/images/HofCalc.png" alt=""></p>
 <p>This post will explain how it works, and will look at some examples of how it can be used in practice. I'm grateful to Norman Shankland who provided invaluable feedback and assistance with debugging of the app.</p>
@@ -187,10 +187,9 @@ window.onload = wrap_img;
 <p>
 $$V_{est} = \sum\limits_{i=1}^{100} n_i\bar{v_i}(1+\bar{\alpha}T) = \bold{n\bar{v}}(1+\bar{\alpha}T)$$
 </p>
-<p>Where $n_i$ is the number of atoms of element $i$ in the unit cell, and $\bar{v_i}$ is the average volume occupied by an atom of element $i$. This equation also assumes that the atomic volume varies linearly with temperature.</p>
-<p>He split the dataset into 20 subsets, then applied linear regression to solve the above equation for each of the subsets. This allowed him to find the average volumes occupied by atoms of each element, and due to the splitting of the data into subsets, he also obtains their standard deviations. His use of a temperature parameter allowed him to provide volumes for all of the elements represented in the CSD at 298 K.</p>
+<p>Where $n_i$ is the number of atoms of element $i$ in the unit cell, and $\bar{v_i}$ is the average volume occupied by an atom of element $i$. He also assumes that atomic volumes vary linearly with temperature.</p>
+<p>He split the dataset into 20 subsets, then used an iterative least-squares method to solve the above equation for each of the subsets. This allowed him to find the average volumes occupied by atoms of each element, and due to the splitting of the data into subsets, he also obtains their standard deviations. The coefficient of thermal expansion, $\bar{\alpha}$, was found to be $0.95 \times 10^{-4} K^{-1}$. This temperature correction factor then allowed him to provide the average volumes for all of the elements represented in the CSD at 298 K.</p>
 <p>You can download a <code>.json</code> file containing the volumes <a href="https://github.com/mspillman/blog/blob/master/_notebooks/files/Hofmann-volumes.json">here</a>.</p>
-<p>The coefficient of thermal expansion, $\bar{\alpha}$, was found to be $0.95 \times 10^{-4} K^{-1}$.</p>
 
 </div>
 </div>
@@ -201,8 +200,7 @@ $$V_{est} = \sum\limits_{i=1}^{100} n_i\bar{v_i}(1+\bar{\alpha}T) = \bold{n\bar{
 <h1 id="Comparison-to-other-atomic-volumes">
 <a class="anchor" href="#Comparison-to-other-atomic-volumes" aria-hidden="true"><span class="octicon octicon-link"></span></a>Comparison to other atomic volumes<a class="anchor-link" href="#Comparison-to-other-atomic-volumes"> </a>
 </h1>
-<p>Let's compare Hofmann's volumes to those obtained from other sources. To do that, I downloaded the <a href="https://en.wikipedia.org/wiki/Atomic_radii_of_the_elements_(data_page">atomic radii data</a>) from wikipedia, which I've saved as an Excel spreadsheet which you can download <a href="https://github.com/mspillman/blog/blob/master/_notebook/files/wikipedia_radii.xlsx">here</a>. We'll convert these radii into volumes, and plot them alongside Hofmann's volumes.</p>
-<p>The chart below will let you highlight the different types of volumes.</p>
+<p>Let's compare Hofmann's volumes to those obtained from other sources. I downloaded the <a href="https://en.wikipedia.org/wiki/Atomic_radii_of_the_elements_(data_page">atomic radii data</a>) from wikipedia, which I've saved as an Excel spreadsheet which you can download <a href="https://github.com/mspillman/blog/blob/master/_notebooks/files/wikipedia_radii.xlsx">here</a>. I converted these radii into volumes (assuming spherical atoms), and have plotted them alongside Hofmann's volumes in the interactive chart below.</p>
 
 </div>
 </div>
@@ -354,7 +352,215 @@ $$V_{est} = \sum\limits_{i=1}^{100} n_i\bar{v_i}(1+\bar{\alpha}T) = \bold{n\bar{
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>As can be seen, for most of the elements, Hofmann's CSD-derived values are fairly different to the other sources.</p>
+<p>As you can see, Hofmann's CSD-derived values are fairly different to the other sources. Whilst there are some hints of periodicity, it's nowhere near as pronounced as for the other volumes. You can also see some missing data in all of the plots, in Hoffman's case, this is due to the absence of certain elements, such as helium, from the crystal structures in his filtered dataset.</p>
+<p>Let's print out some of the statistics describing the data, as well as the coefficient of variation for each type of volume.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<details class="description">
+      <summary class="btn btn-sm" data-open="Hide Code" data-close="Show Code"></summary>
+        <p></p>
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">df</span><span class="o">.</span><span class="n">describe</span><span class="p">()[[</span><span class="s2">"Hofmann"</span><span class="p">]</span><span class="o">+</span><span class="n">radtype</span><span class="p">]</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+    </details>
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Hofmann</th>
+      <th>Empirical</th>
+      <th>Calculated</th>
+      <th>vdW</th>
+      <th>Covalent-single</th>
+      <th>Covalent-triple</th>
+      <th>Metallic</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>count</th>
+      <td>84.000000</td>
+      <td>91.000000</td>
+      <td>86.000000</td>
+      <td>55.000000</td>
+      <td>95.000000</td>
+      <td>71.000000</td>
+      <td>68.000000</td>
+    </tr>
+    <tr>
+      <th>mean</th>
+      <td>39.586310</td>
+      <td>17.084519</td>
+      <td>23.849111</td>
+      <td>37.865054</td>
+      <td>13.250696</td>
+      <td>6.963913</td>
+      <td>19.946436</td>
+    </tr>
+    <tr>
+      <th>std</th>
+      <td>13.460829</td>
+      <td>12.248898</td>
+      <td>20.652779</td>
+      <td>33.870162</td>
+      <td>8.900926</td>
+      <td>3.301590</td>
+      <td>12.541749</td>
+    </tr>
+    <tr>
+      <th>min</th>
+      <td>5.080000</td>
+      <td>0.065450</td>
+      <td>0.124788</td>
+      <td>7.238229</td>
+      <td>0.137258</td>
+      <td>0.623615</td>
+      <td>5.884949</td>
+    </tr>
+    <tr>
+      <th>25%</th>
+      <td>31.000000</td>
+      <td>10.305995</td>
+      <td>7.377367</td>
+      <td>19.870146</td>
+      <td>7.329463</td>
+      <td>4.988916</td>
+      <td>11.039115</td>
+    </tr>
+    <tr>
+      <th>50%</th>
+      <td>39.300000</td>
+      <td>12.770051</td>
+      <td>19.334951</td>
+      <td>27.833137</td>
+      <td>11.008442</td>
+      <td>6.538266</td>
+      <td>17.157285</td>
+    </tr>
+    <tr>
+      <th>75%</th>
+      <td>49.250000</td>
+      <td>23.632685</td>
+      <td>36.484963</td>
+      <td>39.070796</td>
+      <td>19.160766</td>
+      <td>9.204406</td>
+      <td>24.469830</td>
+    </tr>
+    <tr>
+      <th>max</th>
+      <td>74.000000</td>
+      <td>77.951815</td>
+      <td>110.850435</td>
+      <td>176.533179</td>
+      <td>52.306127</td>
+      <td>16.837592</td>
+      <td>77.951815</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<details class="description">
+      <summary class="btn btn-sm" data-open="Hide Code" data-close="Show Code"></summary>
+        <p></p>
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">"Coefficient of variation"</span><span class="p">)</span>
+<span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">"std"</span><span class="p">]</span> <span class="o">/</span> <span class="n">df</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">"mean"</span><span class="p">])[[</span><span class="s2">"Hofmann"</span><span class="p">]</span><span class="o">+</span><span class="n">radtype</span><span class="p">]</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+    </details>
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Coefficient of variation
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>Hofmann            0.340037
+Empirical          0.716959
+Calculated         0.865977
+vdW                0.894497
+Covalent-single    0.671733
+Covalent-triple    0.474100
+Metallic           0.628771
+dtype: float64</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We see a much lower coefficient of variation for Hofmann's volumes than the others, which is reflected in the chart.</p>
 
 </div>
 </div>
@@ -365,8 +571,7 @@ $$V_{est} = \sum\limits_{i=1}^{100} n_i\bar{v_i}(1+\bar{\alpha}T) = \bold{n\bar{
 <h1 id="HofCalc---using-the-web-app">
 <a class="anchor" href="#HofCalc---using-the-web-app" aria-hidden="true"><span class="octicon octicon-link"></span></a>HofCalc - using the web app<a class="anchor-link" href="#HofCalc---using-the-web-app"> </a>
 </h1>
-<p>The web app is available at <a href="http://hofcalc.herokuapp.com">http://hofcalc.herokuapp.com</a>.</p>
-<p>HofCalc makes use two key python libraries to <a href="https://github.com/xnx/pyvalem">process chemical formulae</a>, <a href="https://github.com/mcs07/PubChemPy">resolve chemical names</a> prior to processing. This provides a really convenient interface for users, who as you'll see below, can easily mix and match between these different formats in order to obtain the information they need.</p>
+<p><a href="http://hofcalc.herokuapp.com">HofCalc</a> makes use of two key python libraries to process chemical formulae (<a href="https://github.com/xnx/pyvalem">pyvalem</a>) and resolve chemical names (<a href="https://github.com/mcs07/PubChemPy">PubChemPy</a>) prior to processing. This allows the app to have a really convenient interface for specifying queries (see below), which enables users to easily mix and match between formulae and names to obtain the information they need.</p>
 <h2 id="Formulae-and-names">
 <a class="anchor" href="#Formulae-and-names" aria-hidden="true"><span class="octicon octicon-link"></span></a>Formulae and names<a class="anchor-link" href="#Formulae-and-names"> </a>
 </h2>
@@ -567,9 +772,9 @@ $$V = \sum{n_{i}v_{i}}(1 +  \alpha(T - 298))$$
 </h2>
 <p>Each time HofCalc is used, a downloadable summary file is produced. It is designed to serve both as a record of the query for future reference and also as a method to sense-check the interpretation of the entered terms, with links to the PubChem entries where relevant.
 An example of the contents of the summary file for the following search terms is given below.</p>
-<p>Search term = <code>carbamazepine; indomethacin</code>
-T = 293 K
-Unit cell volume = 2921.6 Å³</p>
+<p>Search term = <code>carbamazepine; indomethacin</code></p>
+<p>T = 293 K</p>
+<p>Unit cell volume = 2921.6 Å³</p>
 <div class="highlight"><pre><span></span><span class="p">{</span>
     <span class="nt">"combined"</span><span class="p">:</span> <span class="p">{</span>
         <span class="nt">"C"</span><span class="p">:</span> <span class="mi">34</span><span class="p">,</span>
@@ -629,7 +834,6 @@ Unit cell volume = 2921.6 Å³</p>
 <p>Using the <em>DASH</em> interface to <em>DICVOL</em>, the following unit cells are suggested:</p>
 <p><img src="/blog/images/copied_from_nb/images/DASH-indexing.png" alt=""></p>
 <p>Both monoclinic and triclinic cells are obtained with very different unit cell volumes. Whilst the figures of merit certainly push towards accepting the conclusion of a monoclinic unit cell, it's worth checking to see if this makes sense given the expected composition of the material. In addition, there may be more than one dimethylformamide molecule crystallising with the chlorothiazide - HofCalc may be able to shed some light there too.</p>
-<p>Using HofCalc, we can easily calculate the expected molecular volume, and supply the unit cell volume to obtain the ratio $\frac{V_{cell}}{V_{Hofmann}}$.</p>
 <p>The <a href="https://doi.org/10.1002/jps.20942">paper</a> states that the solvate was formed by recrystallisation of chlorothiazide from DMF solvent, so it seems logical to try the following permutations:</p>
 <ol>
 <li>chlorothiazide alone</li>
@@ -696,7 +900,7 @@ Unit cell volume = 2921.6 Å³</p>
 </tr>
 </tbody>
 </table>
-<p>We can see from the table that the $\frac{V_{cell}}{V_{mol}}$ ratios that give the most favourable crystallographic outcome are CT-DMF2 (monoclinic) and CT-DMF3 (triclinic). Given the higher figure of merit for the monoclinic unit cell, it seems reasonable to take this forwarg. Space-group determination identifies the most probable space group as $P2_1/c$, which then implies $Z'=2$.</p>
+<p>If we exclude those results with $\frac{V_{cell}}{V_{mol}}$ ratios &gt;0.25 away from a (crystallographically sensible) whole number, we can see from the table that the most favourable compositions are CT + 2xDMF (monoclinic) and CT + 3xDMF (triclinic). Given the higher figure of merit for the monoclinic unit cell, it seems reasonable to take this forward and attempt space-group determination. Doing this in <em>DASH</em> identifies the most probable space group as $P2_1/c$, which then implies $Z'=2$. This is indeed the correct result.</p>
 <p>If we compare this to the commonly used 18 Å³ rule, we end up with the follow results:</p>
 <table>
 <thead>
@@ -758,7 +962,7 @@ Unit cell volume = 2921.6 Å³</p>
 </tr>
 </tbody>
 </table>
-<p>Using the 18 Å³ rule, a triclinic pure chlorothiazide unit cell also becomes a viable possibility. Had there been a less clear distinction in indexing figure-of-merit, this may cause time to be wasted on testing this additional possibility.</p>
+<p>Again, CT+2xDMF is in the candidates to check, however, using the 18 Å³ rule, a triclinic pure chlorothiazide unit cell also becomes a viable possibility. Had there been a less clear distinction in the indexing figure-of-merit, this may have resulted in time being wasted on testing this additional possibility.</p>
 
 </div>
 </div>
