@@ -112,7 +112,7 @@ window.onload = wrap_img;
        • <span class="read-time" title="Estimated read time">
     
     
-      7 min read
+      9 min read
     
 </span></p>
 
@@ -151,6 +151,7 @@ window.onload = wrap_img;
 <li class="toc-entry toc-h2"><a href="#Summary-Files">Summary Files </a></li>
 </ul>
 </li>
+<li class="toc-entry toc-h1"><a href="#Case-study:-CT-DMF2">Case study: CT-DMF2 </a></li>
 <li class="toc-entry toc-h1"><a href="#Conclusions">Conclusions </a></li>
 </ul><!--
 #################################################
@@ -188,7 +189,7 @@ $$V_{est} = \sum\limits_{i=1}^{100} n_i\bar{v_i}(1+\bar{\alpha}T) = \bold{n\bar{
 </p>
 <p>Where $n_i$ is the number of atoms of element $i$ in the unit cell, and $\bar{v_i}$ is the average volume occupied by an atom of element $i$. This equation also assumes that the atomic volume varies linearly with temperature.</p>
 <p>He split the dataset into 20 subsets, then applied linear regression to solve the above equation for each of the subsets. This allowed him to find the average volumes occupied by atoms of each element, and due to the splitting of the data into subsets, he also obtains their standard deviations. His use of a temperature parameter allowed him to provide volumes for all of the elements represented in the CSD at 298 K.</p>
-<p>You can download a <code>.json</code> file containing his volumes <a href="https://github.com/mspillman/blog/blob/master/_notebooks/files/Hofmann-volumes.json">here</a>.</p>
+<p>You can download a <code>.json</code> file containing the volumes <a href="https://github.com/mspillman/blog/blob/master/_notebooks/files/Hofmann-volumes.json">here</a>.</p>
 <p>The coefficient of thermal expansion, $\bar{\alpha}$, was found to be $0.95 \times 10^{-4} K^{-1}$.</p>
 
 </div>
@@ -446,23 +447,84 @@ Note that formulae can be prefixed with a multiple, e.g. 2H2O</p>
 <h3 id="More-complex-examples---hemihydrates">
 <a class="anchor" href="#More-complex-examples---hemihydrates" aria-hidden="true"><span class="octicon octicon-link"></span></a>More complex examples - hemihydrates<a class="anchor-link" href="#More-complex-examples---hemihydrates"> </a>
 </h3>
-<p>In cases where fractional multiples of search components are required, such as with hemihydrates, care should be taken to check the evaluated chemical formula for consistency with the expected formula.
-|                                    Search term              |     Evaluated as     | $V_{Hofmann}$     | Divide by | Expected Volume |
-|:-----------------------------------------------------------:|:--------------------:|:-----------------:|:---------:|:---------------:|
-| Calcium sulfate hemihydrate                                 | Ca2 H2 O9 S2         | 253.07            | 2         | 126.53          |
-| calcium; calcium; sulfate; sulfate; water                   | Ca2 H2 O9 S2         | 253.07            | 2         | 126.53          |
-| calcium; sulfate; 0.5H2O                                    | Ca1 H1.0 O4.5 S1     | 126.53            | -         | 126.53          |
-| Codeine phosphate hemihydrate                               | C36 H50 N2 O15 P2    | 1006.77           | 2         | 503.38          |
-| codeine; codeine; phosphoric acid; phosphoric acid; water   | C36 H50 N2 O15 P2    | 1006.77           | 2         | 503.38          |
-| codeine; phosphoric acid; 0.5H2O                            | C18 H25.0 N1 O7.5 P1 | 503.38            | -         | 503.38          |</p>
+<p>In cases where fractional multiples of search components are required, such as with hemihydrates, care should be taken to check the evaluated chemical formula for consistency with the expected formula.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Search term</th>
+<th style="text-align:center">Evaluated as</th>
+<th style="text-align:center">$V_{Hofmann}$</th>
+<th style="text-align:center">Divide by</th>
+<th style="text-align:center">Expected Volume</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">Calcium sulfate hemihydrate</td>
+<td style="text-align:center">Ca2 H2 O9 S2</td>
+<td style="text-align:center">253.07</td>
+<td style="text-align:center">2</td>
+<td style="text-align:center">126.53</td>
+</tr>
+<tr>
+<td style="text-align:center">calcium; calcium; sulfate; sulfate; water</td>
+<td style="text-align:center">Ca2 H2 O9 S2</td>
+<td style="text-align:center">253.07</td>
+<td style="text-align:center">2</td>
+<td style="text-align:center">126.53</td>
+</tr>
+<tr>
+<td style="text-align:center">calcium; sulfate; 0.5H2O</td>
+<td style="text-align:center">Ca1 H1.0 O4.5 S1</td>
+<td style="text-align:center">126.53</td>
+<td style="text-align:center">-</td>
+<td style="text-align:center">126.53</td>
+</tr>
+<tr>
+<td style="text-align:center">Codeine phosphate hemihydrate</td>
+<td style="text-align:center">C36 H50 N2 O15 P2</td>
+<td style="text-align:center">1006.77</td>
+<td style="text-align:center">2</td>
+<td style="text-align:center">503.38</td>
+</tr>
+<tr>
+<td style="text-align:center">codeine; codeine; phosphoric acid; phosphoric acid; water</td>
+<td style="text-align:center">C36 H50 N2 O15 P2</td>
+<td style="text-align:center">1006.77</td>
+<td style="text-align:center">2</td>
+<td style="text-align:center">503.38</td>
+</tr>
+<tr>
+<td style="text-align:center">codeine; phosphoric acid; 0.5H2O</td>
+<td style="text-align:center">C18 H25.0 N1 O7.5 P1</td>
+<td style="text-align:center">503.38</td>
+<td style="text-align:center">-</td>
+<td style="text-align:center">503.38</td>
+</tr>
+</tbody>
+</table>
 <h3 id="Charged-species-in-formulae">
 <a class="anchor" href="#Charged-species-in-formulae" aria-hidden="true"><span class="octicon octicon-link"></span></a>Charged species in formulae<a class="anchor-link" href="#Charged-species-in-formulae"> </a>
 </h3>
-<p>Charges could potentially interfere with the parsing of chemical formulae. For example, two ways of representing an oxide ion:
-| Search term | Evaluated as |
-|:-----------:|:------------:|
-| O-2         | 1 x O        |
-| O2-         | 2 x O        |</p>
+<p>Charges could potentially interfere with the parsing of chemical formulae. For example, two ways of representing an oxide ion:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Search term</th>
+<th style="text-align:center">Evaluated as</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">O-2</td>
+<td style="text-align:center">1 x O</td>
+</tr>
+<tr>
+<td style="text-align:center">O2-</td>
+<td style="text-align:center">2 x O</td>
+</tr>
+</tbody>
+</table>
 <p>Whilst is is recommended that charges be omitted from HofCalc queries, if including charges in your queries, ensure that the correct number of atoms has been determined in the displayed atom counts or the downloadable summary file. For more information on formatting formulae, see the pyvalem documentation (link in references)</p>
 <h2 id="Temperature">
 <a class="anchor" href="#Temperature" aria-hidden="true"><span class="octicon octicon-link"></span></a>Temperature<a class="anchor-link" href="#Temperature"> </a>
@@ -505,9 +567,9 @@ $$V = \sum{n_{i}v_{i}}(1 +  \alpha(T - 298))$$
 </h2>
 <p>Each time HofCalc is used, a downloadable summary file is produced. It is designed to serve both as a record of the query for future reference and also as a method to sense-check the interpretation of the entered terms, with links to the PubChem entries where relevant.
 An example of the contents of the summary file for the following search terms is given below.</p>
-<ul>
-<li>carbamazepine; indomethacin with T = 293 K and unit cell volume = 2921.6 Å³</li>
-</ul>
+<p>Search term = <code>carbamazepine; indomethacin</code>
+T = 293 K
+Unit cell volume = 2921.6 Å³</p>
 <div class="highlight"><pre><span></span><span class="p">{</span>
     <span class="nt">"combined"</span><span class="p">:</span> <span class="p">{</span>
         <span class="nt">"C"</span><span class="p">:</span> <span class="mi">34</span><span class="p">,</span>
@@ -560,11 +622,155 @@ An example of the contents of the summary file for the following search terms is
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Case-study:-CT-DMF2">
+<a class="anchor" href="#Case-study:-CT-DMF2" aria-hidden="true"><span class="octicon octicon-link"></span></a>Case study: CT-DMF2<a class="anchor-link" href="#Case-study:-CT-DMF2"> </a>
+</h1>
+<p>The crystal structure of chlorothiazide N,N-dimethylformamide, a.k.a <a href="https://jpharmsci.org/article/S0022-3549(16">CT-DMF2</a>32253-5/fulltext), was solved from laboratory powder diffraction data back in 2007. I decided to try re-indexing the diffraction data to see if HofCalc would be of use.</p>
+<p>Using the <em>DASH</em> interface to <em>DICVOL</em>, the following unit cells are suggested:</p>
+<p><img src="/blog/images/copied_from_nb/images/DASH-indexing.png" alt=""></p>
+<p>Both monoclinic and triclinic cells are obtained with very different unit cell volumes. Whilst the figures of merit certainly push towards accepting the conclusion of a monoclinic unit cell, it's worth checking to see if this makes sense given the expected composition of the material. In addition, there may be more than one dimethylformamide molecule crystallising with the chlorothiazide - HofCalc may be able to shed some light there too.</p>
+<p>Using HofCalc, we can easily calculate the expected molecular volume, and supply the unit cell volume to obtain the ratio $\frac{V_{cell}}{V_{Hofmann}}$.</p>
+<p>The <a href="https://jpharmsci.org/article/S0022-3549(16">paper</a>32253-5/fulltext) states that the solvate was formed by recrystallisation of chlorothiazide from DMF solvent, so it seems logical to try the following permutations:</p>
+<ol>
+<li>chlorothiazide alone</li>
+<li>chlorothiazide + 1 DMF</li>
+<li>chlorothiazide + 2 DMF (etc)</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">HofCalc query</th>
+<th style="text-align:center">$V_{Hofmann}$</th>
+<th style="text-align:center">$V_{cell}$</th>
+<th style="text-align:center">$\frac{V_{cell}}{V_{Hofmann}}$</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">chlorothiazide</td>
+<td style="text-align:center">284.73</td>
+<td style="text-align:center">2422 (triclinic)</td>
+<td style="text-align:center">8.51</td>
+</tr>
+<tr>
+<td style="text-align:center">chlorothiazide</td>
+<td style="text-align:center">284.73</td>
+<td style="text-align:center">3950 (monoclinic)</td>
+<td style="text-align:center">13.87</td>
+</tr>
+<tr>
+<td style="text-align:center">chlorothiazide; DMF</td>
+<td style="text-align:center">385.09</td>
+<td style="text-align:center">2422 (triclinic)</td>
+<td style="text-align:center">6.29</td>
+</tr>
+<tr>
+<td style="text-align:center">chlorothiazide; DMF</td>
+<td style="text-align:center">385.09</td>
+<td style="text-align:center">3950 (monoclinic)</td>
+<td style="text-align:center">10.26</td>
+</tr>
+<tr>
+<td style="text-align:center">chlorothiazide; DMF; DMF</td>
+<td style="text-align:center">485.45</td>
+<td style="text-align:center">2422 (triclinic)</td>
+<td style="text-align:center">4.99</td>
+</tr>
+<tr>
+<td style="text-align:center">chlorothiazide; DMF; DMF</td>
+<td style="text-align:center">485.45</td>
+<td style="text-align:center">3950 (monoclinic)</td>
+<td style="text-align:center">8.14</td>
+</tr>
+<tr>
+<td style="text-align:center">chlorothiazide; DMF; DMF; DMF</td>
+<td style="text-align:center">585.81</td>
+<td style="text-align:center">2422 (triclinic)</td>
+<td style="text-align:center">4.13</td>
+</tr>
+<tr>
+<td style="text-align:center">chlorothiazide; DMF; DMF; DMF</td>
+<td style="text-align:center">585.81</td>
+<td style="text-align:center">3950 (monoclinic)</td>
+<td style="text-align:center">6.74</td>
+</tr>
+</tbody>
+</table>
+<p>We can see from the table that the $\frac{V_{cell}}{V_{mol}}$ ratios that give the most favourable crystallographic outcome are CT-DMF2 (monoclinic) and CT-DMF3 (triclinic). Given the higher figure of merit for the monoclinic unit cell, it seems reasonable to take this forwarg. Space-group determination identifies the most probable space group as $P2_1/c$, which then implies $Z'=2$.</p>
+<p>If we compare this to the commonly used 18 Å³ rule, we end up with the follow results:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Possible composition</th>
+<th style="text-align:center">$V_{18Å^{3}}$</th>
+<th style="text-align:center">$V_{cell}$</th>
+<th style="text-align:center">$\frac{V_{cell}}{V_{18Å^{3}}}$</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">chlorothiazide</td>
+<td style="text-align:center">306</td>
+<td style="text-align:center">2422 (triclinic)</td>
+<td style="text-align:center">7.92</td>
+</tr>
+<tr>
+<td style="text-align:center">chlorothiazide</td>
+<td style="text-align:center">306</td>
+<td style="text-align:center">3950 (monoclinic)</td>
+<td style="text-align:center">12.91</td>
+</tr>
+<tr>
+<td style="text-align:center">chlorothiazide; DMF</td>
+<td style="text-align:center">396</td>
+<td style="text-align:center">2422 (triclinic)</td>
+<td style="text-align:center">6.12</td>
+</tr>
+<tr>
+<td style="text-align:center">chlorothiazide; DMF</td>
+<td style="text-align:center">396</td>
+<td style="text-align:center">3950 (monoclinic)</td>
+<td style="text-align:center">9.97</td>
+</tr>
+<tr>
+<td style="text-align:center">chlorothiazide; DMF; DMF</td>
+<td style="text-align:center">486</td>
+<td style="text-align:center">2422 (triclinic)</td>
+<td style="text-align:center">4.98</td>
+</tr>
+<tr>
+<td style="text-align:center">chlorothiazide; DMF; DMF</td>
+<td style="text-align:center">486</td>
+<td style="text-align:center">3950 (monoclinic)</td>
+<td style="text-align:center">8.13</td>
+</tr>
+<tr>
+<td style="text-align:center">chlorothiazide; DMF; DMF; DMF</td>
+<td style="text-align:center">576</td>
+<td style="text-align:center">2422 (triclinic)</td>
+<td style="text-align:center">4.20</td>
+</tr>
+<tr>
+<td style="text-align:center">chlorothiazide; DMF; DMF; DMF</td>
+<td style="text-align:center">576</td>
+<td style="text-align:center">3950 (monoclinic)</td>
+<td style="text-align:center">6.86</td>
+</tr>
+</tbody>
+</table>
+<p>Using the 18 Å³ rule, a triclinic pure chlorothiazide unit cell also becomes a viable possibility. Had there been a less clear distinction in indexing figure-of-merit, this may cause time to be wasted on testing this additional possibility.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
 <h1 id="Conclusions">
 <a class="anchor" href="#Conclusions" aria-hidden="true"><span class="octicon octicon-link"></span></a>Conclusions<a class="anchor-link" href="#Conclusions"> </a>
 </h1>
-<p>Hofmann's volumes give more accurate estimates of molecular volumes in crystals, and should be used in preference to the 18 Å rule where possible.</p>
-<p>To make this easier for people, I've made a web-app that can be used to very rapidly and conveniently obtain these estimates.</p>
+<p>Hofmann's volumes give more accurate estimates of molecular volumes in crystals, and should be used in preference to the 18 Å³ rule where possible.</p>
+<p>To make this easier for people, the <a href="https://hofcalc.herokuapp.com">HofCalc web-app</a> can be used to very rapidly and conveniently obtain these estimates.</p>
 
 </div>
 </div>
