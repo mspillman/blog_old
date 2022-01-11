@@ -299,7 +299,7 @@ var n,i=t("./lib/build-log"),a=t("./lib/epsilon"),o=t("./lib/intersecter"),s=t("
 <p>I'll write another blog post in the future showing how to use the <em>GALLOP</em> code to generate plots like this.</p>
 <p>There are several local minima present, each of which represents an incorrect structure that has either 21 or 22 of its 23 degrees of freedom correctly determined. Despite this, the $\chi^{2}$ at each local minimum gives no indication that the result is so close to correct. This means that even failed runs with high values of $\chi^{2}$ may be close to the global minimum. If we could accumulate and exploit this information to influence where the next set of local optimisations start, then it might be possible to save time in searching for the global minimum.</p>
 <p>With this idea in mind, I tried a few things to attempt to recycle information from "failed" local optimisation attempts, including using <a href="https://en.wikipedia.org/wiki/Kernel_density_estimation">kernel density estimation</a> to try to resample various degrees of freedom depending based on the density of solutions that ended up with particular coordinates. This definitely showed an improvement relative to random sampling, but proved inconsistent in terms of the level of improvement obtained. Perhaps I'll revisit this in a future blog post as I still think there's something there that may be of use.</p>
-<p>Eventually, I ended trying particle swarm optimisation (PSO) to attempt to recycle the optimised positions. A few things attracted me to PSO:</p>
+<p>Eventually, I ended up trying particle swarm optimisation (PSO) to attempt to recycle the optimised positions. A few things attracted me to PSO:</p>
 <ol>
 <li>It's a simple algorithm to implement - just a few lines of code got it working as a proof of concept</li>
 <li>The algorithm maintains a memory of "good" solutions so there's less risk of the algorithm moving in a bad direction and getting stuck there</li>
@@ -397,7 +397,7 @@ $$\bold{v}_{t+1} = \omega_{t} \bold{v}_{t} + c_{1}\bold{R}_1(\bold{g}_{best} - \
 <p>
 $$ \omega_i = 0.4 + \frac{Rank_i}{2N} $$
 </p>
-<p>This gives inertia values in the range 0.4 - 0.9, and means that the best particles slow down, whilst the worst particles in the swarm have higher inertias and hence are able to continue moving more rapidly towards (hopefully) promising areas of the hypersurface.</p>
+<p>where $Rank_i$ is the position of particle $i$ in a sorted list of their respective $\chi^2$ values. This gives inertia values in the range 0.4 - 0.9, and means that the best particles slow down, whilst the worst particles in the swarm have higher inertias and hence are able to continue moving more rapidly towards (hopefully) promising areas of the hypersurface.</p>
 <p>The degrees of freedom are then updated using the velocity and previous parameters according to:</p>
 <p>
 $$\bold{x}_{t+1} = \bold{x}_t + \bold{v}_{t+1} $$
