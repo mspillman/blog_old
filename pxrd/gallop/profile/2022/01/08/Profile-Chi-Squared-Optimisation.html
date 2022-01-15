@@ -1384,6 +1384,11 @@ GALLOP iter 0010 LO iter 0500 min chi2 57.1: 100%|██████████
 </h2>
 <p>One obvious thing to do would be to see if this can also be done easily with GSAS-II output files, or indeed other programs that are capable of Le Bail fits.</p>
 <p>Another interesting possibility would be to have a go using the <a href="http://objcryst.sourceforge.net/ZKrist219_847.pdf">integrated profile strategy employed by FOX (pdf)</a> which should afford improved performance.</p>
+<p>One other thing which I really should get round to looking into is how the 20 % correlation threshold used in DASH for the intensity $\chi^2$ calculation influences the optimisation behaviour. Given that there is no performance penalty with setting this threshold in GALLOP to zero, it might be interesting to run some large-scale experiments to see if there's anything to be gained by including such lower-level correlations into the figure of merit.</p>
+<p>Anyone interested in trying that for themselves can do so in GALLOP python mode easily. When reading in the data, add the <code>percentage_cutoff</code> argument, which defaults to 20 in order to match <em>DASH</em>.</p>
+<div class="highlight"><pre><span></span><span class="n">mystructure</span><span class="o">.</span><span class="n">add_data</span><span class="p">(</span><span class="s2">"filename.sdi"</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="s2">"DASH"</span><span class="p">,</span> <span class="n">percentage_cutoff</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+<p>This also applies to <em>GSAS</em> and <em>TOPAS</em> derived data files.</p>
 
 </div>
 </div>
