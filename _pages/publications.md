@@ -5,7 +5,18 @@ toc: true
 permalink: /publications/
 ---
 
-## Journal articles
+## Books
+
+Matthew J. Almond, **Mark J. Spillman** and Elizabeth M. Page. "Workbook in Inorganic Chemistry", Oxford University Press (2017). ISBN: 9780198729501. [Publisher](https://global.oup.com/ukhe/product/workbook-in-inorganic-chemistry-9780198729501?cc=gb&lang=en&)
+### Chapter
+
+**Mark J. Spillman**, Daniel Nicholls and Kenneth Shankland. “Experimental Analysis of Powder Diffraction Data.” (2020). doi: [10.1142/9789811204579_0001](https://doi.org/10.1142/9789811204579_0001), Chapter 1 in "Handbook on Big Data and Machine Learning in the Physical Sciences", World Scientific (2020)
+
+---
+
+## Articles
+
+**Mark J. Spillman**, Norman Shankland and Kenneth Shankland. “An efficient treatment of ring conformations during molecular crystal structure determination from powder diffraction data.” CrystEngComm (2022) doi: 
 
 **Mark J. Spillman** and Kenneth Shankland. “GALLOP: accelerated molecular crystal structure determination from powder diffraction data.” CrystEngComm (2021) doi: [10.1039/d1ce00978h](https://doi.org/10.1039/d1ce00978h)
 
@@ -27,11 +38,5 @@ Mridul Majumder, Graham Buckton, Clare F. Rawlinson-Malone, Adrian C. Williams, 
 
 Mridul Majumder, Graham Buckton, Clare F. Rawlinson-Malone, Adrian C Williams, **Mark J. Spillman**, Norman Shankland and Kenneth Shankland. "A Carbamazepine-Indomethacin (1 : 1) Cocrystal Produced by Milling." CrystEngComm  (2011) doi: [10.1039/C1CE05650F](https://doi.org/10.1039/C1CE05650F)
 
----
 
-## Books
 
-Matthew J. Almond, **Mark J. Spillman** and Elizabeth M. Page. "Workbook in Inorganic Chemistry", Oxford University Press (2017). ISBN: 9780198729501. [Publisher](https://global.oup.com/ukhe/product/workbook-in-inorganic-chemistry-9780198729501?cc=gb&lang=en&)
-### Chapter
-
-**Mark J. Spillman**, Daniel Nicholls and Kenneth Shankland. “Experimental Analysis of Powder Diffraction Data.” (2020). doi: [10.1142/9789811204579_0001](https://doi.org/10.1142/9789811204579_0001), chapter in "Handbook on Big Data and Machine Learning in the Physical Sciences", World Scientific (2020)
