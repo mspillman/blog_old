@@ -469,7 +469,7 @@ $$ \nabla C(\textbf{x}) = \nabla \chi^2(\textbf{x}) + \chi^2_{copy} \nabla R(\te
 <p>We'll be using both distance and torsion restraints, so select these. New input widgets will appear as a result:</p>
 <p><img src="/blog/images/copied_from_nb/./images/distance_restraint_inputs.png" alt=""></p>
 <p>For the distance restraint, we only need one, so all we need to do is specify the atoms involved, the distance value we want to use, and the weight to apply to this restraint - we'll use a weight of 1.0:</p>
-<p>For the torsionn restraints, we'll need two of these, so we modify the number of restraints to 2, and then the boxes allow us to specify each one:</p>
+<p>For the torsion restraints, we'll need two of these, so we modify the number of restraints to 2, and then the boxes allow us to specify each one:</p>
 <p><img src="/blog/images/copied_from_nb/./images/torsion_restraint_inputs.png" alt=""></p>
 <p>As a brief aside, even though we aren't using them in this case, it's worth talking about using angle restraints in the browser interface. As <em>GALLOP</em> allows the flexibility to specify angle restraints between any two interatomic vectors, we can either supply 3 or 4 atom labels depending on what we want to do. For normal bond angles, we only provide three atom labels. For example, if we want the angle C2 - C1 - C3 (i.e. atom C1 in the middle) to be restrained to 120 degrees with a weight of 1.0, we would enter the following into the widget:</p>
 
@@ -489,7 +489,7 @@ $$ \nabla C(\textbf{x}) = \nabla \chi^2(\textbf{x}) + \chi^2_{copy} \nabla R(\te
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>One thing that <em>GALLOP</em> allows is to save animations of the trajectory taken by each particle. This option slows things down a fair bit, but does produce some cool animations! Below, I've embedded an interactive animation (move, zoon etc using mouse) of the trajectory taken by the best performing particle during the first iteration of a different set of runs, with hydrogen atoms hidden for clarity. On the left, you see the whole unit cell, with the asymmetric unit shown on the right. You can see that the ring very rapidly reforms due to the action of the distance restraint.</p>
+<p>One thing that <em>GALLOP</em> allows is to save animations of the trajectory taken by each particle. This option slows things down a fair bit, but does produce some cool animations! Below, I've embedded an interactive animation (move, zoom etc using mouse) of the trajectory taken by the best performing particle during the first iteration of a different set of runs, with hydrogen atoms hidden for clarity. On the left, you see the whole unit cell, with the asymmetric unit shown on the right. You can see that the ring very rapidly reforms due to the action of the distance restraint.</p>
 
 </div>
 </div>
@@ -927,7 +927,7 @@ GALLOP iter 0005 LO iter 0500 min chi2 104.9: 100%|█████████�
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p></p>
-<div class="footnotes"><p id="fn-1">1. Meso structures means that in practice, it may not always be as high as $2^n$<a href="#fnref-1" class="footnote footnotes">↩</a></p></div>
+<div class="footnotes"><p id="fn-1">1. The existence of meso structures means that in practice, it may not always be as high as $2^n$<a href="#fnref-1" class="footnote footnotes">↩</a></p></div>
 
 </div>
 </div>
