@@ -474,7 +474,7 @@ $$ \nabla C(\textbf{x}) = \nabla \chi^2(\textbf{x}) + \chi^2_{copy} \nabla R(\te
 <p>As a brief aside, even though we aren't using them in this case, it's worth talking about using angle restraints in the browser interface. As <em>GALLOP</em> allows the flexibility to specify angle restraints between any two interatomic vectors, we can either supply 3 or 4 atom labels depending on what we want to do. For normal bond angles, we only provide three atom labels. For example, if we want the angle C2 - C1 - C3 (i.e. atom C1 in the middle) to be restrained to 120 degrees with a weight of 1.0, we would enter the following into the widget:</p>
 
 <pre><code>C2,C1,C3,120,1.0</code></pre>
-<p>Alternatively, if we have two interatomic vectors, for example C1 -&gt; C2 and C3 -&gt; C4, and we want them to be perpendicular with a weight of 0.5, we would use the following input:</p>
+<p>Alternatively, if we have two interatomic vectors, for example C1 $\rightarrow$ C2 and C3 $\rightarrow$ C4, and we want them to be perpendicular with a weight of 0.5, we would use the following input:</p>
 
 <pre><code>C1,C2,C3,C4,90,0.5</code></pre>
 <h4 id="Running-GALLOP">
@@ -696,7 +696,7 @@ Degrees of freedom: 21 (7 + 14)
 <h4 id="Angle-restraints">
 <a class="anchor" href="#Angle-restraints" aria-hidden="true"><span class="octicon octicon-link"></span></a>Angle restraints<a class="anchor-link" href="#Angle-restraints"> </a>
 </h4>
-<p>Whilst we aren't using them here, for an angle restraint, we need to specify two interatomic vectors. If we want this to be a standard bond angle, then atom1 and atom3 need to be the same atom, for example, in a structure where the angle C2 - C1 - C3 is 120 degrees, then we want the angle between the vectors C1 -&gt; C2 and C1 -&gt; C3 to be 120 degrees, so we would use the following command:</p>
+<p>Whilst we aren't using them here, for an angle restraint, we need to specify two interatomic vectors. If we want this to be a standard bond angle, then atom1 and atom3 need to be the same atom, for example, in a structure where the angle C2 - C1 - C3 is 120 degrees, then we want the angle between the vectors C1 $\rightarrow$ C2 and C1 $\rightarrow$ C3 to be 120 degrees, so we would use the following command:</p>
 <div class="highlight"><pre><span></span><span class="n">mystructure</span><span class="o">.</span><span class="n">add_restraint</span><span class="p">({</span><span class="s2">"type"</span> <span class="p">:</span> <span class="s2">"angle"</span><span class="p">,</span>
                         <span class="s2">"atom1"</span> <span class="p">:</span> <span class="s2">"C1"</span><span class="p">,</span>
                         <span class="s2">"atom2"</span> <span class="p">:</span> <span class="s2">"C2"</span><span class="p">,</span>
@@ -705,7 +705,7 @@ Degrees of freedom: 21 (7 + 14)
                         <span class="s2">"value"</span> <span class="p">:</span> <span class="mf">120.0</span><span class="p">,</span>
                         <span class="s2">"weight"</span> <span class="p">:</span> <span class="mf">1.0</span><span class="p">})</span>
 </pre></div>
-<p>If we weren't working with a normal bond angle, then to specify a restraint between two interatomic vectors, e.g. C1 -&gt; C2 and C3 -&gt; C4, then we would use something like this:</p>
+<p>If we weren't working with a normal bond angle, then to specify a restraint between two interatomic vectors, e.g. C1 $\rightarrow$ C2 and C3 $\rightarrow$ C4, then we would use something like this:</p>
 <div class="highlight"><pre><span></span><span class="n">mystructure</span><span class="o">.</span><span class="n">add_restraint</span><span class="p">({</span><span class="s2">"type"</span> <span class="p">:</span> <span class="s2">"angle"</span><span class="p">,</span>
                         <span class="s2">"atom1"</span> <span class="p">:</span> <span class="s2">"C1"</span><span class="p">,</span>
                         <span class="s2">"atom2"</span> <span class="p">:</span> <span class="s2">"C2"</span><span class="p">,</span>
