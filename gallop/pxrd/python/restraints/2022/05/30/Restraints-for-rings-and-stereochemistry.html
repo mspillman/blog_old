@@ -884,8 +884,7 @@ GALLOP iter 0005 LO iter 0500 min chi2 104.9: 100%|█████████�
 <a class="anchor" href="#Using-restraints-in-GALLOP-for-stereochemistry" aria-hidden="true"><span class="octicon octicon-link"></span></a>Using restraints in <em>GALLOP</em> for stereochemistry<a class="anchor-link" href="#Using-restraints-in-GALLOP-for-stereochemistry"> </a>
 </h1>
 <p>The restraints we've been working with so far are not limited in application to ring systems. In this section, we'll see how the use of restraints can save a significant amount of user effort in model preparation and testing in the case of a structure with multiple chiral centres of unknown (relative) configuration.</p>
-<p>An asymmetric unit containing $n$ chiral centres of unknown configuration leads to up to $2^n$ unique combinations of R and S at each of the centres. <sup id="fnref-1" class="footnote-ref"><a href="#fn-1">1</a></sup> </p>
-<div class="footnotes"><p id="fn-1">1. Meso structures means that in practice, it may not always be as high as $2^n$<a href="#fnref-1" class="footnote footnotes">↩</a></p></div> Enantiomers are indistinguishable in standard PXRD experiments, this therefore means that there are $2^{n-1}$ configurations of R and S that each require a model to be prepared and tested. Given the exponential growth in the number of models with $n$, this could rapidly lead to very large numbers of runs being required!
+<p>An asymmetric unit containing $n$ chiral centres of unknown configuration leads to up to $2^n$ unique combinations of R and S at each of the centres. <sup id="fnref-1" class="footnote-ref"><a href="#fn-1">1</a></sup> Enantiomers are indistinguishable in standard PXRD experiments, this therefore means that there are $2^{n-1}$ configurations of R and S that each require a model to be prepared and tested. Given the exponential growth in the number of models with $n$, this could rapidly lead to very large numbers of runs being required!</p>
 <p>So, how do restraints help? Well, if we break two of the bonds at each chiral centre, the separated fragments will be able to move independently, and be refined to their correct relative positions. However, as was the case with rings, breaking bonds leads to an increase in the number of degrees of freedom that need to be determined. Therefore, the inclusion of restraints ensures that the additional degrees of freedom are limited to only taking on values that reform the bonds that were broken, thus ensuring both that the correct molecule is obtained after optimisation and also that the optimisation process doesn't take an inordinate amount of time!</p>
 <p>In the article we published, we took a look at the structure of trandolapril, <a href="https://discovery.ucl.ac.uk/id/eprint/1519753/">published by Reid et al</a>, which has CSD refcode IQISAE01. This molecule has 5 chiral centres:</p>
 <p><img src="/blog/images/copied_from_nb/./images/Trandolapril_structure.png" alt="2D molecular structure of trandolapril"></p>
@@ -920,6 +919,15 @@ GALLOP iter 0005 LO iter 0500 min chi2 104.9: 100%|█████████�
 <a class="anchor" href="#Conclusions" aria-hidden="true"><span class="octicon octicon-link"></span></a>Conclusions<a class="anchor-link" href="#Conclusions"> </a>
 </h1>
 <p>In this post, we've seen how to use restraints in <em>GALLOP</em> to help with solving structures with unknown ring conformations and structures with multiple stereochemical centres of unknown relative configuration.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p></p>
+<div class="footnotes"><p id="fn-1">1. Meso structures means that in practice, it may not always be as high as $2^n$<a href="#fnref-1" class="footnote footnotes">↩</a></p></div>
 
 </div>
 </div>
