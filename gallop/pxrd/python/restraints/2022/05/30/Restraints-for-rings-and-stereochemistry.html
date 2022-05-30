@@ -462,13 +462,9 @@ $$ \nabla C(\textbf{x}) = \nabla \chi^2(\textbf{x}) + \chi^2_{copy} \nabla R(\te
 <a class="anchor" href="#Browser-interface" aria-hidden="true"><span class="octicon octicon-link"></span></a>Browser interface<a class="anchor-link" href="#Browser-interface"> </a>
 </h2>
 <p>Start the <em>GALLOP</em> browser interface as normal (I'm using Kaggle, so my jobs are running on a P100 GPU), then upload the files needed. Modify the number of swarms and number of particles per swarm as you see fit, then we'll need to tweak a couple of settings. You may also wish to reduce the total number of iterations as this structure will solve very quickly - 5 <em>GALLOP</em> iterations with 10 swarms of 1000 particles should be more than sufficient.</p>
-<ol>
-<li>Learning rate - open the Local Optimiser settings, then select "Show advanced options". Scroll down until you see "Find learning rate", and unselect that box. A new number input widget will appear, in here, set the learning rate to 0.0325 (or whatever value you obtain with your fit files). When you press enter, the display may show "0.03", but rest assured that the additional decimal places are still recorded internally - not that they make much difference in practice!</li>
-</ol>
+<p><strong>Learning rate</strong> - open the Local Optimiser settings, then select "Show advanced options". Scroll down until you see "Find learning rate", and unselect that box. A new number input widget will appear, in here, set the learning rate to 0.0325 (or whatever value you obtain with your fit files). When you press enter, the display may show "0.03", but rest assured that the additional decimal places are still recorded internally - not that they make much difference in practice!</p>
 <p><img src="/blog/images/copied_from_nb/./images/manual_learning_rate.png" alt=""></p>
-<ol>
-<li>Restraints - continue scrolling down the advanced local optimiser settings, until you see check boxes for restraints:</li>
-</ol>
+<p><strong>Restraints</strong> - continue scrolling down the advanced local optimiser settings, until you see check boxes for restraints:</p>
 <p><img src="/blog/images/copied_from_nb/./images/restraint_check_boxes.png" alt=""></p>
 <p>We'll be using both distance and torsion restraints, so select these. New input widgets will appear as a result:</p>
 <p><img src="/blog/images/copied_from_nb/./images/distance_restraint_inputs.png" alt=""></p>
