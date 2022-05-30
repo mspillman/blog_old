@@ -16,7 +16,7 @@ Matthew J. Almond, **Mark J. Spillman** and Elizabeth M. Page. "Workbook in Inor
 
 ## Articles
 
-**Mark J. Spillman**, Norman Shankland and Kenneth Shankland. “An efficient treatment of ring conformations during molecular crystal structure determination from powder diffraction data.” CrystEngComm (2022) doi: 
+**Mark J. Spillman**, Norman Shankland and Kenneth Shankland. “An efficient treatment of ring conformations during molecular crystal structure determination from powder diffraction data.” CrystEngComm (2022) doi: [10.1039/D2CE00520D](https://doi.org/10.1039/D2CE00520D)
 
 **Mark J. Spillman** and Kenneth Shankland. “GALLOP: accelerated molecular crystal structure determination from powder diffraction data.” CrystEngComm (2021) doi: [10.1039/d1ce00978h](https://doi.org/10.1039/d1ce00978h)
 
