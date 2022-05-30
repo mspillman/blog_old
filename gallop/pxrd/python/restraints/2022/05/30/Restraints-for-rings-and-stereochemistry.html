@@ -112,7 +112,7 @@ window.onload = wrap_img;
        • <span class="read-time" title="Estimated read time">
     
     
-      28 min read
+      29 min read
     
 </span></p>
 
@@ -449,7 +449,7 @@ $$ \nabla C(\textbf{x}) = \nabla \chi^2(\textbf{x}) + \chi^2_{copy} \nabla R(\te
 <h3 id="GALLOP-Learning-rate">
 <a class="anchor" href="#GALLOP-Learning-rate" aria-hidden="true"><span class="octicon octicon-link"></span></a><em>GALLOP</em> Learning rate<a class="anchor-link" href="#GALLOP-Learning-rate"> </a>
 </h3>
-<p>One thing I have found is that the learning rate finder built into <em>GALLOP</em> doesn't work as well when there are restraints in play, so my recommendation is to use the learning rate finder as normal with a non-cut model, then use the learning rate obtained from that experiment with the cut models.</p>
+<p>One thing I have found is that the learning rate finder built into <em>GALLOP</em> doesn't work as well when there are restraints in play, so my recommendation is to use the learning rate finder as normal with either a cut or a non-cut model, then use the learning rate obtained there when the restraints are active. A bit of experimentation might be needed to get a reasonable learning rate, however, as a general rule I choose the larger of the two value obtained.</p>
 <p>For my fit files and the un-cut model, I obtained a learning rate of 0.0325, which I'll be using for the rest of this work.</p>
 
 </div>
