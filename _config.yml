@@ -39,8 +39,8 @@ baseurl: "/blog" # the subpath of your site, e.g. "/blog".
 # Github and twitter are optional:
 minima:
   social_links:
-    twitter: mspillman
-    github: mspillman
+    - { platform: twitter, user_url: "https://twitter.com/mspillman" }
+    - { platform: github, user_url: "https://github.com/mspillman/" }
   author: Mark Spillman
   email: markspillman@gmail.com
 
