@@ -1,107 +1,4 @@
-<!DOCTYPE html>
-<html lang="en"><head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="twitter:card" content="summary_large_image" /><!-- Begin Jekyll SEO tag v2.6.1 -->
-<title>Estimating molecular volumes to aid in powder X-ray diffraction indexing | Mark Spillman</title>
-<meta name="generator" content="Jekyll v4.1.1" />
-<meta property="og:title" content="Estimating molecular volumes to aid in powder X-ray diffraction indexing" />
-<meta name="author" content="Mark Spillman" />
-<meta property="og:locale" content="en_US" />
-<meta name="description" content="An overview of using database-derived atomic volumes to aid PXRD indexing." />
-<meta property="og:description" content="An overview of using database-derived atomic volumes to aid PXRD indexing." />
-<link rel="canonical" href="https://mspillman.github.io/blog/pxrd/indexing/2021/11/10/Hofcalc.html" />
-<meta property="og:url" content="https://mspillman.github.io/blog/pxrd/indexing/2021/11/10/Hofcalc.html" />
-<meta property="og:site_name" content="Mark Spillman" />
-<meta property="og:image" content="https://mspillman.github.io/blog/images/Volumes.png" />
-<meta property="og:type" content="article" />
-<meta property="article:published_time" content="2021-11-10T00:00:00-06:00" />
-<script type="application/ld+json">
-{"url":"https://mspillman.github.io/blog/pxrd/indexing/2021/11/10/Hofcalc.html","@type":"BlogPosting","headline":"Estimating molecular volumes to aid in powder X-ray diffraction indexing","dateModified":"2021-11-10T00:00:00-06:00","datePublished":"2021-11-10T00:00:00-06:00","image":"https://mspillman.github.io/blog/images/Volumes.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://mspillman.github.io/blog/pxrd/indexing/2021/11/10/Hofcalc.html"},"author":{"@type":"Person","name":"Mark Spillman"},"description":"An overview of using database-derived atomic volumes to aid PXRD indexing.","@context":"https://schema.org"}</script>
-<!-- End Jekyll SEO tag -->
-<link rel="stylesheet" href="/blog/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://mspillman.github.io/blog/feed.xml" title="Mark Spillman" /><!-- the google_analytics_id gets auto inserted from the config file -->
-
-
-
-<!-- Global site tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-EVMREB130B"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-EVMREB130B');
-</script>
-
-
-<link rel="shortcut icon" type="image/x-icon" href="/blog/images/favicon.ico"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Primer/15.2.0/primer.css" integrity="sha512-xTz2ys4coGAOz8vuV1NcQBkgVmKhsSEtjbqyMJbBHRplFuvKIUo6xhLHpAyPt9mfR6twHJgn9OgVLuqOvjeBhg==" crossorigin="anonymous" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog==" crossorigin="anonymous" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/katex.min.css" integrity="sha512-h7nl+xz8wgDlNM4NqKEM4F1NkIRS17M9+uJwIGwuo8vGqIl4BhuCKdxjWEINm+xyrUjNCnK5dCrhM0sj+wTIXw==" crossorigin="anonymous" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/katex.min.js" integrity="sha512-/CMIhXiDA3m2c9kzRyd97MTb3MC6OVnx4TElQ7fkkoRghwDf6gi41gaT1PwF270W6+J60uTmwgeRpNpJdRV6sg==" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/contrib/auto-render.min.js" integrity="sha512-Do7uJAaHZm5OLrIv/yN4w0iG1dbu01kzdMNnFfu/mAqgUk6Nniv2JYHcwH+cNwjqgLcqcuBBk+JRvprLVI8azg==" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha512-0doc9hKxR3PYwso42RD1p5ySZpzzuDiOwMrdCEh2WdJZCjcmFKc/wEnL+z8fBQrnHoiNWbo+3fiGkOYXBdQp4A==" crossorigin="anonymous"></script>
-    <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        renderMathInElement( document.body, {
-        delimiters: [
-            {left: "$$", right: "$$", display: true},
-            {left: "[%", right: "%]", display: true},
-            {left: "$", right: "$", display: false}
-        ]}
-        );
-    });
-    </script>
-
-
-<script>
-function wrap_img(fn) {
-    if (document.attachEvent ? document.readyState === "complete" : document.readyState !== "loading") {
-        var elements = document.querySelectorAll(".post img");
-        Array.prototype.forEach.call(elements, function(el, i) {
-            if (el.getAttribute("title") && (el.className != "emoji")) {
-                const caption = document.createElement('figcaption');
-                var node = document.createTextNode(el.getAttribute("title"));
-                caption.appendChild(node);
-                const wrapper = document.createElement('figure');
-                wrapper.className = 'image';
-                el.parentNode.insertBefore(wrapper, el);
-                el.parentNode.removeChild(el);
-                wrapper.appendChild(el);
-                wrapper.appendChild(caption);
-            }
-        });
-    } else { document.addEventListener('DOMContentLoaded', fn); }
-}
-window.onload = wrap_img;
-</script>
-
-<script>
-    document.addEventListener("DOMContentLoaded", function(){
-    // add link icon to anchor tags
-    var elem = document.querySelectorAll(".anchor-link")
-    elem.forEach(e => (e.innerHTML = '<i class="fas fa-link fa-xs"></i>'));
-    });
-</script>
-</head>
-<body><header class="site-header">
-
-  <div class="wrapper"><a class="site-title" rel="author" href="/blog/">Mark Spillman</a><nav class="site-nav">
-        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
-        <label for="nav-trigger">
-          <span class="menu-icon">
-            <svg viewBox="0 0 18 15" width="18px" height="15px">
-              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
-            </svg>
-          </span>
-        </label>
-
-        <div class="trigger"><a class="page-link" href="/blog/about/">About</a><a class="page-link" href="/blog/publications/">Publications</a><a class="page-link" href="/blog/search/">Search</a><a class="page-link" href="/blog/categories/">Tags</a></div>
-      </nav></div>
-</header>
-<main class="page-content" aria-label="Content">
-      <div class="wrapper">
-        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+<article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
 
   <header class="post-header">
     <h1 class="post-title p-name" itemprop="name headline">Estimating molecular volumes to aid in powder X-ray diffraction indexing</h1><p class="page-description">An overview of using database-derived atomic volumes to aid PXRD indexing.</p><p class="post-meta post-meta-title"><time class="dt-published" datetime="2021-11-10T00:00:00-06:00" itemprop="datePublished">
@@ -170,7 +67,7 @@ window.onload = wrap_img;
 </h1>
 <p>An <a href="http://scripts.iucr.org/cgi-bin/paper?S0108768101021814">article</a> published in 2001 by D. W. M. Hofmann describes how crystallographic databases can be used to derive the average volume occupied by atoms of each element in crystal structures. Using his tabulated values, it's possible to rapidly estimate the volume occupied by a given molecule, and use this to aid indexing of powder diffraction data. This is particularly useful for laboratory diffraction data, which is generally associated with lower figures of merit such as de Wolff's $M_{20}$ and Smith and Snyder's $F_N$, which can make discriminating between alternative options more challenging. Other volume estimation methods, notably the 18 Å³ rule are also commonly used, though Hofmann's volumes give generally more accurate results.</p>
 <p>I've put together a freely available web-app, <em>HofCalc</em>, which can be used to conveniently obtain these estimates. It should display reasonably well on mobile devices as well as PCs/laptops. You can access it at the following address:</p>
-<p><a href="https://hofcalc.herokuapp.com">https://hofcalc.herokuapp.com</a></p>
+<p><a href="https://hofcalc.onrender.com">https://hofcalc.onrender.com</a></p>
 <p><img src="/blog/images/copied_from_nb/images/HofCalc.png" alt=""></p>
 <p>This post will explain how it works, and will look at some examples of how it can be used in practice. I'm grateful to Norman Shankland who provided invaluable feedback and assistance with debugging of the app.</p>
 
@@ -978,7 +875,7 @@ An example of the contents of the summary file for the following search terms is
 <a class="anchor" href="#Conclusions" aria-hidden="true"><span class="octicon octicon-link"></span></a>Conclusions<a class="anchor-link" href="#Conclusions"> </a>
 </h1>
 <p>Hofmann's volumes give more accurate estimates of molecular volumes in crystals, and should be used in preference to the 18 Å³ rule where possible.</p>
-<p>To make this easier for people, the <a href="https://hofcalc.herokuapp.com">HofCalc web-app</a> can be used to very rapidly and conveniently obtain these estimates.</p>
+<p>To make this easier for people, the <a href="https://hofcalc.onrender.com">HofCalc web-app</a> can be used to very rapidly and conveniently obtain these estimates.</p>
 
 </div>
 </div>
@@ -997,47 +894,3 @@ An example of the contents of the summary file for the following search terms is
         async>
 </script><a class="u-url" href="/blog/pxrd/indexing/2021/11/10/Hofcalc.html" hidden></a>
 </article>
-      </div>
-    </main><footer class="site-footer h-card">
-  <data class="u-url" href="/blog/"></data>
-
-  <div class="wrapper">
-
-    <div class="footer-col-wrapper">
-      <div class="footer-col">
-        <p class="feed-subscribe">
-          <a href="https://mspillman.github.io/blog/feed.xml">
-            <svg class="svg-icon orange">
-              <use xlink:href="/blog/assets/minima-social-icons.svg#rss"></use>
-            </svg><span>Subscribe</span>
-          </a>
-        </p>
-      </div>
-      <div class="footer-col">
-        <p>Various musings, mostly on crystallography and powder diffraction. All opinions my own.</p>
-      </div>
-    </div>
-
-    <div class="social-links"><ul class="social-media-list"><li>
-  <a rel="me" href="https://twitter.com/mspillman" target="_blank" title="twitter">
-    <svg class="svg-icon grey">
-      <use xlink:href="/blog/assets/minima-social-icons.svg#twitter"></use>
-    </svg>
-  </a>
-</li>
-<li>
-  <a rel="me" href="https://github.com/mspillman/" target="_blank" title="github">
-    <svg class="svg-icon grey">
-      <use xlink:href="/blog/assets/minima-social-icons.svg#github"></use>
-    </svg>
-  </a>
-</li>
-</ul>
-</div>
-
-  </div>
-
-</footer>
-</body>
-
-</html>
