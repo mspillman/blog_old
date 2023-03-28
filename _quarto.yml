@@ -3,6 +3,8 @@ project:
 
 website:
   title: "Mark Spillman"
+  site-url: https://mspillman.github.io
+  google-analytics: G-EVMREB130B
   navbar:
     right:
       - text: Home
