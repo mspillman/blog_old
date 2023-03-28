@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.290">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Mark Spillman">
+<meta name="dcterms.date" content="2022-05-30">
+<meta name="description" content="Solving structures with unknown ring conformations or stereochemistry can be difficult and time consuming. Suitable application of restraints can help.">
+
+<title>Mark Spillman - Restraints for rings and stereochemistry</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Mark Spillman</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html" rel="" target="">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/mspillman" rel="" target=""><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com/mspillman" rel="" target=""><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+            <div class="quarto-navbar-tools">
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Restraints for rings and stereochemistry</h1>
+                  <div>
+        <div class="description">
+          Solving structures with unknown ring conformations or stereochemistry can be difficult and time consuming. Suitable application of restraints can help.
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">GALLOP</div>
+                <div class="quarto-category">PXRD</div>
+                <div class="quarto-category">Python</div>
+                <div class="quarto-category">Restraints</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Mark Spillman </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">May 30, 2022</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#rings-in-sdpd" id="toc-rings-in-sdpd" class="nav-link" data-scroll-target="#rings-in-sdpd">Rings in SDPD</a>
+  <ul class="collapse">
+  <li><a href="#conformer-generation" id="toc-conformer-generation" class="nav-link" data-scroll-target="#conformer-generation">Conformer generation</a></li>
+  <li><a href="#other-approaches" id="toc-other-approaches" class="nav-link" data-scroll-target="#other-approaches">Other approaches</a></li>
+  <li><a href="#ring-breaking" id="toc-ring-breaking" class="nav-link" data-scroll-target="#ring-breaking">Ring breaking</a></li>
+  </ul></li>
+  <li><a href="#the-approach-in-gallop" id="toc-the-approach-in-gallop" class="nav-link" data-scroll-target="#the-approach-in-gallop">The approach in <em>GALLOP</em></a>
+  <ul class="collapse">
+  <li><a href="#distance-restraints" id="toc-distance-restraints" class="nav-link" data-scroll-target="#distance-restraints">Distance restraints</a></li>
+  <li><a href="#angle-restraints" id="toc-angle-restraints" class="nav-link" data-scroll-target="#angle-restraints">Angle restraints</a></li>
+  <li><a href="#torsion-angle-restraints" id="toc-torsion-angle-restraints" class="nav-link" data-scroll-target="#torsion-angle-restraints">Torsion angle restraints</a></li>
+  <li><a href="#cost-function-and-restraint-weighting" id="toc-cost-function-and-restraint-weighting" class="nav-link" data-scroll-target="#cost-function-and-restraint-weighting">Cost function and restraint weighting</a></li>
+  </ul></li>
+  <li><a href="#using-restraints-in-gallop-for-ring-systems" id="toc-using-restraints-in-gallop-for-ring-systems" class="nav-link" data-scroll-target="#using-restraints-in-gallop-for-ring-systems">Using restraints in <em>GALLOP</em> for ring systems</a>
+  <ul class="collapse">
+  <li><a href="#preparing-models-and-restraints" id="toc-preparing-models-and-restraints" class="nav-link" data-scroll-target="#preparing-models-and-restraints">Preparing models and restraints</a>
+  <ul class="collapse">
+  <li><a href="#gallop-learning-rate" id="toc-gallop-learning-rate" class="nav-link" data-scroll-target="#gallop-learning-rate"><em>GALLOP</em> Learning rate</a></li>
+  </ul></li>
+  <li><a href="#browser-interface" id="toc-browser-interface" class="nav-link" data-scroll-target="#browser-interface">Browser interface</a></li>
+  <li><a href="#python-api" id="toc-python-api" class="nav-link" data-scroll-target="#python-api">Python API</a></li>
+  </ul></li>
+  <li><a href="#using-restraints-in-gallop-for-stereochemistry" id="toc-using-restraints-in-gallop-for-stereochemistry" class="nav-link" data-scroll-target="#using-restraints-in-gallop-for-stereochemistry">Using restraints in <em>GALLOP</em> for stereochemistry</a>
+  <ul class="collapse">
+  <li><a href="#other-applications" id="toc-other-applications" class="nav-link" data-scroll-target="#other-applications">Other applications</a></li>
+  </ul></li>
+  <li><a href="#conclusions" id="toc-conclusions" class="nav-link" data-scroll-target="#conclusions">Conclusions</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<p>In this post, we’ll take a look at an approach I’ve recently been working on for refining the conformations of rings during crystal structure determination from powder diffraction data (SDPD). We’ll go over how the approach works, and how to apply it with <em>GALLOP</em> both via the Python API and the browser interface. The approach, which I developed in collaboration with Kenneth and Norman Shankland, was recently <a href="https://pubs.rsc.org/en/content/articlelanding/2022/ce/d2ce00520d/">published in CrystEngComm</a>, so this post is designed to give an informal summary of the paper and give some detail on how to apply it in your own work.</p>
+</section>
+<section id="rings-in-sdpd" class="level1">
+<h1>Rings in SDPD</h1>
+<p>Determining the conformation of ring systems during SDPD is a challenge for global optimization (GO) methods, which typically rely on an <em>internal coordinate</em> representation of molecular geometry in order to reduce the total number of degrees of freedom. A popular choice is the <a href="https://en.wikipedia.org/wiki/Z-matrix_%28chemistry%29">Z-matrix</a> which enables the conformation of a molecule to be specified in terms of (generally) fixed bond lengths and angles, and a mixture of fixed and non-fixed torsion angles depending on the atomic environment. This particular formalism does not allow the geometry of ring systems to be adjusted during the GO process and hence crystallographers are forced to turn to other methods when the conformation of a ring is not known <em>a priori</em>.</p>
+<section id="conformer-generation" class="level2">
+<h2 class="anchored" data-anchor-id="conformer-generation">Conformer generation</h2>
+<p>Conformer generators are often used to generate <em>reasonable</em> ring conformations which can then be used as the starting point for standard SDPD via GO methods. However, whilst providing a potentially straightforward solution to the ring conformation issue, such conformer generators frequently produce multiple alternative conformations, and <a href="https://pubs.acs.org/doi/10.1021/acs.jcim.0c00025">despite much progress</a>, often still have difficulty in reproducing sensible macrocyclic ring conformations. This can result in a large number of candidate molecular models that must be tested, with no guarantee that any of them are sufficiently close to the true conformation to obtain a solution from which subsequent Rietveld/DFT refinement could reasonably proceed.</p>
+</section>
+<section id="other-approaches" class="level2">
+<h2 class="anchored" data-anchor-id="other-approaches">Other approaches</h2>
+<p>The program <em>FOX</em> provides two alternative methods by which a ring conformation can be treated during SDPD: 1. Use of an alternative molecular descriptor based on the Cartesian coordinates of each atom, with <a href="https://www.degruyter.com/document/doi/10.1524/zkri.219.12.847.55869/pdf">restraints applied to enforce the molecular geometry</a> 2. <a href="https://www.mdpi.com/2073-4352/7/10/322">Use of molecular dynamics routines</a> which allow the ring conformation to be adjusted during the SDPD procedure whilst maintaining the internal coordinate description</p>
+<p>Both of these methods have been shown to work effectively. In the former, the huge increase in degrees of freedom relative to an internal coordinate based molecular descriptor is counteracted by the addition of restraints. These restrict the allowable combinations of values of the degrees of freedom to only those that maintain the molecular geometry. Where this approach doesn’t give solutions rapidly, the second approach using molecualar dynamics routines can be employed, though the computational cost of their inclusion results in run times that are approximately double that of a pure GO approach.</p>
+</section>
+<section id="ring-breaking" class="level2">
+<h2 class="anchored" data-anchor-id="ring-breaking">Ring breaking</h2>
+<p>A less commonly employed approach is to keep the Z-matrix representation, but <a href="https://it.iucr.org/Ha/ch4o4v0001/sec4o4o2o3/">break one of the bonds in the ring in order to convert the ring into a flexible chain of atoms</a>. This then allows the standard Z-matrix representation to be used to refine the torsion angles within the ring.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="./images/snipped_unsnipped.png" class="quarto-discovered-preview-image img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Side by side of unbroken and broken macrocycle</figcaption><p></p>
+</figure>
+</div>
+<p>However, this clearly comes at the expense of increasing the number of degrees of freedom which must be determined. In the figure above, we go from 8 degrees of freedom on the left (3 position, 3 orientation, 2 torsions) to 20 degrees of freedom on the right (3 position, 3 orientation, 14 torsions) - this is a pretty hefty increase!</p>
+<p>So, what can we do about this? Well, the bond we broke to allow the ring conformation to adjust still exists in reality! We can therefore use a restraint that forces the distance between the atoms either side of the broken bond to be equal to the known bond length. This restraint places limits on the values that can be taken by the additional degrees of freedom to only those that reform the ring, whilst allowing any ring conformation to be adopted. The idea of using restraints to counteract the increase in the number of degrees of freedom forms the basis of our approach.</p>
+<p>We were not the first people by any means to make use of restraints in this context - see for example <a href="https://www.sciencedirect.com/science/article/abs/pii/S0927025622002282">a recent article from the Bari group</a> who used EXPO to do essentially the same thing (incidentally, this was published <em>after</em> we submitted our first version of our article to CEC, so the timing is a complete coincidence). However, I think our work still provides some new insights. Firstly, the combined use of bond breaking and restraints is not limited in applicability to ring systems - all sorts of other problems could be tackled more efficiently using this method (discussed more later in this post). Secondly, we also show that <em>GALLOP</em> continues to provide extremely impressive performance - even with the large numbers of degrees of freedom that bond breaking introduces; results are typically obtained in tens of minutes rather than tens of hours or days!</p>
+</section>
+</section>
+<section id="the-approach-in-gallop" class="level1">
+<h1>The approach in <em>GALLOP</em></h1>
+<p>In addition to distance restraints, I have also implemented angle and torsion angle restraints. As discussed below, the restraints are enforced by including them as additional terms in the cost function which the local optimiser attempts to minimise. The restraints are only used during the local optimisation part of the <a href="https://mspillman.github.io/blog/gallop/pxrd/python/2021/10/30/Introduction-to-GALLOP.html#The-GALLOP-algorithm"><em>GALLOP</em> algorithm</a> - this is because inclusion of restraints may introduce additional local minima in the <span class="math inline">\(\chi^2\)</span> hypersurface, and so allowing the particle swarm optimiser to work freely can enable these to be escaped.</p>
+<section id="distance-restraints" class="level2">
+<h2 class="anchored" data-anchor-id="distance-restraints">Distance restraints</h2>
+<p>Any two atoms in the asymmetric unit can be directed to sit a defined distance apart by adding the following penalty term to the cost function that is to be minimised:</p>
+<p><span class="math display">\[ D = (|\vec{u}_{ij}| - \delta_{ij})^2 \]</span></p>
+<p>where <span class="math inline">\(D\)</span> is the penalty term, <span class="math inline">\(|\vec{u}_{ij}|\)</span> is the magnitude of the vector pointing from atom <span class="math inline">\(i\)</span> to atom <span class="math inline">\(j\)</span> and <span class="math inline">\(\delta_{ij}\)</span> is the distance provided by the user as the restraint. It can take values from 0 to ∞.</p>
+<p>Whilst in the context of ring conformations, the distance penalty is likely to be used to restore broken bonds, it can also be used to enforce other distance-based restraints, between any of the atoms in the asymmetric unit.</p>
+<div class="cell" data-execution_count="4">
+<div class="cell-output cell-output-display">
+<p><img src="2022-05-30-Restraints-for-rings-and-stereochemistry_files/figure-html/cell-2-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+</section>
+<section id="angle-restraints" class="level2">
+<h2 class="anchored" data-anchor-id="angle-restraints">Angle restraints</h2>
+<p>Angles between any two interatomic vectors can also form the basis of a restraint. Typically this would be for a standard bond angle, though it could also be used to, for example, ensure that bonds on opposite sides of a ring are held parallel to each other. The penalty term <span class="math inline">\(A\)</span> is defined as:</p>
+<p><span class="math display">\[ A = \left(\frac{\vec{u}_{ij}\cdot\vec{u}_{kl}}{|\vec{u}_{ij}||\vec{u}_{kl}|} - \cos{\alpha_{ijkl}}\right)^2 \]</span></p>
+<p>where <span class="math inline">\(\vec{u}_{ij}\)</span> is the vector pointing from atom <span class="math inline">\(i\)</span> to atom <span class="math inline">\(j\)</span>, <span class="math inline">\(\vec{u}_{kl}\)</span> is the vector pointing from atom <span class="math inline">\(k\)</span> to atom <span class="math inline">\(l\)</span> and <span class="math inline">\(\alpha_{ijkl}\)</span> is the angle between the interatomic vectors supplied by the user. If atom <span class="math inline">\(i\)</span> and atom <span class="math inline">\(k\)</span> are the same atom, then this equation gives a standard bond angle restraint. In the <em>GALLOP</em> code, the cosine of the user supplied angle is calculated and stored in advance for efficiency. The penalty term is bounded to values in the range 0 to 4 (inclusive).</p>
+<div class="cell" data-execution_count="2">
+<div class="cell-output cell-output-display">
+<p><img src="2022-05-30-Restraints-for-rings-and-stereochemistry_files/figure-html/cell-3-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+</section>
+<section id="torsion-angle-restraints" class="level2">
+<h2 class="anchored" data-anchor-id="torsion-angle-restraints">Torsion angle restraints</h2>
+<p>Torsion angles can also be used as a restraint. Whilst in general this will be a normal molecular torsion angle, it’s not a requirement - any two pairs of intersecting planes can be used as the basis for a restraint. This could be used to ensure the relative orientations of separated planes of atoms if required. The penalty term, <span class="math inline">\(T\)</span> is defined as:</p>
+<p><span class="math display">\[ T = \left(\frac{|\vec{u}_{jk}|\vec{u}_{ij}\cdot(\vec{u}_{jk}\times\vec{u}_{kl})}{|\vec{u}_{ij}\times\vec{u}_{jk}||\vec{u}_{jk}\times\vec{u}_{kl}|} - \sin{\tau_{ijkl}}\right)^2 + \left(\frac{(\vec{u}_{ij}\times\vec{u}_{jk})\cdot(\vec{u}_{jk}\times\vec{u}_{kl})}{|\vec{u}_{ij}\times\vec{u}_{jk}||\vec{u}_{jk}\times\vec{u}_{kl}|} - \cos{\tau_{ijkl}}\right)^2\]</span></p>
+<p>where <span class="math inline">\(\vec{u}_{ij}\)</span> is the vector pointing from atom <span class="math inline">\(i\)</span> to atom <span class="math inline">\(j\)</span>, <span class="math inline">\(\vec{u}_{jk}\)</span> is the vector pointing from atom <span class="math inline">\(j\)</span> to atom <span class="math inline">\(k\)</span>, <span class="math inline">\(\vec{u}_{kl}\)</span> is the vector pointing from atom <span class="math inline">\(k\)</span> to atom <span class="math inline">\(l\)</span> and <span class="math inline">\(\tau_{ijkl}\)</span> is the torsion angle supplied by the user. As with the angle penalty term, the sine and cosine of the angle are calculated in advance and stored. This penalty term is also bounded to values in the range 0 to 4 (inclusive).</p>
+<div class="cell" data-execution_count="3">
+<div class="cell-output cell-output-display">
+<p><img src="2022-05-30-Restraints-for-rings-and-stereochemistry_files/figure-html/cell-4-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+</section>
+<section id="cost-function-and-restraint-weighting" class="level2">
+<h2 class="anchored" data-anchor-id="cost-function-and-restraint-weighting">Cost function and restraint weighting</h2>
+<p>Due to the generally small values of the restraint penalty terms relative to typical SDPD <span class="math inline">\(\chi^2\)</span> values, we need to weight the penalty terms so that their magnitude is sufficient to have a meaningful impact on the optimisation process. The approach that I ended up going with is to scale <em>all</em> of the penalty terms by the value of <span class="math inline">\(\chi^2\)</span> at every iteration so that their numerical values are comparable. I’ve also made it possible to further set the relative importance of each <em>individual</em> restraint by allowing users to set their own weights for each restraint. A weight of 1 indicates that the restraint has equal importance to <span class="math inline">\(\chi^2\)</span>, weights less than or greater than 1 therefore enable the relative importance to be down- or up-weighted respectivly.</p>
+<p>One thing that took me a little while to work out when I was implementing this (in retrospect this was an obvious thing I should have considered!) is that it’s not OK to just multiply the tensor of penalty terms by the tensor of <span class="math inline">\(\chi^2\)</span> values. To see why, let’s say that we have a structure with <span class="math inline">\(a\)</span> distance restraints, <span class="math inline">\(b\)</span> angle restraints and <span class="math inline">\(c\)</span> torsion restraints (and their associated weights, <span class="math inline">\(w_a\)</span>, <span class="math inline">\(w_b\)</span>, and <span class="math inline">\(w_c\)</span>). Let’s define the cost function that the local optimiser is trying to minimise as:</p>
+<p><span class="math display">\[ C(\textbf{x}) = \chi^2(\textbf{x}) + \chi^2(\textbf{x})\left(\sum_a w_a{D(\textbf{x})} + \sum_b{w_bA(\textbf{x})} + \sum_c{w_cT(\textbf{x})}\right) \]</span></p>
+<p>where <span class="math inline">\(\textbf{x}\)</span> represents the structural degrees of freedom. Let’s simplify this using <span class="math inline">\(R\)</span> to represent the sum of all the weighted penalty terms:</p>
+<p><span class="math display">\[ C(\textbf{x}) = \chi^2(\textbf{x})(1 + R(\textbf{x})) \]</span></p>
+<p>By the product rule, the gradient of this function is:</p>
+<p><span class="math display">\[ \nabla C(\textbf{x}) = (1 + R(\textbf{x}))\nabla \chi^2(\textbf{x}) + \chi^2(\textbf{x})\nabla R(\textbf{x}) \]</span></p>
+<p>We can see that this could lead to problems because of the scaling of the gradient of <span class="math inline">\(\chi^2\)</span> by a factor of <span class="math inline">\(1 + R(\textbf{x})\)</span>. In my testing this led to some very strange runs where it looked like progress was being made but then the optimisation behaviour resulted in strange oscillations in the value of <span class="math inline">\(\chi^2\)</span> and failure to obtain a solution on even simple problems.</p>
+<p>The solution I landed on is to make a gradient-free copy of the <span class="math inline">\(\chi^2\)</span> tensor, i.e.&nbsp;a copy that is not a function of the degrees of freedom which can act purely as a numerical scaling factor. This converts the cost function into:</p>
+<p><span class="math display">\[ C(\textbf{x}) = \chi^2(\textbf{x}) + \chi^2_{copy}\left(\sum_a w_a{D(\textbf{x})} + \sum_b{w_bA(\textbf{x})} + \sum_c{w_cT(\textbf{x})}\right) = \chi^2(\textbf{x}) + \chi^2_{copy}R(\textbf{x})) \]</span></p>
+<p>and hence the gradient into:</p>
+<p><span class="math display">\[ \nabla C(\textbf{x}) = \nabla \chi^2(\textbf{x}) + \chi^2_{copy} \nabla R(\textbf{x}) \]</span></p>
+<p>This gives the optimisation behaviour that was expected and desired! In pytorch (the library used by <em>GALLOP</em> to perform the automatic differentiation), it’s very easy to make the required gradient-free copy of the <span class="math inline">\(\chi^2\)</span> tensor:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>chisquared_copy <span class="op">=</span> chisquared.detach().clone()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The <code>.detach()</code> method means that the computational graph associated with the tensor is removed, thus removing the dependence on the degrees of freedom. The <code>.clone()</code> method then copies the contents into the new tensor which can then act purely as a scaling factor.</p>
+</section>
+</section>
+<section id="using-restraints-in-gallop-for-ring-systems" class="level1">
+<h1>Using restraints in <em>GALLOP</em> for ring systems</h1>
+<p>Ok, so now we know how the restraints work, let’s see how to include them in an SDPD attempt with <em>GALLOP</em>. We’ll have a go both with the browser based GUI and the Python API. I’ve tried to make it relatively easy to use, though for the browser interface mode, it relies on having unique labels for all of the atoms within the Z-matrices. In Python mode, this isn’t required, though I would suggest that it’s still easier to use the atom label mode if you can! Now that <em>DASH</em> is <a href="https://github.com/ccdc-opensource/dash">open source</a>, it’s very easy to generate suitable Z-matrices using <em>DASH</em>, starting from a CIF or MOL2 file where each atom has a unique label.</p>
+<section id="preparing-models-and-restraints" class="level2">
+<h2 class="anchored" data-anchor-id="preparing-models-and-restraints">Preparing models and restraints</h2>
+<p>I have been using Mercury to modify the structures and to break bonds and measure distances, angles and torsions. I then save the structure as a <code>.mol2</code> file, which can then be used with <em>DASH</em> to generate a Z-matrix. Occasionally, there’ll be issues with the resultant Z-matrices using hydrogen atoms to define rotatable torsions. In such cases, I recommend deleting all hydrogen atoms prior to saving the mol2, then regenerating the Z-matrices. The hydrogen atoms can be added back in once the structure has solved.</p>
+<p>As our example, we’ll use the structure with CSD refcode IJUXUI, <a href="https://link.springer.com/article/10.1134/S0022476615020080">a Schiff base with a 17-membered macrocyclic ring</a>. Diffraction data and the structure can be downloaded <a href="https://www.ccdc.cam.ac.uk/structures/Search?Ccdcid=ijuxui&amp;DatabaseToSearch=Published">here</a> - I’m not sure if I can rehost the data here, but if you would like a copy of my fit files and models, feel free to message me and I’ll send them over.</p>
+<p>I opened the CSD entry for IJUXUI in Mercury and deleted the bond between <code>O2</code> and <code>C8</code>. I also converted the two C=N double bonds into single bonds, and ended up with the following model, shown here with the atom labels involved with the cut bonds and restricted torsion angles, and hydrogen atoms hidden for clarity.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="./images/ijuxui_snipped_labels.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">IJUXUI cut model</figcaption><p></p>
+</figure>
+</div>
+<p>We are going to use the following restraints for our runs:</p>
+<ol type="1">
+<li>Distance restraint between <code>O2</code> and <code>C8</code>, set to 1.44 Å</li>
+<li>Torsion angle restraint using atoms <code>C3</code>, <code>C12</code>, <code>N1</code> and <code>C13</code> set to <span class="math inline">\(180 \degree\)</span></li>
+<li>Torsion angle restraint using atoms <code>C18</code>, <code>C17</code>, <code>N2</code> and <code>C16</code> set to <span class="math inline">\(180 \degree\)</span></li>
+</ol>
+<section id="gallop-learning-rate" class="level3">
+<h3 class="anchored" data-anchor-id="gallop-learning-rate"><em>GALLOP</em> Learning rate</h3>
+<p>One thing I have found is that the learning rate finder built into <em>GALLOP</em> doesn’t work as well when there are restraints in play, so my recommendation is to use the learning rate finder as normal with either a cut or a non-cut model, then use the learning rate obtained there when the restraints are active. A bit of experimentation might be needed to get a reasonable learning rate, however, as a general rule I choose the larger of the two value obtained.</p>
+<p>For my fit files and the un-cut model, I obtained a learning rate of 0.0325, which I’ll be using for the rest of this work.</p>
+</section>
+</section>
+<section id="browser-interface" class="level2">
+<h2 class="anchored" data-anchor-id="browser-interface">Browser interface</h2>
+<p>Start the <em>GALLOP</em> browser interface as normal (I’m using Kaggle, so my jobs are running on a P100 GPU), then upload the files needed. Modify the number of swarms and number of particles per swarm as you see fit, then we’ll need to tweak a couple of settings. You may also wish to reduce the total number of iterations as this structure will solve very quickly - 5 <em>GALLOP</em> iterations with 10 swarms of 1000 particles should be more than sufficient.</p>
+<p><strong>Learning rate</strong> - open the Local Optimiser settings, then select “Show advanced options”. Scroll down until you see “Find learning rate”, and unselect that box. A new number input widget will appear, in here, set the learning rate to 0.0325 (or whatever value you obtain with your fit files). When you press enter, the display may show “0.03”, but rest assured that the additional decimal places are still recorded internally - not that they make much difference in practice!</p>
+<p><img src="./images/manual_learning_rate.png" class="img-fluid"></p>
+<p><strong>Restraints</strong> - continue scrolling down the advanced local optimiser settings, until you see check boxes for restraints:</p>
+<p><img src="./images/restraint_check_boxes.png" class="img-fluid"></p>
+<p>We’ll be using both distance and torsion restraints, so select these. New input widgets will appear as a result:</p>
+<p><img src="./images/distance_restraint_inputs.png" class="img-fluid"></p>
+<p>For the distance restraint, we only need one, so all we need to do is specify the atoms involved, the distance value we want to use, and the weight to apply to this restraint - we’ll use a weight of 1.0:</p>
+<p>For the torsion restraints, we’ll need two of these, so we modify the number of restraints to 2, and then the boxes allow us to specify each one:</p>
+<p><img src="./images/torsion_restraint_inputs.png" class="img-fluid"></p>
+<p>As a brief aside, even though we aren’t using them in this case, it’s worth talking about using angle restraints in the browser interface. As <em>GALLOP</em> allows the flexibility to specify angle restraints between any two interatomic vectors, we can either supply 3 or 4 atom labels depending on what we want to do. For normal bond angles, we only provide three atom labels. For example, if we want the angle C2 - C1 - C3 (i.e.&nbsp;atom C1 in the middle) to be restrained to 120 degrees with a weight of 1.0, we would enter the following into the widget:</p>
+<pre><code>C2,C1,C3,120,1.0</code></pre>
+<p>Alternatively, if we have two interatomic vectors, for example C1 <span class="math inline">\(\rightarrow\)</span> C2 and C3 <span class="math inline">\(\rightarrow\)</span> C4, and we want them to be perpendicular with a weight of 0.5, we would use the following input:</p>
+<pre><code>C1,C2,C3,C4,90,0.5</code></pre>
+<section id="running-gallop" class="level4">
+<h4 class="anchored" data-anchor-id="running-gallop">Running <em>GALLOP</em></h4>
+<p>Once the restraints and other settings have been entered, we’re good to go! Start <em>GALLOP</em> as normal. On this structure with a P100 GPU accessed via Kaggle, this process took less than 3 minutes to complete:</p>
+<p><img src="./images/ijuxui_browser_interface_performance.png" class="img-fluid"></p>
+<p>One thing that <em>GALLOP</em> allows is to save animations of the trajectory taken by each particle. This option slows things down a fair bit, but does produce some cool animations! <a href="https://htmlpreview.github.io/?https://github.com/mspillman/blog/blob/master/_notebooks/files/ijuxui_restraint_iter_1_animation.html">Click this link</a> for an interactive animation (move, zoom etc using mouse) of the trajectory taken by the best performing particle during the first iteration of a different set of runs, with hydrogen atoms hidden for clarity. On the left, you see the whole unit cell, with the asymmetric unit shown on the right. You can see that the ring very rapidly reforms due to the action of the distance restraint.</p>
+<p><em>Note: an earlier version of this blog post had the animation embedded, but I found it runs fairly slowly on old hardware so it’s now accessible via the link above</em></p>
+<p>The “shaking” that we see is due to the high learning rate in the middle of the local optimisation process, as per the <a href="https://sgugger.github.io/the-1cycle-policy.html">1-cycle</a> learning rate policy used in <em>GALLOP</em> by default. This causes some oscillation due to the larger step sizes taken in the middle of the run.</p>
+</section>
+</section>
+<section id="python-api" class="level2">
+<h2 class="anchored" data-anchor-id="python-api">Python API</h2>
+<p>As with the browser interface, we’ll set up our runs as normal then implement the restraints and fix the learning rate. I’ll run these jobs on my PC (RTX 2060 GPU) to provide a comparison against the P100 for performance. If you’re running this notebook yourself on Colab or Kaggle, you’ll need to install <em>GALLOP</em> first by uncommenting the code cell below (hidden on blog).</p>
+<p>As usual, we start with our library imports and creating a structure object. We then use the structure methods read in the diffraction data and add Z-matrices. For a more detailed overview of using the Python API, see <a href="https://mspillman.github.io/blog/gallop/pxrd/python/2021/11/03/Solving-structures-with-GALLOP-Python-API.html">this post</a>.</p>
+<div class="cell" data-execution_count="5">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Uncomment the line below, then run this cell to install GALLOP on Colab or Kaggle</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co">#!git clone https://github.com/mspillman/gallop.git &amp;&amp; cd gallop &amp;&amp; pip install .</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> gallop.structure <span class="im">import</span> Structure</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> gallop.optim <span class="im">import</span> local</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> gallop.optim <span class="im">import</span> Swarm</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>mystructure <span class="op">=</span> Structure(name<span class="op">=</span><span class="st">"IJUXUI_cut_with_restraints"</span>, ignore_H_atoms<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>mystructure.add_data(<span class="st">"files/IJUXUI.sdi"</span>, source<span class="op">=</span><span class="st">"DASH"</span>)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>mystructure.add_zmatrix(<span class="st">"files/IJUXUI_cut_1.zmatrix"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Added Z-matrix with Filename: files/IJUXUI_cut_1.zmatrix
+Non-H atoms: 29
+refinable torsions: 14
+Degrees of freedom: 21 (7 + 14)</code></pre>
+</div>
+</div>
+<p>Now let’s add the restraints. The below code cell shows how to do this using the unique atom-label approach that was also used in the browser interface - we pass a dictionary to the function containing key/value pairs corresponding to the atom labels, the desired value for the distance/angle/torsion and the weight for the restraint.</p>
+<div class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>mystructure.add_restraint({<span class="st">"type"</span> : <span class="st">"distance"</span>,</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"atom1"</span> : <span class="st">"O2"</span>,</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"atom2"</span> : <span class="st">"C8"</span>,</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"value"</span> : <span class="fl">1.44</span>,</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"weight"</span> : <span class="fl">1.0</span>})</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>mystructure.add_restraint({<span class="st">"type"</span> : <span class="st">"torsion"</span>,</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"atom1"</span> : <span class="st">"C3"</span>,</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"atom2"</span> : <span class="st">"C12"</span>,</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"atom3"</span> : <span class="st">"N1"</span>,</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"atom4"</span> : <span class="st">"C13"</span>,</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"value"</span> : <span class="fl">180.0</span>,</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"weight"</span> : <span class="fl">1.0</span>})</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>mystructure.add_restraint({<span class="st">"type"</span> : <span class="st">"torsion"</span>,</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"atom1"</span> : <span class="st">"C18"</span>,</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"atom2"</span> : <span class="st">"C17"</span>,</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"atom3"</span> : <span class="st">"N2"</span>,</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"atom4"</span> : <span class="st">"C16"</span>,</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"value"</span> : <span class="fl">180.0</span>,</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"weight"</span> : <span class="fl">1.0</span>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="angle-restraints-1" class="level4">
+<h4 class="anchored" data-anchor-id="angle-restraints-1">Angle restraints</h4>
+<p>Whilst we aren’t using them here, for an angle restraint, we need to specify two interatomic vectors. If we want this to be a standard bond angle, then atom1 and atom3 need to be the same atom, for example, in a structure where the angle C2 - C1 - C3 is 120 degrees, then we want the angle between the vectors C1 <span class="math inline">\(\rightarrow\)</span> C2 and C1 <span class="math inline">\(\rightarrow\)</span> C3 to be 120 degrees, so we would use the following command:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>mystructure.add_restraint({<span class="st">"type"</span> : <span class="st">"angle"</span>,</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"atom1"</span> : <span class="st">"C1"</span>,</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"atom2"</span> : <span class="st">"C2"</span>,</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"atom3"</span> : <span class="st">"C1"</span>,</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"atom4"</span> : <span class="st">"C3"</span>,</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"value"</span> : <span class="fl">120.0</span>,</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"weight"</span> : <span class="fl">1.0</span>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>If we weren’t working with a normal bond angle, then to specify a restraint between two interatomic vectors, e.g.&nbsp;C1 <span class="math inline">\(\rightarrow\)</span> C2 and C3 <span class="math inline">\(\rightarrow\)</span> C4, then we would use something like this:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>mystructure.add_restraint({<span class="st">"type"</span> : <span class="st">"angle"</span>,</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"atom1"</span> : <span class="st">"C1"</span>,</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"atom2"</span> : <span class="st">"C2"</span>,</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"atom3"</span> : <span class="st">"C3"</span>,</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"atom4"</span> : <span class="st">"C4"</span>,</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"value"</span> : <span class="fl">120.0</span>,</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"weight"</span> : <span class="fl">1.0</span>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="other-input-methods" class="level4">
+<h4 class="anchored" data-anchor-id="other-input-methods">Other input methods</h4>
+<p>If we didn’t have unique atom labels for each of the atoms in the asymmetric unit, we can instead specify the atoms involved by referring to their associated Z-matrix and the position of the atom within the Z-matrix. For example, a distance restraint between the 4th atom in zmatrix_1.zmatrix and the 8th atom in zmatrix_3.zmatrix, with a distance of 3.0 Å and weight of 0.5 can be added via:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>mystructure.add_restraint({<span class="st">"type"</span> : <span class="st">"distance"</span>,</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"zm1"</span>:<span class="st">"zmatrix_1.zmatrix"</span>, <span class="st">"atom1"</span>:<span class="dv">4</span>,</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"zm2"</span>:<span class="st">"zmatrix_3.zmatrix"</span>, <span class="st">"atom2"</span>:<span class="dv">8</span>,</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"value"</span>:<span class="dv">3</span>,</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"weight"</span>:<span class="fl">0.5</span>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Alternatively, assuming that the zmatrices were added sequentially starting with zmatrix_1.zmatrix:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>mystructure.add_restraint({<span class="st">"type"</span>:<span class="st">"distance"</span>,</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"zm1"</span>:<span class="dv">1</span>, <span class="st">"atom1"</span>:<span class="dv">4</span>,</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"zm2"</span>:<span class="dv">3</span>, <span class="st">"atom2"</span>:<span class="dv">8</span>,</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"value"</span>:<span class="fl">3.0</span>,</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"weight"</span>:<span class="fl">0.5</span>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The same principles apply to angle and torsion restraints, they just require changing the “type” key/value pair, as well as additional entries for atoms 3 and 4, and their associated ZMs. For example:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>mystructure.add_restraint({<span class="st">"type"</span>:<span class="st">"torsion"</span>,</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"zm1"</span>:<span class="dv">2</span>, <span class="st">"atom1"</span>:<span class="dv">4</span>,</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"zm2"</span>:<span class="dv">2</span>, <span class="st">"atom2"</span>:<span class="dv">8</span>,</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"zm3"</span>:<span class="dv">2</span>, <span class="st">"atom3"</span>:<span class="dv">12</span>,</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"zm4"</span>:<span class="dv">2</span>, <span class="st">"atom4"</span>:<span class="dv">14</span>,</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"value"</span>: <span class="fl">130.0</span>,</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"weight"</span>: <span class="fl">0.5</span>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="running-gallop-1" class="level4">
+<h4 class="anchored" data-anchor-id="running-gallop-1">Running <em>GALLOP</em></h4>
+<p>Now that we have our restraints specified, let’s set up our <em>GALLOP</em> parameters and loop, then run it. We’ll need to remember to pass the <code>use_restraints = True</code> bool to the local optimiser function. The easiest way to do this is to modify the value in the <code>minimiser_settings</code> dictionary.</p>
+<p>Again, we’ll go for 10 swarms of 1000 particles, and run <em>GALLOP</em> for 5 iterations.</p>
+<div class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> time</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>swarm <span class="op">=</span> Swarm(mystructure, n_particles<span class="op">=</span><span class="dv">10000</span>, n_swarms<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>external, internal <span class="op">=</span> swarm.get_initial_positions()</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Get the default minimiser settings</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>minimiser_settings <span class="op">=</span> local.get_minimiser_settings(mystructure)</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Set the learning rate to what we obtain from a rigid ring model and learning rate finder</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>minimiser_settings[<span class="st">"learning_rate"</span>] <span class="op">=</span> <span class="fl">0.0325</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Toggle this run to use the restraints we added</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>minimiser_settings[<span class="st">"use_restraints"</span>] <span class="op">=</span> <span class="va">True</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Set the total number of iterations for the GALLOP run</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>gallop_iters <span class="op">=</span> <span class="dv">5</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>start_time <span class="op">=</span> time.time()</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a><span class="co"># The main GALLOP loop</span></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(gallop_iters):</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Local optimisation of particle positions</span></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>    result <span class="op">=</span> local.minimise(mystructure, external<span class="op">=</span>external, internal<span class="op">=</span>internal,</span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>                run<span class="op">=</span>i, start_time<span class="op">=</span>start_time, <span class="op">**</span>minimiser_settings)</span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Particle swarm update generates new positions to be optimised</span></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>    external, internal <span class="op">=</span> swarm.update_position(result<span class="op">=</span>result)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>100%|██████████| 10/10 [00:00&lt;00:00, 714.26it/s]
+GALLOP iter 0001 LO iter 0500 min chi2 159.8: 100%|██████████| 500/500 [00:48&lt;00:00, 10.32it/s]
+GALLOP iter 0002 LO iter 0500 min chi2 88.3: 100%|██████████| 500/500 [00:48&lt;00:00, 10.31it/s] 
+GALLOP iter 0003 LO iter 0500 min chi2 87.0: 100%|██████████| 500/500 [00:48&lt;00:00, 10.29it/s] 
+GALLOP iter 0004 LO iter 0500 min chi2 86.9: 100%|██████████| 500/500 [00:48&lt;00:00, 10.23it/s] 
+GALLOP iter 0005 LO iter 0500 min chi2 86.8: 100%|██████████| 500/500 [00:48&lt;00:00, 10.37it/s] </code></pre>
+</div>
+</div>
+<p>As you can see, we hit approximately the same <span class="math inline">\(\chi^2\)</span> value as we did with the browser interface, though due to the use of my desktop PC rather than a cloud-based GPU, things took a little longer.</p>
+<p>As a point of comparison, let’s rerun the jobs above, this time without the restraints. We should see a significant difference in the rate of convergence.</p>
+<div class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a new swarm object so we don't start from the end point of the last run</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>swarm <span class="op">=</span> Swarm(mystructure, n_particles<span class="op">=</span><span class="dv">10000</span>, n_swarms<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>external, internal <span class="op">=</span> swarm.get_initial_positions()</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="co"># We'll use the same settings as the previous run</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="co"># However, we'll turn off the restraints for this run.</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>minimiser_settings[<span class="st">"use_restraints"</span>] <span class="op">=</span> <span class="va">False</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Set the total number of iterations for the GALLOP run</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>gallop_iters <span class="op">=</span> <span class="dv">5</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>start_time <span class="op">=</span> time.time()</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a><span class="co"># The main GALLOP loop</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(gallop_iters):</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Local optimisation of particle positions</span></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>    result <span class="op">=</span> local.minimise(mystructure, external<span class="op">=</span>external, internal<span class="op">=</span>internal,</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>                run<span class="op">=</span>i, start_time<span class="op">=</span>start_time, <span class="op">**</span>minimiser_settings)</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Particle swarm update generates new positions to be optimised</span></span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>    external, internal <span class="op">=</span> swarm.update_position(result<span class="op">=</span>result)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>100%|██████████| 10/10 [00:00&lt;00:00, 625.06it/s]
+GALLOP iter 0001 LO iter 0500 min chi2 423.0: 100%|██████████| 500/500 [00:45&lt;00:00, 10.90it/s]
+GALLOP iter 0002 LO iter 0500 min chi2 147.0: 100%|██████████| 500/500 [00:46&lt;00:00, 10.78it/s]
+GALLOP iter 0003 LO iter 0500 min chi2 126.0: 100%|██████████| 500/500 [00:45&lt;00:00, 10.96it/s]
+GALLOP iter 0004 LO iter 0500 min chi2 119.2: 100%|██████████| 500/500 [00:45&lt;00:00, 10.96it/s]
+GALLOP iter 0005 LO iter 0500 min chi2 104.9: 100%|██████████| 500/500 [00:45&lt;00:00, 10.89it/s]</code></pre>
+</div>
+</div>
+<p>As we can see, without restraints, we don’t reach the bottom of the global minimum within the 5 iterations alloted (though we get close - the final CIF gave a relatively low RMSD of 0.204 Å against the published structure). Whilst this is a small sample size, it does seem like restraints are providing a significant benefit.</p>
+<p>However, using restraints comes at a cost: as we can see, using the restraints results in an approximately 7 % increase in the time taken to perform the runs. This is simply because there are more operations that <em>GALLOP</em> has to carry out in order to calculate the restraint penalty term values and their associated gradients. However, this computational cost is fairly small and hopefully it’s obvious that even for relatively simple problems like the one we are tackling here, the benefits outweigh the increased computational cost!</p>
+</section>
+</section>
+</section>
+<section id="using-restraints-in-gallop-for-stereochemistry" class="level1">
+<h1>Using restraints in <em>GALLOP</em> for stereochemistry</h1>
+<p>The restraints we’ve been working with so far are not limited in application to ring systems. In this section, we’ll see how the use of restraints can save a significant amount of user effort in model preparation and testing in the case of a structure with multiple chiral centres of unknown (relative) configuration.</p>
+<p>An asymmetric unit containing <span class="math inline">\(n\)</span> chiral centres of unknown configuration leads to up to <span class="math inline">\(2^n\)</span> unique combinations of R and S at each of the centres (meso structures might reduce this number). Enantiomers are indistinguishable in standard PXRD experiments, this therefore means that there are <span class="math inline">\(2^{n-1}\)</span> configurations of R and S that each require a model to be prepared and tested. Given the exponential growth in the number of models with <span class="math inline">\(n\)</span>, this could rapidly lead to very large numbers of runs being required!</p>
+<p>So, how do restraints help? Well, if we break two of the bonds at each chiral centre, the separated fragments will be able to move independently, and be refined to their correct relative positions. However, as was the case with rings, breaking bonds leads to an increase in the number of degrees of freedom that need to be determined. Therefore, the inclusion of restraints ensures that the additional degrees of freedom are limited to only taking on values that reform the bonds that were broken, thus ensuring both that the correct molecule is obtained after optimisation and also that the optimisation process doesn’t take an inordinate amount of time!</p>
+<p>In the article we published, we took a look at the structure of trandolapril, <a href="https://discovery.ucl.ac.uk/id/eprint/1519753/">published by Reid et al</a>, which has CSD refcode IQISAE01. This molecule has 5 chiral centres:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="./images/Trandolapril_structure.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">2D molecular structure of trandolapril</figcaption><p></p>
+</figure>
+</div>
+<p>In the event that the configuration at each centre was unknown, then up to 16 alternative models would require construction and testing. With our approach, a single model is cut to produce 5 separate fragments, which are then connected with restraints:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="./images/iqisae_snipped.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Cut model of trandolapril</figcaption><p></p>
+</figure>
+</div>
+<p>In a head-to-head comparison of the performance between the correct fixed model and the cut and restrained model, we saw a reduction in the rate of success from 44 % to 17 % - a factor of approximately 2.5. However, what does this reduction in success rate mean in practice?</p>
+<p>If you were using <em>GALLOP</em> and a P100 GPU (16 GB memory) accessed via Kaggle to solve the structure, we could expect to fit approximately 10 swarms of 1000 particles in the GPU memory. With a 17 % success rate, a single run of 20 iterations with 10 swarms of 1000 particles using the cut and restrained model has an 84.5 % probability of solving the structure. With the correct uncut model, which has a 44 % swarm success rate, the probability of success with the same number of iterations, swarms and particles increases to 99.7 %. Therefore, let’s conservatively assume that we need two runs with the cut and restrained model to be reasonably sure of getting at least one solution (20 swarms would give 97.6 % probability of success), but only one run is needed if we are using a model with the correct relative configuration. This conservative assumption still means that the normal model building approach requires 8 times the number of runs to obtain a solution than the cut and restrain approach. This approach therefore offers a significant improvement in the time taken to obtain a solution, even without considering the onerous task of preparing 16 different input models!</p>
+<p>One other thing to note is that if the absolute stereochemical configuration of <em>any</em> of the chiral centres is known, then by leaving that centre intact, the absolute configuration all <em>other</em> centres can be obtained directly by refining with the cut and restrain approach we discussed above. For PXRD experiments, this seems like a logical method to speed up the approach to absolute configuration determination described <a href="https://onlinelibrary.wiley.com/doi/abs/10.1002/anie.201713168">here</a>.</p>
+<section id="other-applications" class="level2">
+<h2 class="anchored" data-anchor-id="other-applications">Other applications</h2>
+<p>Restraints in general enable the inclusion of additional information into the SDPD process, reducing the search space and (hopefully) increasing the probability of success. The information used to specify the restraints can come from a wide variety of sources. Whilst we have focussed here on using known bond lengths and expected torsion angle values, we could also include information from a multitude of other sources.</p>
+<p>For example, solid state NMR experiments can be used to obtain intramolecular end-to-end distances. As was <a href="https://pubs.rsc.org/en/content/articlelanding/2002/cc/b204289d/unauth">demonstrated by Middleton et al</a>, these distances can be used to force the molecualar fragments being optimised to adopt conformations close to that at the global minimum during the early stages of optimisation, significatly reducing the time taken to solve the crystal structure.</p>
+<p>Crystallographic databases can also be used to derive both positional and conformational information. For example, protonated quarternary ammonium cations and chloride counter ions are commonly found approximately 3 Å apart, providing the basis of an easily applied restraint. In two previous posts, we looked at solving the crystal structure of verapamil hydrochloride, which includes this feature. I ran 20 swarms of 1000 particles for 10 iterations, both with and without the Cl1 to N1 3 Å restraint applied, with a weight of 1. The learning rate was set to 0.05 in both cases. With restraints, 6 swarms reached the global minimum (30 %), whilst without, only 2 swarms (10 %) obtained the solution. This is a very small sample size, but I still think it’s reasonable to suggest that the restraint provides some benefit for very little effort! <a href="https://pubs.rsc.org/en/content/articlelanding/2013/ce/c3ce40367j">Hydrogen-bond propensity calculations</a> could also be used to inform restraints on the basis of likely intermolecular contact distances.</p>
+<p>The use of database-derived torsion angle distribution information is well established in SDPD via the use of techniques such as the Mogul Distribution Bias (MDB) which has been shown to <a href="http://scripts.iucr.org/cgi-bin/paper?po5105">greatly improve success rates in <em>DASH</em></a>. It worth noting that you can also use MDB information in <em>GALLOP</em>. This is described in the context of the <a href="https://mspillman.github.io/blog/gallop/pxrd/python/2021/11/02/Solving-structures-with-GALLOP-browser-interface.html#Fitting-data-with-DASH">browser interface</a> and <a href="https://mspillman.github.io/blog/gallop/pxrd/python/2021/11/03/Solving-structures-with-GALLOP-Python-API.html#Initialise-a-Particle-Swarm">Python API</a> in other posts. Other torsional information could be manually included via restraints if desired.</p>
+<p>Recent advances in the field of <a href="https://www.deepmind.com/research/highlighted-research/alphafold">protein folding</a> allow both protein conformations and intramolecular residue contact distances to be predicted. Clearly such information could also be used to inform restraints for SDPD applications.</p>
+</section>
+</section>
+<section id="conclusions" class="level1">
+<h1>Conclusions</h1>
+<p>In this post, we’ve seen how to use restraints in <em>GALLOP</em> to help with solving structures with unknown ring conformations and structures with multiple stereochemical centres of unknown relative configuration.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

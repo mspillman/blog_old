@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.290">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Mark Spillman">
+<meta name="dcterms.date" content="2021-11-18">
+<meta name="description" content="A guide to setting up GALLOP on a GPU-equipped virtual machine using Google Compute Engine">
+
+<title>Mark Spillman - Installing and running GALLOP on cloud GPUs</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Mark Spillman</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html" rel="" target="">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/mspillman" rel="" target=""><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com/mspillman" rel="" target=""><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+            <div class="quarto-navbar-tools">
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Installing and running GALLOP on cloud GPUs</h1>
+                  <div>
+        <div class="description">
+          A guide to setting up GALLOP on a GPU-equipped virtual machine using Google Compute Engine
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">GALLOP</div>
+                <div class="quarto-category">Cloud</div>
+                <div class="quarto-category">GCE</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Mark Spillman </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">November 18, 2021</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#starting-a-vm" id="toc-starting-a-vm" class="nav-link" data-scroll-target="#starting-a-vm">Starting a VM</a></li>
+  <li><a href="#installing-the-cuda-driver-and-gallop" id="toc-installing-the-cuda-driver-and-gallop" class="nav-link" data-scroll-target="#installing-the-cuda-driver-and-gallop">Installing the CUDA driver and <em>GALLOP</em></a>
+  <ul class="collapse">
+  <li><a href="#installing-the-cuda-driver" id="toc-installing-the-cuda-driver" class="nav-link" data-scroll-target="#installing-the-cuda-driver">Installing the CUDA driver</a></li>
+  <li><a href="#installing-gallop-and-running-in-python-mode" id="toc-installing-gallop-and-running-in-python-mode" class="nav-link" data-scroll-target="#installing-gallop-and-running-in-python-mode">Installing <em>GALLOP</em> and running in Python mode</a></li>
+  </ul></li>
+  <li><a href="#running-gallop-via-the-browser-interface" id="toc-running-gallop-via-the-browser-interface" class="nav-link" data-scroll-target="#running-gallop-via-the-browser-interface">Running GALLOP via the Browser interface</a></li>
+  <li><a href="#once-finished" id="toc-once-finished" class="nav-link" data-scroll-target="#once-finished">Once finished</a></li>
+  <li><a href="#conclusions" id="toc-conclusions" class="nav-link" data-scroll-target="#conclusions">Conclusions</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<p><a href="https://github.com/mspillman/gallop"><em>GALLOP</em></a> is designed to run on GPUs and TPUs. Users that don’t have local access to GPUs, or who want to gain access to faster GPUs without needing to purchase their own can make use of cloud computing resources. In this post we’ll look at how to set up a GPU-equipped virtual machine on Google’s <a href="https://cloud.google.com/compute">Compute Engine</a> cloud service, and then use it to run <em>GALLOP</em> jobs both through the <a href="https://mspillman.github.io/blog/gallop/pxrd/python/2021/11/02/Solving-structures-with-GALLOP-browser-interface.html">graphical browser-based interface</a> and via <a href="https://mspillman.github.io/blog/gallop/pxrd/python/2021/11/03/Solving-structures-with-GALLOP-Python-API.html">python mode</a>.</p>
+<p>One feature offered by GCE is <em>preemptible</em> instances, which significantly lowers the cost of using resources. There are some limitations that come with this, but they are usually not a concern for GALLOP jobs that take &lt; 24 hours to complete. It’s also worth noting that new customers to Google Cloud get $300 free credits to try out their services, so it’s well worth having a go. You will need a credit/debit card to gain access to GPUs even though you won’t be charged until the free credits run out. You will also need to request an increase to your GPU quota before they can be used - this only took a few minutes to be approved for me.</p>
+<p>Lastly, I’m not sponsored or endorsed by Google at all, I just like this service. There are many other cloud GPU providers who may be worth a look to see if they suit your requirements. If you know of any good ones, please get in contact with me, especially if you want to help with providing instructions for other users.</p>
+</section>
+<section id="starting-a-vm" class="level1">
+<h1>Starting a VM</h1>
+<p>Log onto your <a href="https://console.cloud.google.com/home/dashboard">Google Cloud Dashboard</a>. In the top-left hand corner, you’ll see the now ubiquitous (at least on Google products) <em>three lines</em> menu button. Click this, and a menu will appear. We are interested in the Compute Engine, so hover over that and an additional menu expansion will appear. Click on VM instances.</p>
+<p><img src="images/GC_menu.png" class="quarto-discovered-preview-image img-fluid"></p>
+<p>Once you’ve done that, we will create our GPU-backed VM! Click on the blue Create Instance button:</p>
+<p><img src="images/GC_create_instance.png" class="img-fluid"></p>
+<p>You’ll be taken to a menu where we will configure our machine. I am going to select the us-west1 region, though you can choose whichever region you like (provided that you have a GPU-quota in that region).</p>
+<p>We then need to make sure we choose a GPU-backed machine, so click on the blue GPU option under Machine family, then select which type of GPU and the number of GPUs you require. For this tutorial, we’ll go for a state of the art NVIDIA Tesla A100 GPU. Once you select this, you’ll notice a price estimate in the top right hand corner, which is quite expensive! Don’t worry, this will come down once we switch to a preemptible instance type.</p>
+<p><img src="images/GC_select_GPU.png" class="img-fluid"></p>
+<p>There is no need to change the machine type or CPU platform, so our next task is to change the Boot disk. The default is a Debian GNU/Linux environment, we’ll change this so that pytorch (one of the libraries that GALLOP depends on) is pre-installed.</p>
+<p>To do this, click the “change” button under Boot disk:</p>
+<p><img src="images/GC_Boot_disk_initial.png" class="img-fluid"></p>
+<p>Once you do that, a menu will appear. Under Operating system, select <code>Deep Learning on Linux</code>, then in the Version menu, select <code>Deep Learning Image: PyTorch 1.9 m82 CUDA 110</code>. You should end up with something like this:</p>
+<p><img src="images/GC_Boot_disk_menu.png" class="img-fluid"></p>
+<p>Once happy, press Select.</p>
+<p>The last thing we’ll do is set our instance to be preemptible. This will bring the hourly cost down dramatically, though it comes with some restrictions relative to a non-preemptible instance. See <a href="https://cloud.google.com/compute/docs/instances/preemptible">here</a> for more details.</p>
+<p>Near the bottom of the page, a blue expandable menu titled “NETWORKING, DISKS, SECURITY, MANAGEMENT, SOLE-TENANCY” is available. Click this to expand. Then click the Management expandable section. Now look down this list for the “Availability policy” menu, which has a drop-down list titled Preemptibility. Click this, and select “On”. The price estimate in the top-right corner should reduce significantly!</p>
+<p><img src="images/GC_preemptibility.png" class="img-fluid"></p>
+<p>Once you have completed all of the steps above, we are ready to create the instance. Press the blue Create button at the bottom of the page. You will be taken to a new screen which displays the status of the instance, and will allow us to connect to it via a browser-based SSH window. It takes a few minutes for the instances to become accessible, but once it’s ready, you should see something like this:</p>
+<p><img src="images/GC_instances.png" class="img-fluid"></p>
+<p>To connect to our instance, on the right hand side you’ll see an arrow next to “SSH”. Click this and then select “Open in browser window”. A new window will appear, which will connect to your instance. It will ask you if you want to initiate a connection - press the blue “Connect” button. After a short wait, you will be greeted with the following screen:</p>
+<p><img src="images/GC_install_driver.png" class="img-fluid"></p>
+</section>
+<section id="installing-the-cuda-driver-and-gallop" class="level1">
+<h1>Installing the CUDA driver and <em>GALLOP</em></h1>
+<section id="installing-the-cuda-driver" class="level2">
+<h2 class="anchored" data-anchor-id="installing-the-cuda-driver">Installing the CUDA driver</h2>
+<p>Once SSH’d into the VM for the first time, I typed <code>y</code>, then pressed enter to install the CUDA driver. This unfortunately failed (I’m not sure why, but this happens frequently! Thankfully, we can fix it quite easily). If yours doesn’t fail, proceed onto the GALLOP installation described below, otherwise follow these steps to get the CUDA driver working.</p>
+<p>Run the following commands one by one:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> rm /var/lib/apt/lists/lock <span class="kw">&amp;&amp;</span> <span class="fu">sudo</span> rm /var/cache/apt/archives/lock <span class="kw">&amp;&amp;</span> <span class="fu">sudo</span> rm /var/lib/dpkg/lock<span class="pp">*</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> dpkg <span class="at">--configure</span> <span class="at">-a</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> /opt/deeplearning/install-driver.sh</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The last command in particular may take a couple of minutes to run. If any errors occur during these steps, then depending on the error, you may need to run a few more commands to resolve them.</p>
+<p>One possible issue is:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">dpkg:</span> error: parsing file <span class="st">'/var/lib/dpkg/updates/0003'</span> near line 0:</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a> <span class="ex">newline</span> in field name <span class="st">'#padding'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>I solved this issue by running <code>sudo rm /var/lib/dpkg/0003</code>, though you may need to replace <code>0003</code> with whatever number you have on your error.</p>
+<p>Another potential issue is the second command complains about the google cloud sdk:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">Errors</span> were encountered while processing:</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a> <span class="ex">google-cloud-sdk</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>If this occurs, run the following commands and hopefully it’ll work. The first command can take a few minutes to run.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt-get upgrade google-cloud-sdk <span class="at">-y</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> dpkg <span class="at">--configure</span> <span class="at">-a</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> /opt/deeplearning/install-driver.sh</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>If you get any other errors, I found several examples of other people experiencing the same thing on Google so I suggest searching for your error message. Feel free to contact me by email or on Twitter and I can try to help.</p>
+</section>
+<section id="installing-gallop-and-running-in-python-mode" class="level2">
+<h2 class="anchored" data-anchor-id="installing-gallop-and-running-in-python-mode">Installing <em>GALLOP</em> and running in Python mode</h2>
+<p>Once the CUDA driver is installed, we’re ready to install <em>GALLOP</em>! Run the following command to grab the code from github and install it to the VM.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone https://github.com/mspillman/gallop.git <span class="kw">&amp;&amp;</span> <span class="bu">cd</span> gallop <span class="kw">&amp;&amp;</span> <span class="ex">pip</span> install .</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Once these commands are finished, GALLOP is now installed. If you’re running in python mode, then you can upload a script (and diffraction data &amp; ZMs) using the “gear” menu in the top right. Just below you’ll also see an option for downloading files which will be of use to obtain your results.</p>
+<p><img src="images/GC_upload_file.png" class="img-fluid"></p>
+<p>You may also be interested in using SSH to access JupyterLab</p>
+<p><a href="">https://cloud.google.com/vertex-ai/docs/workbench/user-managed/ssh-access</a></p>
+</section>
+</section>
+<section id="running-gallop-via-the-browser-interface" class="level1">
+<h1>Running GALLOP via the Browser interface</h1>
+<p>To use the browser interface, we’ll need to make use of <a href="https://ngrok.com/">ngrok</a> which is available for free. Run the following command to download and unzip the ngrok executable:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">wget</span> https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-386.zip <span class="kw">&amp;&amp;</span> <span class="fu">unzip</span> ngrok<span class="pp">*</span>.zip</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>We then need to setup ngrok with our authoken.</p>
+<p>Run the following command, but ensure you paste in your authtoken in the space I’ve indicated. This will be pre-populated in “step 2” on your <a href="https://dashboard.ngrok.com/get-started/setup">ngrok homepage</a>.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./ngrok</span> authtoken [authtoken goes here]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Once this is done, we will first start the browser interface running in a background process:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">streamlit</span> run gallop_streamlit.py <span class="op">&amp;&gt;</span>/dev/null <span class="kw">&amp;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><img src="images/GC_streamlit_background.png" class="img-fluid"></p>
+<p>The process ID displayed will allow you to kill streamlit if needed with the command <code>kill 9943</code> command, where you replace <code>9943</code> with the process ID that is displayed.</p>
+<p>Lastly, to get our ngrok link and access the <em>GALLOP</em> browser interface, run:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./ngrok</span> http 8501</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>And the following will appear:</p>
+<p><img src="images/GC_ngrok.png" class="img-fluid"></p>
+<p>Click on the Forwarding URL and you will be taken to the GALLOP browser interface.</p>
+<p>Note - when I tried it, Google Chrome complained that it suspected it was some sort of phishing attempt but Firefox opened the URL without complaint. Not sure what happened there, but if you get a concerning red screen, I suggest switching to Firefox!</p>
+</section>
+<section id="once-finished" class="level1">
+<h1>Once finished</h1>
+<p>Once you’re finished, you may wish to stop, suspend or delete your instance in order to avoid incurring any additional fees. Press the small three-dots menu on the right hand side of your instances page, and various options will appear.</p>
+<p><img src="images/GC_delete_instance.png" class="img-fluid"></p>
+</section>
+<section id="conclusions" class="level1">
+<h1>Conclusions</h1>
+<p>In this post, we’ve seen how to get a preemptible GPU-equipped VM running on Google Compute Engine, and install the CUDA driver and <em>GALLOP</em> on it.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

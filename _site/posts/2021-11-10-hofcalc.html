@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.290">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Mark Spillman">
+<meta name="dcterms.date" content="2021-11-10">
+<meta name="description" content="An overview of using database-derived atomic volumes to aid PXRD indexing.">
+
+<title>Mark Spillman - Estimating molecular volumes to aid in powder X-ray diffraction indexing</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Mark Spillman</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html" rel="" target="">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/mspillman" rel="" target=""><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com/mspillman" rel="" target=""><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+            <div class="quarto-navbar-tools">
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Estimating molecular volumes to aid in powder X-ray diffraction indexing</h1>
+                  <div>
+        <div class="description">
+          An overview of using database-derived atomic volumes to aid PXRD indexing.
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">PXRD</div>
+                <div class="quarto-category">Indexing</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Mark Spillman </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">November 10, 2021</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#hofmann-volumes" id="toc-hofmann-volumes" class="nav-link" data-scroll-target="#hofmann-volumes">Hofmann volumes</a></li>
+  <li><a href="#comparison-with-other-atomic-volumes" id="toc-comparison-with-other-atomic-volumes" class="nav-link" data-scroll-target="#comparison-with-other-atomic-volumes">Comparison with other atomic volumes</a></li>
+  <li><a href="#hofcalc---using-the-web-app" id="toc-hofcalc---using-the-web-app" class="nav-link" data-scroll-target="#hofcalc---using-the-web-app">HofCalc - using the web app</a>
+  <ul class="collapse">
+  <li><a href="#formulae-and-names" id="toc-formulae-and-names" class="nav-link" data-scroll-target="#formulae-and-names">Formulae and names</a>
+  <ul class="collapse">
+  <li><a href="#basic-use" id="toc-basic-use" class="nav-link" data-scroll-target="#basic-use">Basic use</a></li>
+  <li><a href="#multiple-search-terms" id="toc-multiple-search-terms" class="nav-link" data-scroll-target="#multiple-search-terms">Multiple search terms</a></li>
+  <li><a href="#more-complex-examples---hemihydrates" id="toc-more-complex-examples---hemihydrates" class="nav-link" data-scroll-target="#more-complex-examples---hemihydrates">More complex examples - hemihydrates</a></li>
+  <li><a href="#charged-species-in-formulae" id="toc-charged-species-in-formulae" class="nav-link" data-scroll-target="#charged-species-in-formulae">Charged species in formulae</a></li>
+  </ul></li>
+  <li><a href="#temperature" id="toc-temperature" class="nav-link" data-scroll-target="#temperature">Temperature</a></li>
+  <li><a href="#unit-cell-volume" id="toc-unit-cell-volume" class="nav-link" data-scroll-target="#unit-cell-volume">Unit cell volume</a></li>
+  <li><a href="#summary-files" id="toc-summary-files" class="nav-link" data-scroll-target="#summary-files">Summary Files</a></li>
+  </ul></li>
+  <li><a href="#case-study-ct-dmf2" id="toc-case-study-ct-dmf2" class="nav-link" data-scroll-target="#case-study-ct-dmf2">Case study: CT-DMF2</a></li>
+  <li><a href="#conclusions" id="toc-conclusions" class="nav-link" data-scroll-target="#conclusions">Conclusions</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<p>An <a href="http://scripts.iucr.org/cgi-bin/paper?S0108768101021814">article</a> published in 2001 by D. W. M. Hofmann describes how crystallographic databases can be used to derive the average volume occupied by atoms of each element in crystal structures. Using his tabulated values, it’s possible to rapidly estimate the volume occupied by a given molecule, and use this to aid indexing of powder diffraction data. This is particularly useful for laboratory diffraction data, which is generally associated with lower figures of merit such as de Wolff’s <span class="math inline">\(M_{20}\)</span> and Smith and Snyder’s <span class="math inline">\(F_N\)</span>, which can make discriminating between alternative options more challenging. Other volume estimation methods, notably the 18 Å³ rule are also commonly used, though Hofmann’s volumes give generally more accurate results.</p>
+<p>I’ve put together a freely available web-app, <em>HofCalc</em>, which can be used to conveniently obtain these estimates. It should display reasonably well on mobile devices as well as PCs/laptops. You can access it at the following address:</p>
+<p><a href="https://hofcalc.onrender.com">https://hofcalc.onrender.com</a></p>
+<p><img src="images/HofCalc.png" class="quarto-discovered-preview-image img-fluid"></p>
+<p>This post will explain how it works, and will look at some examples of how it can be used in practice. I’m grateful to Norman Shankland who provided invaluable feedback and assistance with debugging of the app.</p>
+</section>
+<section id="hofmann-volumes" class="level1">
+<h1>Hofmann volumes</h1>
+<p>After applying various filters to crystal structures deposited in the CSD, Hofmann ended up with a dataset comprised of 182239 structures. Hofmann only considers the elements up to atomic number 100 (fermium) in his work, and assumes that the volume of the unit cell is equivalent to:</p>
+<p><span class="math display">\[V_{est} = \sum\limits_{i=1}^{100} n_i\bar{v_i}(1+\bar{\alpha}T)\]</span></p>
+<p>Where <span class="math inline">\(n_i\)</span> is the number of atoms of element <span class="math inline">\(i\)</span> in the unit cell, and <span class="math inline">\(\bar{v_i}\)</span> is the average volume occupied by an atom of element <span class="math inline">\(i\)</span>. He also assumes that atomic volumes vary linearly with temperature.</p>
+<p>He split the dataset into 20 subsets, then used an iterative least-squares method to solve the above equation for each of the subsets. This allowed him to find the average volumes occupied by atoms of each element, and due to the splitting of the data into subsets, he also obtains their standard deviations. The coefficient of thermal expansion, <span class="math inline">\(\bar{\alpha}\)</span>, was found to be <span class="math inline">\(0.95 \times 10^{-4} K^{-1}\)</span>. This temperature correction factor then allowed him to provide the average volumes for all of the elements represented in the CSD at 298 K.</p>
+<p>You can download a <code>.json</code> file containing the 298 K volumes <a href="https://github.com/mspillman/blog/blob/master/_notebooks/files/Hofmann-volumes.json">here</a>.</p>
+</section>
+<section id="comparison-with-other-atomic-volumes" class="level1">
+<h1>Comparison with other atomic volumes</h1>
+<p>Let’s compare Hofmann’s volumes to those obtained from other sources. Hofmann’s article compares his volumes to those derived by Mighell and coworkers, which were published in 1987. As additional comparison points, which highlight the importance of using <em>crystallographic volumes</em> in this context, I also downloaded some <a href="https://en.wikipedia.org/wiki/Atomic_radii_of_the_elements_%28data_page%29">atomic radii data</a> from Wikipedia and converted these into atomic volumes (assuming spherical atoms). Sources for these radii may be found at the bottom of the Wikipedia article.</p>
+<p>Click on the coloured boxes in the top left to view individual types of volume, and shift-click to add other volumes back in again.</p>
+<div class="cell" data-execution_count="5">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> altair <span class="im">as</span> alt</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">"files/Hofmann-volumes.json"</span>) <span class="im">as</span> hv:</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    hofmann_volumes <span class="op">=</span> json.load(hv)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>hv.close()</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>vols <span class="op">=</span> []</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, key <span class="kw">in</span> <span class="bu">enumerate</span>(hofmann_volumes.keys()):</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    vols.append([i<span class="op">+</span><span class="dv">1</span>, key, hofmann_volumes[key]])</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.DataFrame(vols)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>df.columns <span class="op">=</span> [<span class="st">"Atomic number"</span>, <span class="st">"Element"</span>, <span class="st">"Hofmann"</span>]</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>df.reset_index(drop<span class="op">=</span><span class="va">True</span>, inplace<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>df.replace(<span class="st">"N/A"</span>, np.NaN, inplace<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>wikiradii <span class="op">=</span> pd.read_excel(<span class="st">"files/wikipedia_radii.xlsx"</span>)</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>wikiradii.replace(<span class="st">""</span>, np.NaN, inplace<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>radtype <span class="op">=</span> [<span class="st">"Mighell"</span>, <span class="st">"Empirical"</span>,<span class="st">"Calculated"</span>,<span class="st">"vdW"</span>,<span class="st">"Covalent-single"</span>,<span class="st">"Covalent-triple"</span>,</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Metallic"</span>]</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> r <span class="kw">in</span> radtype:</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Radii are in pm so /100 to convert to angstroms.</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> r <span class="op">==</span> <span class="st">"Mighell"</span>:</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>        df[r] <span class="op">=</span> wikiradii[r].values.astype(<span class="bu">float</span>)</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>        df[r] <span class="op">=</span> (<span class="dv">4</span><span class="op">*</span>np.pi<span class="op">/</span><span class="dv">3</span>)<span class="op">*</span>(wikiradii[r].values.astype(<span class="bu">float</span>)<span class="op">/</span><span class="dv">100</span>)<span class="op">**</span><span class="dv">3</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert our dataframe to long-form as this is what is expected by altair</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>dflong <span class="op">=</span> df.melt(<span class="st">"Atomic number"</span>, var_name<span class="op">=</span><span class="st">"Volume"</span>,</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>                value_vars<span class="op">=</span>[<span class="st">"Hofmann"</span>] <span class="op">+</span> radtype)</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a><span class="co"># Restore the element symbols to the long dataframe</span></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>element <span class="op">=</span> []</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> an <span class="kw">in</span> dflong[<span class="st">"Atomic number"</span>]:</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>    element.append(df[<span class="st">"Element"</span>][df[<span class="st">"Atomic number"</span>] <span class="op">==</span> an].item())</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>dflong[<span class="st">"Element"</span>] <span class="op">=</span> element</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>click <span class="op">=</span> alt.selection_multi(encodings<span class="op">=</span>[<span class="st">"color"</span>])</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a><span class="co"># scatter plot, modify opacity based on selection</span></span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>scatter <span class="op">=</span> alt.Chart(dflong).mark_point().encode(</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>    x<span class="op">=</span>alt.X(<span class="st">'Element:N'</span>,sort<span class="op">=</span>dflong[<span class="st">"Atomic number"</span>].values),</span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span>alt.Y(<span class="st">"value:Q"</span>, axis<span class="op">=</span>alt.Axis(title<span class="op">=</span><span class="st">'Volume / Å³'</span>)),</span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>    tooltip<span class="op">=</span>[<span class="st">'Element'</span>, <span class="st">'Volume:N'</span>, <span class="st">'value'</span>],</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>    opacity<span class="op">=</span>alt.value(<span class="fl">0.85</span>),</span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span><span class="st">"Volume:N"</span></span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>).transform_filter(click).properties(width<span class="op">=</span><span class="dv">650</span>, height<span class="op">=</span><span class="dv">500</span>).interactive()</span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a><span class="co"># legend</span></span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>legend <span class="op">=</span> alt.Chart(dflong).mark_rect().encode(</span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span>alt.Y(<span class="st">'Volume:N'</span>, axis<span class="op">=</span>alt.Axis(title<span class="op">=</span><span class="st">'Select volume'</span>), sort<span class="op">=</span>[<span class="dv">4</span>,<span class="dv">6</span>,<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">5</span>,<span class="dv">7</span>]),</span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span>alt.condition(click, <span class="st">'Volume:N'</span>,</span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>                        alt.value(<span class="st">'lightgray'</span>), legend<span class="op">=</span><span class="va">None</span>),</span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>).properties(</span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a>    selection<span class="op">=</span>click,</span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a>chart <span class="op">=</span> (legend <span class="op">|</span> scatter)</span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a>chart</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="5">
+
+<div id="altair-viz-3a9f101df5a04c639a09579fb0703884"></div>
+<script type="text/javascript">
+  (function(spec, embedOpt){
+    let outputDiv = document.currentScript.previousElementSibling;
+    if (outputDiv.id !== "altair-viz-3a9f101df5a04c639a09579fb0703884") {
+      outputDiv = document.getElementById("altair-viz-3a9f101df5a04c639a09579fb0703884");
+    }
+    const paths = {
+      "vega": "https://cdn.jsdelivr.net/npm//vega@5?noext",
+      "vega-lib": "https://cdn.jsdelivr.net/npm//vega-lib?noext",
+      "vega-lite": "https://cdn.jsdelivr.net/npm//vega-lite@4.8.1?noext",
+      "vega-embed": "https://cdn.jsdelivr.net/npm//vega-embed@6?noext",
+    };
+
+    function loadScript(lib) {
+      return new Promise(function(resolve, reject) {
+        var s = document.createElement('script');
+        s.src = paths[lib];
+        s.async = true;
+        s.onload = () => resolve(paths[lib]);
+        s.onerror = () => reject(`Error loading script: ${paths[lib]}`);
+        document.getElementsByTagName("head")[0].appendChild(s);
+      });
+    }
+
+    function showError(err) {
+      outputDiv.innerHTML = `<div class="error" style="color:red;">${err}</div>`;
+      throw err;
+    }
+
+    function displayChart(vegaEmbed) {
+      vegaEmbed(outputDiv, spec, embedOpt)
+        .catch(err => showError(`Javascript Error: ${err.message}<br>This usually means there's a typo in your chart specification. See the javascript console for the full traceback.`));
+    }
+
+    if(typeof define === "function" && define.amd) {
+      requirejs.config({paths});
+      require(["vega-embed"], displayChart, err => showError(`Error loading script: ${err.message}`));
+    } else if (typeof vegaEmbed === "function") {
+      displayChart(vegaEmbed);
+    } else {
+      loadScript("vega")
+        .then(() => loadScript("vega-lite"))
+        .then(() => loadScript("vega-embed"))
+        .catch(showError)
+        .then(() => displayChart(vegaEmbed));
+    }
+  })({"config": {"view": {"continuousWidth": 400, "continuousHeight": 300}}, "hconcat": [{"mark": "rect", "encoding": {"color": {"condition": {"type": "nominal", "field": "Volume", "legend": null, "selection": "selector009"}, "value": "lightgray"}, "y": {"type": "nominal", "axis": {"title": "Select volume"}, "field": "Volume", "sort": [4, 6, 0, 1, 2, 3, 5, 7]}}, "selection": {"selector009": {"type": "multi", "encodings": ["color"]}}}, {"mark": "point", "encoding": {"color": {"type": "nominal", "field": "Volume"}, "opacity": {"value": 0.85}, "tooltip": [{"type": "nominal", "field": "Element"}, {"type": "nominal", "field": "Volume"}, {"type": "quantitative", "field": "value"}], "x": {"type": "nominal", "field": "Element", "sort": [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 20.0, 21.0, 22.0, 23.0, 24.0, 25.0, 26.0, 27.0, 28.0, 29.0, 30.0, 31.0, 32.0, 33.0, 34.0, 35.0, 36.0, 37.0, 38.0, 39.0, 40.0, 41.0, 42.0, 43.0, 44.0, 45.0, 46.0, 47.0, 48.0, 49.0, 50.0, 51.0, 52.0, 53.0, 54.0, 55.0, 56.0, 57.0, 58.0, 59.0, 60.0, 61.0, 62.0, 63.0, 64.0, 65.0, 66.0, 67.0, 68.0, 69.0, 70.0, 71.0, 72.0, 73.0, 74.0, 75.0, 76.0, 77.0, 78.0, 79.0, 80.0, 81.0, 82.0, 83.0, 84.0, 85.0, 86.0, 87.0, 88.0, 89.0, 90.0, 91.0, 92.0, 93.0, 94.0, 95.0, 96.0, 97.0, 98.0, 99.0, 100.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 20.0, 21.0, 22.0, 23.0, 24.0, 25.0, 26.0, 27.0, 28.0, 29.0, 30.0, 31.0, 32.0, 33.0, 34.0, 35.0, 36.0, 37.0, 38.0, 39.0, 40.0, 41.0, 42.0, 43.0, 44.0, 45.0, 46.0, 47.0, 48.0, 49.0, 50.0, 51.0, 52.0, 53.0, 54.0, 55.0, 56.0, 57.0, 58.0, 59.0, 60.0, 61.0, 62.0, 63.0, 64.0, 65.0, 66.0, 67.0, 68.0, 69.0, 70.0, 71.0, 72.0, 73.0, 74.0, 75.0, 76.0, 77.0, 78.0, 79.0, 80.0, 81.0, 82.0, 83.0, 84.0, 85.0, 86.0, 87.0, 88.0, 89.0, 90.0, 91.0, 92.0, 93.0, 94.0, 95.0, 96.0, 97.0, 98.0, 99.0, 100.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 20.0, 21.0, 22.0, 23.0, 24.0, 25.0, 26.0, 27.0, 28.0, 29.0, 30.0, 31.0, 32.0, 33.0, 34.0, 35.0, 36.0, 37.0, 38.0, 39.0, 40.0, 41.0, 42.0, 43.0, 44.0, 45.0, 46.0, 47.0, 48.0, 49.0, 50.0, 51.0, 52.0, 53.0, 54.0, 55.0, 56.0, 57.0, 58.0, 59.0, 60.0, 61.0, 62.0, 63.0, 64.0, 65.0, 66.0, 67.0, 68.0, 69.0, 70.0, 71.0, 72.0, 73.0, 74.0, 75.0, 76.0, 77.0, 78.0, 79.0, 80.0, 81.0, 82.0, 83.0, 84.0, 85.0, 86.0, 87.0, 88.0, 89.0, 90.0, 91.0, 92.0, 93.0, 94.0, 95.0, 96.0, 97.0, 98.0, 99.0, 100.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 20.0, 21.0, 22.0, 23.0, 24.0, 25.0, 26.0, 27.0, 28.0, 29.0, 30.0, 31.0, 32.0, 33.0, 34.0, 35.0, 36.0, 37.0, 38.0, 39.0, 40.0, 41.0, 42.0, 43.0, 44.0, 45.0, 46.0, 47.0, 48.0, 49.0, 50.0, 51.0, 52.0, 53.0, 54.0, 55.0, 56.0, 57.0, 58.0, 59.0, 60.0, 61.0, 62.0, 63.0, 64.0, 65.0, 66.0, 67.0, 68.0, 69.0, 70.0, 71.0, 72.0, 73.0, 74.0, 75.0, 76.0, 77.0, 78.0, 79.0, 80.0, 81.0, 82.0, 83.0, 84.0, 85.0, 86.0, 87.0, 88.0, 89.0, 90.0, 91.0, 92.0, 93.0, 94.0, 95.0, 96.0, 97.0, 98.0, 99.0, 100.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 20.0, 21.0, 22.0, 23.0, 24.0, 25.0, 26.0, 27.0, 28.0, 29.0, 30.0, 31.0, 32.0, 33.0, 34.0, 35.0, 36.0, 37.0, 38.0, 39.0, 40.0, 41.0, 42.0, 43.0, 44.0, 45.0, 46.0, 47.0, 48.0, 49.0, 50.0, 51.0, 52.0, 53.0, 54.0, 55.0, 56.0, 57.0, 58.0, 59.0, 60.0, 61.0, 62.0, 63.0, 64.0, 65.0, 66.0, 67.0, 68.0, 69.0, 70.0, 71.0, 72.0, 73.0, 74.0, 75.0, 76.0, 77.0, 78.0, 79.0, 80.0, 81.0, 82.0, 83.0, 84.0, 85.0, 86.0, 87.0, 88.0, 89.0, 90.0, 91.0, 92.0, 93.0, 94.0, 95.0, 96.0, 97.0, 98.0, 99.0, 100.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 20.0, 21.0, 22.0, 23.0, 24.0, 25.0, 26.0, 27.0, 28.0, 29.0, 30.0, 31.0, 32.0, 33.0, 34.0, 35.0, 36.0, 37.0, 38.0, 39.0, 40.0, 41.0, 42.0, 43.0, 44.0, 45.0, 46.0, 47.0, 48.0, 49.0, 50.0, 51.0, 52.0, 53.0, 54.0, 55.0, 56.0, 57.0, 58.0, 59.0, 60.0, 61.0, 62.0, 63.0, 64.0, 65.0, 66.0, 67.0, 68.0, 69.0, 70.0, 71.0, 72.0, 73.0, 74.0, 75.0, 76.0, 77.0, 78.0, 79.0, 80.0, 81.0, 82.0, 83.0, 84.0, 85.0, 86.0, 87.0, 88.0, 89.0, 90.0, 91.0, 92.0, 93.0, 94.0, 95.0, 96.0, 97.0, 98.0, 99.0, 100.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 20.0, 21.0, 22.0, 23.0, 24.0, 25.0, 26.0, 27.0, 28.0, 29.0, 30.0, 31.0, 32.0, 33.0, 34.0, 35.0, 36.0, 37.0, 38.0, 39.0, 40.0, 41.0, 42.0, 43.0, 44.0, 45.0, 46.0, 47.0, 48.0, 49.0, 50.0, 51.0, 52.0, 53.0, 54.0, 55.0, 56.0, 57.0, 58.0, 59.0, 60.0, 61.0, 62.0, 63.0, 64.0, 65.0, 66.0, 67.0, 68.0, 69.0, 70.0, 71.0, 72.0, 73.0, 74.0, 75.0, 76.0, 77.0, 78.0, 79.0, 80.0, 81.0, 82.0, 83.0, 84.0, 85.0, 86.0, 87.0, 88.0, 89.0, 90.0, 91.0, 92.0, 93.0, 94.0, 95.0, 96.0, 97.0, 98.0, 99.0, 100.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 20.0, 21.0, 22.0, 23.0, 24.0, 25.0, 26.0, 27.0, 28.0, 29.0, 30.0, 31.0, 32.0, 33.0, 34.0, 35.0, 36.0, 37.0, 38.0, 39.0, 40.0, 41.0, 42.0, 43.0, 44.0, 45.0, 46.0, 47.0, 48.0, 49.0, 50.0, 51.0, 52.0, 53.0, 54.0, 55.0, 56.0, 57.0, 58.0, 59.0, 60.0, 61.0, 62.0, 63.0, 64.0, 65.0, 66.0, 67.0, 68.0, 69.0, 70.0, 71.0, 72.0, 73.0, 74.0, 75.0, 76.0, 77.0, 78.0, 79.0, 80.0, 81.0, 82.0, 83.0, 84.0, 85.0, 86.0, 87.0, 88.0, 89.0, 90.0, 91.0, 92.0, 93.0, 94.0, 95.0, 96.0, 97.0, 98.0, 99.0, 100.0]}, "y": {"type": "quantitative", "axis": {"title": "Volume / \u00c5\u00b3"}, "field": "value"}}, "height": 500, "selection": {"selector010": {"type": "interval", "bind": "scales", "encodings": ["x", "y"]}}, "transform": [{"filter": {"selection": "selector009"}}], "width": 650}], "data": {"name": "data-64cfb03cdc63470b9a98df00e2b9fee0"}, "$schema": "https://vega.github.io/schema/vega-lite/v4.8.1.json", "datasets": {"data-64cfb03cdc63470b9a98df00e2b9fee0": [{"Atomic number": 1, "Volume": "Hofmann", "value": 5.08, "Element": "H"}, {"Atomic number": 2, "Volume": "Hofmann", "value": null, "Element": "He"}, {"Atomic number": 3, "Volume": "Hofmann", "value": 22.6, "Element": "Li"}, {"Atomic number": 4, "Volume": "Hofmann", "value": 36.0, "Element": "Be"}, {"Atomic number": 5, "Volume": "Hofmann", "value": 13.24, "Element": "B"}, {"Atomic number": 6, "Volume": "Hofmann", "value": 13.87, "Element": "C"}, {"Atomic number": 7, "Volume": "Hofmann", "value": 11.8, "Element": "N"}, {"Atomic number": 8, "Volume": "Hofmann", "value": 11.39, "Element": "O"}, {"Atomic number": 9, "Volume": "Hofmann", "value": 11.17, "Element": "F"}, {"Atomic number": 10, "Volume": "Hofmann", "value": null, "Element": "Ne"}, {"Atomic number": 11, "Volume": "Hofmann", "value": 26.0, "Element": "Na"}, {"Atomic number": 12, "Volume": "Hofmann", "value": 36.0, "Element": "Mg"}, {"Atomic number": 13, "Volume": "Hofmann", "value": 39.6, "Element": "Al"}, {"Atomic number": 14, "Volume": "Hofmann", "value": 37.3, "Element": "Si"}, {"Atomic number": 15, "Volume": "Hofmann", "value": 29.5, "Element": "P"}, {"Atomic number": 16, "Volume": "Hofmann", "value": 25.2, "Element": "S"}, {"Atomic number": 17, "Volume": "Hofmann", "value": 25.8, "Element": "Cl"}, {"Atomic number": 18, "Volume": "Hofmann", "value": null, "Element": "Ar"}, {"Atomic number": 19, "Volume": "Hofmann", "value": 36.0, "Element": "K"}, {"Atomic number": 20, "Volume": "Hofmann", "value": 45.0, "Element": "Ca"}, {"Atomic number": 21, "Volume": "Hofmann", "value": 42.0, "Element": "Sc"}, {"Atomic number": 22, "Volume": "Hofmann", "value": 27.3, "Element": "Ti"}, {"Atomic number": 23, "Volume": "Hofmann", "value": 24.0, "Element": "V"}, {"Atomic number": 24, "Volume": "Hofmann", "value": 28.1, "Element": "Cr"}, {"Atomic number": 25, "Volume": "Hofmann", "value": 31.9, "Element": "Mn"}, {"Atomic number": 26, "Volume": "Hofmann", "value": 30.4, "Element": "Fe"}, {"Atomic number": 27, "Volume": "Hofmann", "value": 29.4, "Element": "Co"}, {"Atomic number": 28, "Volume": "Hofmann", "value": 26.0, "Element": "Ni"}, {"Atomic number": 29, "Volume": "Hofmann", "value": 26.9, "Element": "Cu"}, {"Atomic number": 30, "Volume": "Hofmann", "value": 39.0, "Element": "Zn"}, {"Atomic number": 31, "Volume": "Hofmann", "value": 37.8, "Element": "Ga"}, {"Atomic number": 32, "Volume": "Hofmann", "value": 41.6, "Element": "Ge"}, {"Atomic number": 33, "Volume": "Hofmann", "value": 36.4, "Element": "As"}, {"Atomic number": 34, "Volume": "Hofmann", "value": 30.3, "Element": "Se"}, {"Atomic number": 35, "Volume": "Hofmann", "value": 32.7, "Element": "Br"}, {"Atomic number": 36, "Volume": "Hofmann", "value": null, "Element": "Kr"}, {"Atomic number": 37, "Volume": "Hofmann", "value": 42.0, "Element": "Rb"}, {"Atomic number": 38, "Volume": "Hofmann", "value": 47.0, "Element": "Sr"}, {"Atomic number": 39, "Volume": "Hofmann", "value": 44.0, "Element": "Y"}, {"Atomic number": 40, "Volume": "Hofmann", "value": 27.0, "Element": "Zr"}, {"Atomic number": 41, "Volume": "Hofmann", "value": 37.0, "Element": "Nb"}, {"Atomic number": 42, "Volume": "Hofmann", "value": 38.0, "Element": "Mo"}, {"Atomic number": 43, "Volume": "Hofmann", "value": 38.0, "Element": "Tc"}, {"Atomic number": 44, "Volume": "Hofmann", "value": 37.3, "Element": "Ru"}, {"Atomic number": 45, "Volume": "Hofmann", "value": 31.2, "Element": "Rh"}, {"Atomic number": 46, "Volume": "Hofmann", "value": 35.0, "Element": "Pd"}, {"Atomic number": 47, "Volume": "Hofmann", "value": 35.0, "Element": "Ag"}, {"Atomic number": 48, "Volume": "Hofmann", "value": 51.0, "Element": "Cd"}, {"Atomic number": 49, "Volume": "Hofmann", "value": 55.0, "Element": "In"}, {"Atomic number": 50, "Volume": "Hofmann", "value": 52.8, "Element": "Sn"}, {"Atomic number": 51, "Volume": "Hofmann", "value": 48.0, "Element": "Sb"}, {"Atomic number": 52, "Volume": "Hofmann", "value": 46.7, "Element": "Te"}, {"Atomic number": 53, "Volume": "Hofmann", "value": 46.2, "Element": "I"}, {"Atomic number": 54, "Volume": "Hofmann", "value": 45.0, "Element": "Xe"}, {"Atomic number": 55, "Volume": "Hofmann", "value": 46.0, "Element": "Cs"}, {"Atomic number": 56, "Volume": "Hofmann", "value": 66.0, "Element": "Ba"}, {"Atomic number": 57, "Volume": "Hofmann", "value": 58.0, "Element": "La"}, {"Atomic number": 58, "Volume": "Hofmann", "value": 54.0, "Element": "Ce"}, {"Atomic number": 59, "Volume": "Hofmann", "value": 57.0, "Element": "Pr"}, {"Atomic number": 60, "Volume": "Hofmann", "value": 50.0, "Element": "Nd"}, {"Atomic number": 61, "Volume": "Hofmann", "value": null, "Element": "Pm"}, {"Atomic number": 62, "Volume": "Hofmann", "value": 50.0, "Element": "Sm"}, {"Atomic number": 63, "Volume": "Hofmann", "value": 53.0, "Element": "Eu"}, {"Atomic number": 64, "Volume": "Hofmann", "value": 56.0, "Element": "Gd"}, {"Atomic number": 65, "Volume": "Hofmann", "value": 45.0, "Element": "Tb"}, {"Atomic number": 66, "Volume": "Hofmann", "value": 50.0, "Element": "Dy"}, {"Atomic number": 67, "Volume": "Hofmann", "value": 42.0, "Element": "Ho"}, {"Atomic number": 68, "Volume": "Hofmann", "value": 54.0, "Element": "Er"}, {"Atomic number": 69, "Volume": "Hofmann", "value": 49.0, "Element": "Tm"}, {"Atomic number": 70, "Volume": "Hofmann", "value": 59.0, "Element": "Yb"}, {"Atomic number": 71, "Volume": "Hofmann", "value": 35.0, "Element": "Lu"}, {"Atomic number": 72, "Volume": "Hofmann", "value": 40.0, "Element": "Hf"}, {"Atomic number": 73, "Volume": "Hofmann", "value": 43.0, "Element": "Ta"}, {"Atomic number": 74, "Volume": "Hofmann", "value": 38.8, "Element": "W"}, {"Atomic number": 75, "Volume": "Hofmann", "value": 42.7, "Element": "Re"}, {"Atomic number": 76, "Volume": "Hofmann", "value": 41.9, "Element": "Os"}, {"Atomic number": 77, "Volume": "Hofmann", "value": 34.3, "Element": "Ir"}, {"Atomic number": 78, "Volume": "Hofmann", "value": 38.0, "Element": "Pt"}, {"Atomic number": 79, "Volume": "Hofmann", "value": 43.0, "Element": "Au"}, {"Atomic number": 80, "Volume": "Hofmann", "value": 38.0, "Element": "Hg"}, {"Atomic number": 81, "Volume": "Hofmann", "value": 54.0, "Element": "Tl"}, {"Atomic number": 82, "Volume": "Hofmann", "value": 52.0, "Element": "Pb"}, {"Atomic number": 83, "Volume": "Hofmann", "value": 60.0, "Element": "Bi"}, {"Atomic number": 84, "Volume": "Hofmann", "value": null, "Element": "Po"}, {"Atomic number": 85, "Volume": "Hofmann", "value": null, "Element": "At"}, {"Atomic number": 86, "Volume": "Hofmann", "value": null, "Element": "Rn"}, {"Atomic number": 87, "Volume": "Hofmann", "value": null, "Element": "Fr"}, {"Atomic number": 88, "Volume": "Hofmann", "value": null, "Element": "Ra"}, {"Atomic number": 89, "Volume": "Hofmann", "value": 74.0, "Element": "Ac"}, {"Atomic number": 90, "Volume": "Hofmann", "value": 56.0, "Element": "Th"}, {"Atomic number": 91, "Volume": "Hofmann", "value": 60.0, "Element": "Pa"}, {"Atomic number": 92, "Volume": "Hofmann", "value": 58.0, "Element": "U"}, {"Atomic number": 93, "Volume": "Hofmann", "value": 45.0, "Element": "Np"}, {"Atomic number": 94, "Volume": "Hofmann", "value": null, "Element": "Pu"}, {"Atomic number": 95, "Volume": "Hofmann", "value": 17.0, "Element": "Am"}, {"Atomic number": 96, "Volume": "Hofmann", "value": null, "Element": "Cm"}, {"Atomic number": 97, "Volume": "Hofmann", "value": null, "Element": "Bk"}, {"Atomic number": 98, "Volume": "Hofmann", "value": null, "Element": "Cf"}, {"Atomic number": 99, "Volume": "Hofmann", "value": null, "Element": "Es"}, {"Atomic number": 100, "Volume": "Hofmann", "value": null, "Element": "Fm"}, {"Atomic number": 1, "Volume": "Mighell", "value": 5.4, "Element": "H"}, {"Atomic number": 2, "Volume": "Mighell", "value": 10.0, "Element": "He"}, {"Atomic number": 3, "Volume": "Mighell", "value": 18.0, "Element": "Li"}, {"Atomic number": 4, "Volume": "Mighell", "value": 24.5, "Element": "Be"}, {"Atomic number": 5, "Volume": "Mighell", "value": 13.0, "Element": "B"}, {"Atomic number": 6, "Volume": "Mighell", "value": 13.94, "Element": "C"}, {"Atomic number": 7, "Volume": "Mighell", "value": 11.0, "Element": "N"}, {"Atomic number": 8, "Volume": "Mighell", "value": 10.0, "Element": "O"}, {"Atomic number": 9, "Volume": "Mighell", "value": 11.5, "Element": "F"}, {"Atomic number": 10, "Volume": "Mighell", "value": 20.0, "Element": "Ne"}, {"Atomic number": 11, "Volume": "Mighell", "value": 18.0, "Element": "Na"}, {"Atomic number": 12, "Volume": "Mighell", "value": 38.0, "Element": "Mg"}, {"Atomic number": 13, "Volume": "Mighell", "value": 34.5, "Element": "Al"}, {"Atomic number": 14, "Volume": "Mighell", "value": 39.0, "Element": "Si"}, {"Atomic number": 15, "Volume": "Mighell", "value": 30.0, "Element": "P"}, {"Atomic number": 16, "Volume": "Mighell", "value": 26.0, "Element": "S"}, {"Atomic number": 17, "Volume": "Mighell", "value": 25.0, "Element": "Cl"}, {"Atomic number": 18, "Volume": "Mighell", "value": 30.0, "Element": "Ar"}, {"Atomic number": 19, "Volume": "Mighell", "value": 31.0, "Element": "K"}, {"Atomic number": 20, "Volume": "Mighell", "value": 41.0, "Element": "Ca"}, {"Atomic number": 21, "Volume": "Mighell", "value": 21.0, "Element": "Sc"}, {"Atomic number": 22, "Volume": "Mighell", "value": 25.5, "Element": "Ti"}, {"Atomic number": 23, "Volume": "Mighell", "value": 39.0, "Element": "V"}, {"Atomic number": 24, "Volume": "Mighell", "value": 34.0, "Element": "Cr"}, {"Atomic number": 25, "Volume": "Mighell", "value": 31.5, "Element": "Mn"}, {"Atomic number": 26, "Volume": "Mighell", "value": 29.0, "Element": "Fe"}, {"Atomic number": 27, "Volume": "Mighell", "value": 27.0, "Element": "Co"}, {"Atomic number": 28, "Volume": "Mighell", "value": 26.5, "Element": "Ni"}, {"Atomic number": 29, "Volume": "Mighell", "value": 24.0, "Element": "Cu"}, {"Atomic number": 30, "Volume": "Mighell", "value": 35.0, "Element": "Zn"}, {"Atomic number": 31, "Volume": "Mighell", "value": 39.0, "Element": "Ga"}, {"Atomic number": 32, "Volume": "Mighell", "value": 39.0, "Element": "Ge"}, {"Atomic number": 33, "Volume": "Mighell", "value": 36.5, "Element": "As"}, {"Atomic number": 34, "Volume": "Mighell", "value": 28.5, "Element": "Se"}, {"Atomic number": 35, "Volume": "Mighell", "value": 30.5, "Element": "Br"}, {"Atomic number": 36, "Volume": "Mighell", "value": 40.0, "Element": "Kr"}, {"Atomic number": 37, "Volume": "Mighell", "value": 39.0, "Element": "Rb"}, {"Atomic number": 38, "Volume": "Mighell", "value": 39.0, "Element": "Sr"}, {"Atomic number": 39, "Volume": "Mighell", "value": 37.0, "Element": "Y"}, {"Atomic number": 40, "Volume": "Mighell", "value": 40.0, "Element": "Zr"}, {"Atomic number": 41, "Volume": "Mighell", "value": 35.5, "Element": "Nb"}, {"Atomic number": 42, "Volume": "Mighell", "value": 37.0, "Element": "Mo"}, {"Atomic number": 43, "Volume": "Mighell", "value": 37.0, "Element": "Tc"}, {"Atomic number": 44, "Volume": "Mighell", "value": 43.0, "Element": "Ru"}, {"Atomic number": 45, "Volume": "Mighell", "value": 39.0, "Element": "Rh"}, {"Atomic number": 46, "Volume": "Mighell", "value": 34.5, "Element": "Pd"}, {"Atomic number": 47, "Volume": "Mighell", "value": 29.5, "Element": "Ag"}, {"Atomic number": 48, "Volume": "Mighell", "value": 35.0, "Element": "Cd"}, {"Atomic number": 49, "Volume": "Mighell", "value": 64.0, "Element": "In"}, {"Atomic number": 50, "Volume": "Mighell", "value": 49.0, "Element": "Sn"}, {"Atomic number": 51, "Volume": "Mighell", "value": 46.0, "Element": "Sb"}, {"Atomic number": 52, "Volume": "Mighell", "value": 48.0, "Element": "Te"}, {"Atomic number": 53, "Volume": "Mighell", "value": 44.0, "Element": "I"}, {"Atomic number": 54, "Volume": "Mighell", "value": 50.0, "Element": "Xe"}, {"Atomic number": 55, "Volume": "Mighell", "value": 53.0, "Element": "Cs"}, {"Atomic number": 56, "Volume": "Mighell", "value": 41.0, "Element": "Ba"}, {"Atomic number": 57, "Volume": "Mighell", "value": 65.0, "Element": "La"}, {"Atomic number": 58, "Volume": "Mighell", "value": 60.0, "Element": "Ce"}, {"Atomic number": 59, "Volume": "Mighell", "value": 60.0, "Element": "Pr"}, {"Atomic number": 60, "Volume": "Mighell", "value": 60.0, "Element": "Nd"}, {"Atomic number": 61, "Volume": "Mighell", "value": 55.0, "Element": "Pm"}, {"Atomic number": 62, "Volume": "Mighell", "value": 55.0, "Element": "Sm"}, {"Atomic number": 63, "Volume": "Mighell", "value": 55.0, "Element": "Eu"}, {"Atomic number": 64, "Volume": "Mighell", "value": 50.0, "Element": "Gd"}, {"Atomic number": 65, "Volume": "Mighell", "value": 50.0, "Element": "Tb"}, {"Atomic number": 66, "Volume": "Mighell", "value": 50.0, "Element": "Dy"}, {"Atomic number": 67, "Volume": "Mighell", "value": 50.0, "Element": "Ho"}, {"Atomic number": 68, "Volume": "Mighell", "value": 50.0, "Element": "Er"}, {"Atomic number": 69, "Volume": "Mighell", "value": 45.0, "Element": "Tm"}, {"Atomic number": 70, "Volume": "Mighell", "value": 45.0, "Element": "Yb"}, {"Atomic number": 71, "Volume": "Mighell", "value": 45.0, "Element": "Lu"}, {"Atomic number": 72, "Volume": "Mighell", "value": 45.0, "Element": "Hf"}, {"Atomic number": 73, "Volume": "Mighell", "value": 43.0, "Element": "Ta"}, {"Atomic number": 74, "Volume": "Mighell", "value": 46.0, "Element": "W"}, {"Atomic number": 75, "Volume": "Mighell", "value": 51.0, "Element": "Re"}, {"Atomic number": 76, "Volume": "Mighell", "value": 43.0, "Element": "Os"}, {"Atomic number": 77, "Volume": "Mighell", "value": 29.5, "Element": "Ir"}, {"Atomic number": 78, "Volume": "Mighell", "value": 42.0, "Element": "Pt"}, {"Atomic number": 79, "Volume": "Mighell", "value": 31.0, "Element": "Au"}, {"Atomic number": 80, "Volume": "Mighell", "value": 38.0, "Element": "Hg"}, {"Atomic number": 81, "Volume": "Mighell", "value": 58.0, "Element": "Tl"}, {"Atomic number": 82, "Volume": "Mighell", "value": 43.0, "Element": "Pb"}, {"Atomic number": 83, "Volume": "Mighell", "value": 49.0, "Element": "Bi"}, {"Atomic number": 84, "Volume": "Mighell", "value": 50.0, "Element": "Po"}, {"Atomic number": 85, "Volume": "Mighell", "value": 55.0, "Element": "At"}, {"Atomic number": 86, "Volume": "Mighell", "value": 60.0, "Element": "Rn"}, {"Atomic number": 87, "Volume": "Mighell", "value": 70.0, "Element": "Fr"}, {"Atomic number": 88, "Volume": "Mighell", "value": 60.0, "Element": "Ra"}, {"Atomic number": 89, "Volume": "Mighell", "value": 75.0, "Element": "Ac"}, {"Atomic number": 90, "Volume": "Mighell", "value": 85.0, "Element": "Th"}, {"Atomic number": 91, "Volume": "Mighell", "value": 80.0, "Element": "Pa"}, {"Atomic number": 92, "Volume": "Mighell", "value": 61.0, "Element": "U"}, {"Atomic number": 93, "Volume": "Mighell", "value": 70.0, "Element": "Np"}, {"Atomic number": 94, "Volume": "Mighell", "value": 70.0, "Element": "Pu"}, {"Atomic number": 95, "Volume": "Mighell", "value": 70.0, "Element": "Am"}, {"Atomic number": 96, "Volume": "Mighell", "value": 70.0, "Element": "Cm"}, {"Atomic number": 97, "Volume": "Mighell", "value": 70.0, "Element": "Bk"}, {"Atomic number": 98, "Volume": "Mighell", "value": 70.0, "Element": "Cf"}, {"Atomic number": 99, "Volume": "Mighell", "value": 70.0, "Element": "Es"}, {"Atomic number": 100, "Volume": "Mighell", "value": 70.0, "Element": "Fm"}, {"Atomic number": 1, "Volume": "Empirical", "value": 0.06544984694978735, "Element": "H"}, {"Atomic number": 2, "Volume": "Empirical", "value": 7.238229473870882, "Element": "He"}, {"Atomic number": 3, "Volume": "Empirical", "value": 12.77005053806691, "Element": "Li"}, {"Atomic number": 4, "Volume": "Empirical", "value": 4.849048260815846, "Element": "Be"}, {"Atomic number": 5, "Volume": "Empirical", "value": 2.5724407845144417, "Element": "B"}, {"Atomic number": 6, "Volume": "Empirical", "value": 1.4367550402417315, "Element": "C"}, {"Atomic number": 7, "Volume": "Empirical", "value": 1.1503465099894625, "Element": "N"}, {"Atomic number": 8, "Volume": "Empirical", "value": 0.9047786842338602, "Element": "O"}, {"Atomic number": 9, "Volume": "Empirical", "value": 0.5235987755982988, "Element": "F"}, {"Atomic number": 10, "Volume": "Empirical", "value": 17.15728467880506, "Element": "Ne"}, {"Atomic number": 11, "Volume": "Empirical", "value": 24.429024474314232, "Element": "Na"}, {"Atomic number": 12, "Volume": "Empirical", "value": 14.137166941154067, "Element": "Mg"}, {"Atomic number": 13, "Volume": "Empirical", "value": 8.18123086872342, "Element": "Al"}, {"Atomic number": 14, "Volume": "Empirical", "value": 5.575279762570688, "Element": "Si"}, {"Atomic number": 15, "Volume": "Empirical", "value": 4.1887902047863905, "Element": "P"}, {"Atomic number": 16, "Volume": "Empirical", "value": 4.1887902047863905, "Element": "S"}, {"Atomic number": 17, "Volume": "Empirical", "value": 4.1887902047863905, "Element": "Cl"}, {"Atomic number": 18, "Volume": "Empirical", "value": 1.4992140909853016, "Element": "Ar"}, {"Atomic number": 19, "Volume": "Empirical", "value": 44.6022381005655, "Element": "K"}, {"Atomic number": 20, "Volume": "Empirical", "value": 24.429024474314232, "Element": "Ca"}, {"Atomic number": 21, "Volume": "Empirical", "value": 17.15728467880506, "Element": "Sc"}, {"Atomic number": 22, "Volume": "Empirical", "value": 11.494040321933852, "Element": "Ti"}, {"Atomic number": 23, "Volume": "Empirical", "value": 10.305994700101317, "Element": "V"}, {"Atomic number": 24, "Volume": "Empirical", "value": 11.494040321933852, "Element": "Cr"}, {"Atomic number": 25, "Volume": "Empirical", "value": 11.494040321933852, "Element": "Mn"}, {"Atomic number": 26, "Volume": "Empirical", "value": 11.494040321933852, "Element": "Fe"}, {"Atomic number": 27, "Volume": "Empirical", "value": 10.305994700101317, "Element": "Co"}, {"Atomic number": 28, "Volume": "Empirical", "value": 10.305994700101317, "Element": "Ni"}, {"Atomic number": 29, "Volume": "Empirical", "value": 10.305994700101317, "Element": "Cu"}, {"Atomic number": 30, "Volume": "Empirical", "value": 10.305994700101317, "Element": "Zn"}, {"Atomic number": 31, "Volume": "Empirical", "value": 9.2027720799157, "Element": "Ga"}, {"Atomic number": 32, "Volume": "Empirical", "value": 8.18123086872342, "Element": "Ge"}, {"Atomic number": 33, "Volume": "Empirical", "value": 6.3706263027045, "Element": "As"}, {"Atomic number": 34, "Volume": "Empirical", "value": 6.3706263027045, "Element": "Se"}, {"Atomic number": 35, "Volume": "Empirical", "value": 6.3706263027045, "Element": "Br"}, {"Atomic number": 36, "Volume": "Empirical", "value": null, "Element": "Kr"}, {"Atomic number": 37, "Volume": "Empirical", "value": 54.36159567894218, "Element": "Rb"}, {"Atomic number": 38, "Volume": "Empirical", "value": 33.510321638291124, "Element": "Sr"}, {"Atomic number": 39, "Volume": "Empirical", "value": 24.429024474314232, "Element": "Y"}, {"Atomic number": 40, "Volume": "Empirical", "value": 15.598531123848922, "Element": "Zr"}, {"Atomic number": 41, "Volume": "Empirical", "value": 12.77005053806691, "Element": "Nb"}, {"Atomic number": 42, "Volume": "Empirical", "value": 12.77005053806691, "Element": "Mo"}, {"Atomic number": 43, "Volume": "Empirical", "value": 10.305994700101317, "Element": "Tc"}, {"Atomic number": 44, "Volume": "Empirical", "value": 9.2027720799157, "Element": "Ru"}, {"Atomic number": 45, "Volume": "Empirical", "value": 10.305994700101317, "Element": "Rh"}, {"Atomic number": 46, "Volume": "Empirical", "value": 11.494040321933852, "Element": "Pd"}, {"Atomic number": 47, "Volume": "Empirical", "value": 17.15728467880506, "Element": "Ag"}, {"Atomic number": 48, "Volume": "Empirical", "value": 15.598531123848922, "Element": "Cd"}, {"Atomic number": 49, "Volume": "Empirical", "value": 15.598531123848922, "Element": "In"}, {"Atomic number": 50, "Volume": "Empirical", "value": 12.77005053806691, "Element": "Sn"}, {"Atomic number": 51, "Volume": "Empirical", "value": 12.77005053806691, "Element": "Sb"}, {"Atomic number": 52, "Volume": "Empirical", "value": 11.494040321933852, "Element": "Te"}, {"Atomic number": 53, "Volume": "Empirical", "value": 11.494040321933852, "Element": "I"}, {"Atomic number": 54, "Volume": "Empirical", "value": null, "Element": "Xe"}, {"Atomic number": 55, "Volume": "Empirical", "value": 77.95181491474793, "Element": "Cs"}, {"Atomic number": 56, "Volume": "Empirical", "value": 41.62976785149394, "Element": "Ba"}, {"Atomic number": 57, "Volume": "Empirical", "value": 31.059355769715484, "Element": "La"}, {"Atomic number": 58, "Volume": "Empirical", "value": 26.521848780380633, "Element": "Ce"}, {"Atomic number": 59, "Volume": "Empirical", "value": 26.521848780380633, "Element": "Pr"}, {"Atomic number": 60, "Volume": "Empirical", "value": 26.521848780380633, "Element": "Nd"}, {"Atomic number": 61, "Volume": "Empirical", "value": 26.521848780380633, "Element": "Pm"}, {"Atomic number": 62, "Volume": "Empirical", "value": 26.521848780380633, "Element": "Sm"}, {"Atomic number": 63, "Volume": "Empirical", "value": 26.521848780380633, "Element": "Eu"}, {"Atomic number": 64, "Volume": "Empirical", "value": 24.429024474314232, "Element": "Gd"}, {"Atomic number": 65, "Volume": "Empirical", "value": 22.44929750377706, "Element": "Tb"}, {"Atomic number": 66, "Volume": "Empirical", "value": 22.44929750377706, "Element": "Dy"}, {"Atomic number": 67, "Volume": "Empirical", "value": 22.44929750377706, "Element": "Ho"}, {"Atomic number": 68, "Volume": "Empirical", "value": 22.44929750377706, "Element": "Er"}, {"Atomic number": 69, "Volume": "Empirical", "value": 22.44929750377706, "Element": "Tm"}, {"Atomic number": 70, "Volume": "Empirical", "value": 22.44929750377706, "Element": "Yb"}, {"Atomic number": 71, "Volume": "Empirical", "value": 22.44929750377706, "Element": "Lu"}, {"Atomic number": 72, "Volume": "Empirical", "value": 15.598531123848922, "Element": "Hf"}, {"Atomic number": 73, "Volume": "Empirical", "value": 12.77005053806691, "Element": "Ta"}, {"Atomic number": 74, "Volume": "Empirical", "value": 10.305994700101317, "Element": "W"}, {"Atomic number": 75, "Volume": "Empirical", "value": 10.305994700101317, "Element": "Re"}, {"Atomic number": 76, "Volume": "Empirical", "value": 9.2027720799157, "Element": "Os"}, {"Atomic number": 77, "Volume": "Empirical", "value": 10.305994700101317, "Element": "Ir"}, {"Atomic number": 78, "Volume": "Empirical", "value": 10.305994700101317, "Element": "Pt"}, {"Atomic number": 79, "Volume": "Empirical", "value": 10.305994700101317, "Element": "Au"}, {"Atomic number": 80, "Volume": "Empirical", "value": 14.137166941154067, "Element": "Hg"}, {"Atomic number": 81, "Volume": "Empirical", "value": 28.730912014629848, "Element": "Tl"}, {"Atomic number": 82, "Volume": "Empirical", "value": 24.429024474314232, "Element": "Pb"}, {"Atomic number": 83, "Volume": "Empirical", "value": 17.15728467880506, "Element": "Bi"}, {"Atomic number": 84, "Volume": "Empirical", "value": 28.730912014629848, "Element": "Po"}, {"Atomic number": 85, "Volume": "Empirical", "value": null, "Element": "At"}, {"Atomic number": 86, "Volume": "Empirical", "value": null, "Element": "Rn"}, {"Atomic number": 87, "Volume": "Empirical", "value": null, "Element": "Fr"}, {"Atomic number": 88, "Volume": "Empirical", "value": 41.62976785149394, "Element": "Ra"}, {"Atomic number": 89, "Volume": "Empirical", "value": 31.059355769715484, "Element": "Ac"}, {"Atomic number": 90, "Volume": "Empirical", "value": 24.429024474314232, "Element": "Th"}, {"Atomic number": 91, "Volume": "Empirical", "value": 24.429024474314232, "Element": "Pa"}, {"Atomic number": 92, "Volume": "Empirical", "value": 22.44929750377706, "Element": "U"}, {"Atomic number": 93, "Volume": "Empirical", "value": 22.44929750377706, "Element": "Np"}, {"Atomic number": 94, "Volume": "Empirical", "value": 22.44929750377706, "Element": "Pu"}, {"Atomic number": 95, "Volume": "Empirical", "value": 22.44929750377706, "Element": "Am"}, {"Atomic number": 96, "Volume": "Empirical", "value": 22.836345907489527, "Element": "Cm"}, {"Atomic number": 97, "Volume": "Empirical", "value": null, "Element": "Bk"}, {"Atomic number": 98, "Volume": "Empirical", "value": null, "Element": "Cf"}, {"Atomic number": 99, "Volume": "Empirical", "value": null, "Element": "Es"}, {"Atomic number": 100, "Volume": "Empirical", "value": null, "Element": "Fm"}, {"Atomic number": 1, "Volume": "Calculated", "value": 0.6236145193179835, "Element": "H"}, {"Atomic number": 2, "Volume": "Calculated", "value": 0.12478824899079136, "Element": "He"}, {"Atomic number": 3, "Volume": "Calculated", "value": 19.50913539355503, "Element": "Li"}, {"Atomic number": 4, "Volume": "Calculated", "value": 5.884948644830136, "Element": "Be"}, {"Atomic number": 5, "Volume": "Calculated", "value": 2.7583309162224525, "Element": "B"}, {"Atomic number": 6, "Volume": "Calculated", "value": 1.2598331083621694, "Element": "C"}, {"Atomic number": 7, "Volume": "Calculated", "value": 0.735618580603767, "Element": "N"}, {"Atomic number": 8, "Volume": "Calculated", "value": 0.4632466863277364, "Element": "O"}, {"Atomic number": 9, "Volume": "Calculated", "value": 0.31033908869221405, "Element": "F"}, {"Atomic number": 10, "Volume": "Calculated", "value": 0.22984729611703883, "Element": "Ne"}, {"Atomic number": 11, "Volume": "Calculated", "value": 28.730912014629848, "Element": "Na"}, {"Atomic number": 12, "Volume": "Calculated", "value": 12.77005053806691, "Element": "Mg"}, {"Atomic number": 13, "Volume": "Calculated", "value": 6.882316347750592, "Element": "Al"}, {"Atomic number": 14, "Volume": "Calculated", "value": 5.728719336562217, "Element": "Si"}, {"Atomic number": 15, "Volume": "Calculated", "value": 3.942455830423312, "Element": "P"}, {"Atomic number": 16, "Volume": "Calculated", "value": 2.854543238436191, "Element": "S"}, {"Atomic number": 17, "Volume": "Calculated", "value": 2.0652369337776775, "Element": "Cl"}, {"Atomic number": 18, "Volume": "Calculated", "value": 1.4992140909853016, "Element": "Ar"}, {"Atomic number": 19, "Volume": "Calculated", "value": 60.104561090990885, "Element": "K"}, {"Atomic number": 20, "Volume": "Calculated", "value": 30.583965780584073, "Element": "Ca"}, {"Atomic number": 21, "Volume": "Calculated", "value": 26.09408533587764, "Element": "Sc"}, {"Atomic number": 22, "Volume": "Calculated", "value": 22.836345907489527, "Element": "Ti"}, {"Atomic number": 23, "Volume": "Calculated", "value": 20.94483485866516, "Element": "V"}, {"Atomic number": 24, "Volume": "Calculated", "value": 19.160766278593563, "Element": "Cr"}, {"Atomic number": 25, "Volume": "Calculated", "value": 17.480998574621157, "Element": "Mn"}, {"Atomic number": 26, "Volume": "Calculated", "value": 15.90239015409433, "Element": "Fe"}, {"Atomic number": 27, "Volume": "Calculated", "value": 14.710226951490485, "Element": "Co"}, {"Atomic number": 28, "Volume": "Calculated", "value": 13.856304369132936, "Element": "Ni"}, {"Atomic number": 29, "Volume": "Calculated", "value": 12.77005053806691, "Element": "Cu"}, {"Atomic number": 30, "Volume": "Calculated", "value": 11.993712727882412, "Element": "Zn"}, {"Atomic number": 31, "Volume": "Calculated", "value": 10.536717453371157, "Element": "Ga"}, {"Atomic number": 32, "Volume": "Calculated", "value": 8.18123086872342, "Element": "Ge"}, {"Atomic number": 33, "Volume": "Calculated", "value": 6.205876995160046, "Element": "As"}, {"Atomic number": 34, "Volume": "Calculated", "value": 4.577204154105618, "Element": "Se"}, {"Atomic number": 35, "Volume": "Calculated", "value": 3.479142123452299, "Element": "Br"}, {"Atomic number": 36, "Volume": "Calculated", "value": 2.854543238436191, "Element": "Kr"}, {"Atomic number": 37, "Volume": "Calculated", "value": 77.95181491474793, "Element": "Rb"}, {"Atomic number": 38, "Volume": "Calculated", "value": 43.99678617557545, "Element": "Sr"}, {"Atomic number": 39, "Volume": "Calculated", "value": 39.911329236350944, "Element": "Y"}, {"Atomic number": 40, "Volume": "Calculated", "value": 36.617633232844945, "Element": "Zr"}, {"Atomic number": 41, "Volume": "Calculated", "value": 32.51503157531224, "Element": "Nb"}, {"Atomic number": 42, "Volume": "Calculated", "value": 28.730912014629848, "Element": "Mo"}, {"Atomic number": 43, "Volume": "Calculated", "value": 25.670946315760734, "Element": "Tc"}, {"Atomic number": 44, "Volume": "Calculated", "value": 23.623737935024458, "Element": "Ru"}, {"Atomic number": 45, "Volume": "Calculated", "value": 21.688370252755973, "Element": "Rh"}, {"Atomic number": 46, "Volume": "Calculated", "value": 20.218490259574793, "Element": "Pd"}, {"Atomic number": 47, "Volume": "Calculated", "value": 18.816569198676063, "Element": "Ag"}, {"Atomic number": 48, "Volume": "Calculated", "value": 17.480998574621157, "Element": "Cd"}, {"Atomic number": 49, "Volume": "Calculated", "value": 15.90239015409433, "Element": "In"}, {"Atomic number": 50, "Volume": "Calculated", "value": 12.77005053806691, "Element": "Sn"}, {"Atomic number": 51, "Volume": "Calculated", "value": 9.854702821018043, "Element": "Sb"}, {"Atomic number": 52, "Volume": "Calculated", "value": 7.794781462010236, "Element": "Te"}, {"Atomic number": 53, "Volume": "Calculated", "value": 6.3706263027045, "Element": "I"}, {"Atomic number": 54, "Volume": "Calculated", "value": 5.276669286451874, "Element": "Xe"}, {"Atomic number": 55, "Volume": "Calculated", "value": 110.85043495306348, "Element": "Cs"}, {"Atomic number": 56, "Volume": "Calculated", "value": 67.83442887119752, "Element": "Ba"}, {"Atomic number": 57, "Volume": "Calculated", "value": 48.35194256092534, "Element": "La"}, {"Atomic number": 58, "Volume": "Calculated", "value": 38.79238608652677, "Element": "Ce"}, {"Atomic number": 59, "Volume": "Calculated", "value": 63.1218136961418, "Element": "Pr"}, {"Atomic number": 60, "Volume": "Calculated", "value": 36.617633232844945, "Element": "Nd"}, {"Atomic number": 61, "Volume": "Calculated", "value": 36.086951213010344, "Element": "Pm"}, {"Atomic number": 62, "Volume": "Calculated", "value": 56.47022010166103, "Element": "Sm"}, {"Atomic number": 63, "Volume": "Calculated", "value": 51.63266588116713, "Element": "Eu"}, {"Atomic number": 64, "Volume": "Calculated", "value": 52.98541892264207, "Element": "Gd"}, {"Atomic number": 65, "Volume": "Calculated", "value": 47.71293842639498, "Element": "Tb"}, {"Atomic number": 66, "Volume": "Calculated", "value": 49.64701596128037, "Element": "Dy"}, {"Atomic number": 67, "Volume": "Calculated", "value": 48.35194256092534, "Element": "Ho"}, {"Atomic number": 68, "Volume": "Calculated", "value": 48.35194256092534, "Element": "Er"}, {"Atomic number": 69, "Volume": "Calculated", "value": 45.82975469249774, "Element": "Tm"}, {"Atomic number": 70, "Volume": "Calculated", "value": 45.82975469249774, "Element": "Yb"}, {"Atomic number": 71, "Volume": "Calculated", "value": 42.80236940384143, "Element": "Lu"}, {"Atomic number": 72, "Volume": "Calculated", "value": 37.69455443933471, "Element": "Hf"}, {"Atomic number": 73, "Volume": "Calculated", "value": 33.510321638291124, "Element": "Ta"}, {"Atomic number": 74, "Volume": "Calculated", "value": 30.11345154325103, "Element": "W"}, {"Atomic number": 75, "Volume": "Calculated", "value": 27.833136987618392, "Element": "Re"}, {"Atomic number": 76, "Volume": "Calculated", "value": 26.521848780380633, "Element": "Os"}, {"Atomic number": 77, "Volume": "Calculated", "value": 24.429024474314232, "Element": "Ir"}, {"Atomic number": 78, "Volume": "Calculated", "value": 23.227817673658254, "Element": "Pt"}, {"Atomic number": 79, "Volume": "Calculated", "value": 22.06664732977962, "Element": "Au"}, {"Atomic number": 80, "Volume": "Calculated", "value": 20.94483485866516, "Element": "Hg"}, {"Atomic number": 81, "Volume": "Calculated", "value": 15.90239015409433, "Element": "Tl"}, {"Atomic number": 82, "Volume": "Calculated", "value": 15.298567668493963, "Element": "Pb"}, {"Atomic number": 83, "Volume": "Calculated", "value": 12.248889638367794, "Element": "Bi"}, {"Atomic number": 84, "Volume": "Calculated", "value": 10.305994700101317, "Element": "Po"}, {"Atomic number": 85, "Volume": "Calculated", "value": 8.580246646050963, "Element": "At"}, {"Atomic number": 86, "Volume": "Calculated", "value": 7.238229473870882, "Element": "Rn"}, {"Atomic number": 87, "Volume": "Calculated", "value": null, "Element": "Fr"}, {"Atomic number": 88, "Volume": "Calculated", "value": null, "Element": "Ra"}, {"Atomic number": 89, "Volume": "Calculated", "value": null, "Element": "Ac"}, {"Atomic number": 90, "Volume": "Calculated", "value": null, "Element": "Th"}, {"Atomic number": 91, "Volume": "Calculated", "value": null, "Element": "Pa"}, {"Atomic number": 92, "Volume": "Calculated", "value": null, "Element": "U"}, {"Atomic number": 93, "Volume": "Calculated", "value": null, "Element": "Np"}, {"Atomic number": 94, "Volume": "Calculated", "value": null, "Element": "Pu"}, {"Atomic number": 95, "Volume": "Calculated", "value": null, "Element": "Am"}, {"Atomic number": 96, "Volume": "Calculated", "value": null, "Element": "Cm"}, {"Atomic number": 97, "Volume": "Calculated", "value": null, "Element": "Bk"}, {"Atomic number": 98, "Volume": "Calculated", "value": null, "Element": "Cf"}, {"Atomic number": 99, "Volume": "Calculated", "value": null, "Element": "Es"}, {"Atomic number": 100, "Volume": "Calculated", "value": null, "Element": "Fm"}, {"Atomic number": 1, "Volume": "vdW", "value": 7.238229473870882, "Element": "H"}, {"Atomic number": 2, "Volume": "vdW", "value": 11.494040321933852, "Element": "He"}, {"Atomic number": 3, "Volume": "vdW", "value": 25.252406587288686, "Element": "Li"}, {"Atomic number": 4, "Volume": "vdW", "value": 15.002474655288227, "Element": "Be"}, {"Atomic number": 5, "Volume": "vdW", "value": 29.64778792497513, "Element": "B"}, {"Atomic number": 6, "Volume": "vdW", "value": 20.579526276115534, "Element": "C"}, {"Atomic number": 7, "Volume": "vdW", "value": 15.598531123848922, "Element": "N"}, {"Atomic number": 8, "Volume": "vdW", "value": 14.710226951490485, "Element": "O"}, {"Atomic number": 9, "Volume": "vdW", "value": 13.30578842767868, "Element": "F"}, {"Atomic number": 10, "Volume": "vdW", "value": 15.298567668493963, "Element": "Ne"}, {"Atomic number": 11, "Volume": "vdW", "value": 48.996626694973415, "Element": "Na"}, {"Atomic number": 12, "Volume": "vdW", "value": 21.688370252755973, "Element": "Mg"}, {"Atomic number": 13, "Volume": "vdW", "value": 26.09408533587764, "Element": "Al"}, {"Atomic number": 14, "Volume": "vdW", "value": 38.79238608652677, "Element": "Si"}, {"Atomic number": 15, "Volume": "vdW", "value": 24.429024474314232, "Element": "P"}, {"Atomic number": 16, "Volume": "vdW", "value": 24.429024474314232, "Element": "S"}, {"Atomic number": 17, "Volume": "vdW", "value": 22.44929750377706, "Element": "Cl"}, {"Atomic number": 18, "Volume": "vdW", "value": 27.833136987618392, "Element": "Ar"}, {"Atomic number": 19, "Volume": "vdW", "value": 87.11374629016697, "Element": "K"}, {"Atomic number": 20, "Volume": "vdW", "value": 51.63266588116713, "Element": "Ca"}, {"Atomic number": 21, "Volume": "vdW", "value": 39.349206157239216, "Element": "Sc"}, {"Atomic number": 22, "Volume": "vdW", "value": null, "Element": "Ti"}, {"Atomic number": 23, "Volume": "vdW", "value": null, "Element": "V"}, {"Atomic number": 24, "Volume": "vdW", "value": null, "Element": "Cr"}, {"Atomic number": 25, "Volume": "vdW", "value": null, "Element": "Mn"}, {"Atomic number": 26, "Volume": "vdW", "value": null, "Element": "Fe"}, {"Atomic number": 27, "Volume": "vdW", "value": null, "Element": "Co"}, {"Atomic number": 28, "Volume": "vdW", "value": 18.14059061300804, "Element": "Ni"}, {"Atomic number": 29, "Volume": "vdW", "value": 11.494040321933852, "Element": "Cu"}, {"Atomic number": 30, "Volume": "vdW", "value": 11.24949456098822, "Element": "Zn"}, {"Atomic number": 31, "Volume": "vdW", "value": 27.391349473509784, "Element": "Ga"}, {"Atomic number": 32, "Volume": "vdW", "value": 39.349206157239216, "Element": "Ge"}, {"Atomic number": 33, "Volume": "vdW", "value": 26.521848780380633, "Element": "As"}, {"Atomic number": 34, "Volume": "vdW", "value": 28.730912014629848, "Element": "Se"}, {"Atomic number": 35, "Volume": "vdW", "value": 26.521848780380633, "Element": "Br"}, {"Atomic number": 36, "Volume": "vdW", "value": 34.525717894252985, "Element": "Kr"}, {"Atomic number": 37, "Volume": "vdW", "value": 116.52429789310379, "Element": "Rb"}, {"Atomic number": 38, "Volume": "vdW", "value": 64.6675861902533, "Element": "Sr"}, {"Atomic number": 39, "Volume": "vdW", "value": null, "Element": "Y"}, {"Atomic number": 40, "Volume": "vdW", "value": null, "Element": "Zr"}, {"Atomic number": 41, "Volume": "vdW", "value": null, "Element": "Nb"}, {"Atomic number": 42, "Volume": "vdW", "value": null, "Element": "Mo"}, {"Atomic number": 43, "Volume": "vdW", "value": null, "Element": "Tc"}, {"Atomic number": 44, "Volume": "vdW", "value": null, "Element": "Ru"}, {"Atomic number": 45, "Volume": "vdW", "value": null, "Element": "Rh"}, {"Atomic number": 46, "Volume": "vdW", "value": 18.14059061300804, "Element": "Pd"}, {"Atomic number": 47, "Volume": "vdW", "value": 21.3144411399649, "Element": "Ag"}, {"Atomic number": 48, "Volume": "vdW", "value": 16.52189547022142, "Element": "Cd"}, {"Atomic number": 49, "Volume": "vdW", "value": 30.11345154325103, "Element": "In"}, {"Atomic number": 50, "Volume": "vdW", "value": 42.80236940384143, "Element": "Sn"}, {"Atomic number": 51, "Volume": "vdW", "value": 36.617633232844945, "Element": "Sb"}, {"Atomic number": 52, "Volume": "vdW", "value": 36.617633232844945, "Element": "Te"}, {"Atomic number": 53, "Volume": "vdW", "value": 32.51503157531224, "Element": "I"}, {"Atomic number": 54, "Volume": "vdW", "value": 42.21335429161499, "Element": "Xe"}, {"Atomic number": 55, "Volume": "vdW", "value": 169.03279372939954, "Element": "Cs"}, {"Atomic number": 56, "Volume": "vdW", "value": 80.62931893517884, "Element": "Ba"}, {"Atomic number": 57, "Volume": "vdW", "value": null, "Element": "La"}, {"Atomic number": 58, "Volume": "vdW", "value": null, "Element": "Ce"}, {"Atomic number": 59, "Volume": "vdW", "value": null, "Element": "Pr"}, {"Atomic number": 60, "Volume": "vdW", "value": null, "Element": "Nd"}, {"Atomic number": 61, "Volume": "vdW", "value": null, "Element": "Pm"}, {"Atomic number": 62, "Volume": "vdW", "value": null, "Element": "Sm"}, {"Atomic number": 63, "Volume": "vdW", "value": null, "Element": "Eu"}, {"Atomic number": 64, "Volume": "vdW", "value": null, "Element": "Gd"}, {"Atomic number": 65, "Volume": "vdW", "value": null, "Element": "Tb"}, {"Atomic number": 66, "Volume": "vdW", "value": null, "Element": "Dy"}, {"Atomic number": 67, "Volume": "vdW", "value": null, "Element": "Ho"}, {"Atomic number": 68, "Volume": "vdW", "value": null, "Element": "Er"}, {"Atomic number": 69, "Volume": "vdW", "value": null, "Element": "Tm"}, {"Atomic number": 70, "Volume": "vdW", "value": null, "Element": "Yb"}, {"Atomic number": 71, "Volume": "vdW", "value": null, "Element": "Lu"}, {"Atomic number": 72, "Volume": "vdW", "value": null, "Element": "Hf"}, {"Atomic number": 73, "Volume": "vdW", "value": null, "Element": "Ta"}, {"Atomic number": 74, "Volume": "vdW", "value": null, "Element": "W"}, {"Atomic number": 75, "Volume": "vdW", "value": null, "Element": "Re"}, {"Atomic number": 76, "Volume": "vdW", "value": null, "Element": "Os"}, {"Atomic number": 77, "Volume": "vdW", "value": null, "Element": "Ir"}, {"Atomic number": 78, "Volume": "vdW", "value": 22.44929750377706, "Element": "Pt"}, {"Atomic number": 79, "Volume": "vdW", "value": 19.160766278593563, "Element": "Au"}, {"Atomic number": 80, "Volume": "vdW", "value": 15.598531123848922, "Element": "Hg"}, {"Atomic number": 81, "Volume": "vdW", "value": 31.539646643386497, "Element": "Tl"}, {"Atomic number": 82, "Volume": "vdW", "value": 34.525717894252985, "Element": "Pb"}, {"Atomic number": 83, "Volume": "vdW", "value": 37.15349259737265, "Element": "Bi"}, {"Atomic number": 84, "Volume": "vdW", "value": 32.02486353433834, "Element": "Po"}, {"Atomic number": 85, "Volume": "vdW", "value": 34.525717894252985, "Element": "At"}, {"Atomic number": 86, "Volume": "vdW", "value": 44.6022381005655, "Element": "Rn"}, {"Atomic number": 87, "Volume": "vdW", "value": 176.53317863823696, "Element": "Fr"}, {"Atomic number": 88, "Volume": "vdW", "value": 94.93971329525185, "Element": "Ra"}, {"Atomic number": 89, "Volume": "vdW", "value": null, "Element": "Ac"}, {"Atomic number": 90, "Volume": "vdW", "value": null, "Element": "Th"}, {"Atomic number": 91, "Volume": "vdW", "value": null, "Element": "Pa"}, {"Atomic number": 92, "Volume": "vdW", "value": 26.95426178201094, "Element": "U"}, {"Atomic number": 93, "Volume": "vdW", "value": null, "Element": "Np"}, {"Atomic number": 94, "Volume": "vdW", "value": null, "Element": "Pu"}, {"Atomic number": 95, "Volume": "vdW", "value": null, "Element": "Am"}, {"Atomic number": 96, "Volume": "vdW", "value": null, "Element": "Cm"}, {"Atomic number": 97, "Volume": "vdW", "value": null, "Element": "Bk"}, {"Atomic number": 98, "Volume": "vdW", "value": null, "Element": "Cf"}, {"Atomic number": 99, "Volume": "vdW", "value": null, "Element": "Es"}, {"Atomic number": 100, "Volume": "vdW", "value": null, "Element": "Fm"}, {"Atomic number": 1, "Volume": "Covalent-single", "value": 0.13725827743044047, "Element": "H"}, {"Atomic number": 2, "Volume": "Covalent-single", "value": 0.4077200833730881, "Element": "He"}, {"Atomic number": 3, "Volume": "Covalent-single", "value": 9.854702821018043, "Element": "Li"}, {"Atomic number": 4, "Volume": "Covalent-single", "value": 4.445177675640957, "Element": "Be"}, {"Atomic number": 5, "Volume": "Covalent-single", "value": 2.5724407845144417, "Element": "B"}, {"Atomic number": 6, "Volume": "Covalent-single", "value": 1.7671458676442584, "Element": "C"}, {"Atomic number": 7, "Volume": "Covalent-single", "value": 1.4992140909853016, "Element": "N"}, {"Atomic number": 8, "Volume": "Covalent-single", "value": 1.0473944243362228, "Element": "O"}, {"Atomic number": 9, "Volume": "Covalent-single", "value": 1.0980662194435238, "Element": "F"}, {"Atomic number": 10, "Volume": "Covalent-single", "value": 1.2598331083621694, "Element": "Ne"}, {"Atomic number": 11, "Volume": "Covalent-single", "value": 15.598531123848922, "Element": "Na"}, {"Atomic number": 12, "Volume": "Covalent-single", "value": 11.24949456098822, "Element": "Mg"}, {"Atomic number": 13, "Volume": "Covalent-single", "value": 8.379155394689782, "Element": "Al"}, {"Atomic number": 14, "Volume": "Covalent-single", "value": 6.538265875490256, "Element": "Si"}, {"Atomic number": 15, "Volume": "Covalent-single", "value": 5.728719336562217, "Element": "P"}, {"Atomic number": 16, "Volume": "Covalent-single", "value": 4.577204154105618, "Element": "S"}, {"Atomic number": 17, "Volume": "Covalent-single", "value": 4.06437894691403, "Element": "Cl"}, {"Atomic number": 18, "Volume": "Covalent-single", "value": 3.7059734906218913, "Element": "Ar"}, {"Atomic number": 19, "Volume": "Covalent-single", "value": 31.539646643386497, "Element": "K"}, {"Atomic number": 20, "Volume": "Covalent-single", "value": 20.94483485866516, "Element": "Ca"}, {"Atomic number": 21, "Volume": "Covalent-single", "value": 13.579186575554882, "Element": "Sc"}, {"Atomic number": 22, "Volume": "Covalent-single", "value": 10.536717453371157, "Element": "Ti"}, {"Atomic number": 23, "Volume": "Covalent-single", "value": 10.078664866897356, "Element": "V"}, {"Atomic number": 24, "Volume": "Covalent-single", "value": 7.606206315780957, "Element": "Cr"}, {"Atomic number": 25, "Volume": "Covalent-single", "value": 7.058777512707628, "Element": "Mn"}, {"Atomic number": 26, "Volume": "Covalent-single", "value": 6.538265875490256, "Element": "Fe"}, {"Atomic number": 27, "Volume": "Covalent-single", "value": 5.728719336562217, "Element": "Co"}, {"Atomic number": 28, "Volume": "Covalent-single", "value": 5.575279762570688, "Element": "Ni"}, {"Atomic number": 29, "Volume": "Covalent-single", "value": 5.884948644830136, "Element": "Cu"}, {"Atomic number": 30, "Volume": "Covalent-single", "value": 6.882316347750592, "Element": "Zn"}, {"Atomic number": 31, "Volume": "Covalent-single", "value": 7.986447935410647, "Element": "Ga"}, {"Atomic number": 32, "Volume": "Covalent-single", "value": 7.420697363981582, "Element": "Ge"}, {"Atomic number": 33, "Volume": "Covalent-single", "value": 7.420697363981582, "Element": "As"}, {"Atomic number": 34, "Volume": "Covalent-single", "value": 6.538265875490256, "Element": "Se"}, {"Atomic number": 35, "Volume": "Covalent-single", "value": 6.205876995160046, "Element": "Br"}, {"Atomic number": 36, "Volume": "Covalent-single", "value": 6.708820846258544, "Element": "Kr"}, {"Atomic number": 37, "Volume": "Covalent-single", "value": 38.79238608652677, "Element": "Rb"}, {"Atomic number": 38, "Volume": "Covalent-single", "value": 26.521848780380633, "Element": "Sr"}, {"Atomic number": 39, "Volume": "Covalent-single", "value": 18.14059061300804, "Element": "Y"}, {"Atomic number": 40, "Volume": "Covalent-single", "value": 15.298567668493963, "Element": "Zr"}, {"Atomic number": 41, "Volume": "Covalent-single", "value": 13.30578842767868, "Element": "Nb"}, {"Atomic number": 42, "Volume": "Covalent-single", "value": 11.008442251073378, "Element": "Mo"}, {"Atomic number": 43, "Volume": "Covalent-single", "value": 8.78452975554819, "Element": "Tc"}, {"Atomic number": 44, "Volume": "Covalent-single", "value": 8.18123086872342, "Element": "Ru"}, {"Atomic number": 45, "Volume": "Covalent-single", "value": 8.18123086872342, "Element": "Rh"}, {"Atomic number": 46, "Volume": "Covalent-single", "value": 7.238229473870882, "Element": "Pd"}, {"Atomic number": 47, "Volume": "Covalent-single", "value": 8.78452975554819, "Element": "Ag"}, {"Atomic number": 48, "Volume": "Covalent-single", "value": 10.536717453371157, "Element": "Cd"}, {"Atomic number": 49, "Volume": "Covalent-single", "value": 11.993712727882412, "Element": "In"}, {"Atomic number": 50, "Volume": "Covalent-single", "value": 11.494040321933852, "Element": "Sn"}, {"Atomic number": 51, "Volume": "Covalent-single", "value": 11.494040321933852, "Element": "Sb"}, {"Atomic number": 52, "Volume": "Covalent-single", "value": 10.536717453371157, "Element": "Te"}, {"Atomic number": 53, "Volume": "Covalent-single", "value": 9.854702821018043, "Element": "I"}, {"Atomic number": 54, "Volume": "Covalent-single", "value": 9.416781560268442, "Element": "Xe"}, {"Atomic number": 55, "Volume": "Covalent-single", "value": 52.30612700392205, "Element": "Cs"}, {"Atomic number": 56, "Volume": "Covalent-single", "value": 31.539646643386497, "Element": "Ba"}, {"Atomic number": 57, "Volume": "Covalent-single", "value": 24.429024474314232, "Element": "La"}, {"Atomic number": 58, "Volume": "Covalent-single", "value": 18.14059061300804, "Element": "Ce"}, {"Atomic number": 59, "Volume": "Covalent-single", "value": 22.836345907489527, "Element": "Pr"}, {"Atomic number": 60, "Volume": "Covalent-single", "value": 22.06664732977962, "Element": "Nd"}, {"Atomic number": 61, "Volume": "Covalent-single", "value": 21.688370252755973, "Element": "Pm"}, {"Atomic number": 62, "Volume": "Covalent-single", "value": 21.3144411399649, "Element": "Sm"}, {"Atomic number": 63, "Volume": "Covalent-single", "value": 19.8617016763017, "Element": "Eu"}, {"Atomic number": 64, "Volume": "Covalent-single", "value": 20.218490259574793, "Element": "Gd"}, {"Atomic number": 65, "Volume": "Covalent-single", "value": 19.8617016763017, "Element": "Tb"}, {"Atomic number": 66, "Volume": "Covalent-single", "value": 19.50913539355503, "Element": "Dy"}, {"Atomic number": 67, "Volume": "Covalent-single", "value": 19.160766278593563, "Element": "Ho"}, {"Atomic number": 68, "Volume": "Covalent-single", "value": 18.816569198676063, "Element": "Er"}, {"Atomic number": 69, "Volume": "Covalent-single", "value": 18.476519021061296, "Element": "Tm"}, {"Atomic number": 70, "Volume": "Covalent-single", "value": 20.579526276115534, "Element": "Yb"}, {"Atomic number": 71, "Volume": "Covalent-single", "value": 17.808758841775074, "Element": "Lu"}, {"Atomic number": 72, "Volume": "Covalent-single", "value": 14.710226951490485, "Element": "Hf"}, {"Atomic number": 73, "Volume": "Covalent-single", "value": 13.036084792763097, "Element": "Ta"}, {"Atomic number": 74, "Volume": "Covalent-single", "value": 10.770858259448103, "Element": "W"}, {"Atomic number": 75, "Volume": "Covalent-single", "value": 9.416781560268442, "Element": "Re"}, {"Atomic number": 76, "Volume": "Covalent-single", "value": 8.992029855922693, "Element": "Os"}, {"Atomic number": 77, "Volume": "Covalent-single", "value": 7.606206315780957, "Element": "Ir"}, {"Atomic number": 78, "Volume": "Covalent-single", "value": 7.794781462010236, "Element": "Pt"}, {"Atomic number": 79, "Volume": "Covalent-single", "value": 7.986447935410647, "Element": "Au"}, {"Atomic number": 80, "Volume": "Covalent-single", "value": 9.854702821018043, "Element": "Hg"}, {"Atomic number": 81, "Volume": "Covalent-single", "value": 12.507660530848884, "Element": "Tl"}, {"Atomic number": 82, "Volume": "Covalent-single", "value": 12.507660530848884, "Element": "Pb"}, {"Atomic number": 83, "Volume": "Covalent-single", "value": 14.421799424359508, "Element": "Bi"}, {"Atomic number": 84, "Volume": "Covalent-single", "value": 12.77005053806691, "Element": "Po"}, {"Atomic number": 85, "Volume": "Covalent-single", "value": 13.30578842767868, "Element": "At"}, {"Atomic number": 86, "Volume": "Covalent-single", "value": 11.993712727882412, "Element": "Rn"}, {"Atomic number": 87, "Volume": "Covalent-single", "value": null, "Element": "Fr"}, {"Atomic number": 88, "Volume": "Covalent-single", "value": 34.01549392577856, "Element": "Ra"}, {"Atomic number": 89, "Volume": "Covalent-single", "value": 26.95426178201094, "Element": "Ac"}, {"Atomic number": 90, "Volume": "Covalent-single", "value": 22.44929750377706, "Element": "Th"}, {"Atomic number": 91, "Volume": "Covalent-single", "value": 20.218490259574793, "Element": "Pa"}, {"Atomic number": 92, "Volume": "Covalent-single", "value": 20.579526276115534, "Element": "U"}, {"Atomic number": 93, "Volume": "Covalent-single", "value": 20.94483485866516, "Element": "Np"}, {"Atomic number": 94, "Volume": "Covalent-single", "value": 21.3144411399649, "Element": "Pu"}, {"Atomic number": 95, "Volume": "Covalent-single", "value": 19.160766278593563, "Element": "Am"}, {"Atomic number": 96, "Volume": "Covalent-single", "value": 19.160766278593563, "Element": "Cm"}, {"Atomic number": 97, "Volume": "Covalent-single", "value": null, "Element": "Bk"}, {"Atomic number": 98, "Volume": "Covalent-single", "value": null, "Element": "Cf"}, {"Atomic number": 99, "Volume": "Covalent-single", "value": null, "Element": "Es"}, {"Atomic number": 100, "Volume": "Covalent-single", "value": null, "Element": "Fm"}, {"Atomic number": 1, "Volume": "Covalent-triple", "value": null, "Element": "H"}, {"Atomic number": 2, "Volume": "Covalent-triple", "value": null, "Element": "He"}, {"Atomic number": 3, "Volume": "Covalent-triple", "value": null, "Element": "Li"}, {"Atomic number": 4, "Volume": "Covalent-triple", "value": 2.5724407845144417, "Element": "Be"}, {"Atomic number": 5, "Volume": "Covalent-triple", "value": 1.629510599095387, "Element": "B"}, {"Atomic number": 6, "Volume": "Covalent-triple", "value": 0.9047786842338602, "Element": "C"}, {"Atomic number": 7, "Volume": "Covalent-triple", "value": 0.6595836608064842, "Element": "N"}, {"Atomic number": 8, "Volume": "Covalent-triple", "value": 0.6236145193179835, "Element": "O"}, {"Atomic number": 9, "Volume": "Covalent-triple", "value": 0.6236145193179835, "Element": "F"}, {"Atomic number": 10, "Volume": "Covalent-triple", "value": null, "Element": "Ne"}, {"Atomic number": 11, "Volume": "Covalent-triple", "value": null, "Element": "Na"}, {"Atomic number": 12, "Volume": "Covalent-triple", "value": 8.580246646050963, "Element": "Mg"}, {"Atomic number": 13, "Volume": "Covalent-triple", "value": 5.728719336562217, "Element": "Al"}, {"Atomic number": 14, "Volume": "Covalent-triple", "value": 4.445177675640957, "Element": "Si"}, {"Atomic number": 15, "Volume": "Covalent-triple", "value": 3.479142123452299, "Element": "P"}, {"Atomic number": 16, "Volume": "Covalent-triple", "value": 3.591364001828731, "Element": "S"}, {"Atomic number": 17, "Volume": "Covalent-triple", "value": 3.3692827227513673, "Element": "Cl"}, {"Atomic number": 18, "Volume": "Covalent-triple", "value": 3.7059734906218913, "Element": "Ar"}, {"Atomic number": 19, "Volume": "Covalent-triple", "value": null, "Element": "K"}, {"Atomic number": 20, "Volume": "Covalent-triple", "value": 9.854702821018043, "Element": "Ca"}, {"Atomic number": 21, "Volume": "Covalent-triple", "value": 6.205876995160046, "Element": "Sc"}, {"Atomic number": 22, "Volume": "Covalent-triple", "value": 5.276669286451874, "Element": "Ti"}, {"Atomic number": 23, "Volume": "Covalent-triple", "value": 4.988916154543868, "Element": "V"}, {"Atomic number": 24, "Volume": "Covalent-triple", "value": 4.577204154105618, "Element": "Cr"}, {"Atomic number": 25, "Volume": "Covalent-triple", "value": 4.577204154105618, "Element": "Mn"}, {"Atomic number": 26, "Volume": "Covalent-triple", "value": 4.445177675640957, "Element": "Fe"}, {"Atomic number": 27, "Volume": "Covalent-triple", "value": 3.7059734906218913, "Element": "Co"}, {"Atomic number": 28, "Volume": "Covalent-triple", "value": 4.315714736781623, "Element": "Ni"}, {"Atomic number": 29, "Volume": "Covalent-triple", "value": 7.238229473870882, "Element": "Cu"}, {"Atomic number": 30, "Volume": "Covalent-triple", "value": null, "Element": "Zn"}, {"Atomic number": 31, "Volume": "Covalent-triple", "value": 7.420697363981582, "Element": "Ga"}, {"Atomic number": 32, "Volume": "Covalent-triple", "value": 6.205876995160046, "Element": "Ge"}, {"Atomic number": 33, "Volume": "Covalent-triple", "value": 4.988916154543868, "Element": "As"}, {"Atomic number": 34, "Volume": "Covalent-triple", "value": 5.131448118842135, "Element": "Se"}, {"Atomic number": 35, "Volume": "Covalent-triple", "value": 5.575279762570688, "Element": "Br"}, {"Atomic number": 36, "Volume": "Covalent-triple", "value": 5.276669286451874, "Element": "Kr"}, {"Atomic number": 37, "Volume": "Covalent-triple", "value": null, "Element": "Rb"}, {"Atomic number": 38, "Volume": "Covalent-triple", "value": 11.24949456098822, "Element": "Sr"}, {"Atomic number": 39, "Volume": "Covalent-triple", "value": 7.986447935410647, "Element": "Y"}, {"Atomic number": 40, "Volume": "Covalent-triple", "value": 7.420697363981582, "Element": "Zr"}, {"Atomic number": 41, "Volume": "Covalent-triple", "value": 6.538265875490256, "Element": "Nb"}, {"Atomic number": 42, "Volume": "Covalent-triple", "value": 6.043992820115667, "Element": "Mo"}, {"Atomic number": 43, "Volume": "Covalent-triple", "value": 5.575279762570688, "Element": "Tc"}, {"Atomic number": 44, "Volume": "Covalent-triple", "value": 4.577204154105618, "Element": "Ru"}, {"Atomic number": 45, "Volume": "Covalent-triple", "value": 4.988916154543868, "Element": "Rh"}, {"Atomic number": 46, "Volume": "Covalent-triple", "value": 5.884948644830136, "Element": "Pd"}, {"Atomic number": 47, "Volume": "Covalent-triple", "value": 10.770858259448103, "Element": "Ag"}, {"Atomic number": 48, "Volume": "Covalent-triple", "value": null, "Element": "Cd"}, {"Atomic number": 49, "Volume": "Covalent-triple", "value": 13.036084792763097, "Element": "In"}, {"Atomic number": 50, "Volume": "Covalent-triple", "value": 9.634083429722146, "Element": "Sn"}, {"Atomic number": 51, "Volume": "Covalent-triple", "value": 8.580246646050963, "Element": "Sb"}, {"Atomic number": 52, "Volume": "Covalent-triple", "value": 7.420697363981582, "Element": "Te"}, {"Atomic number": 53, "Volume": "Covalent-triple", "value": 8.18123086872342, "Element": "I"}, {"Atomic number": 54, "Volume": "Covalent-triple", "value": 7.606206315780957, "Element": "Xe"}, {"Atomic number": 55, "Volume": "Covalent-triple", "value": null, "Element": "Cs"}, {"Atomic number": 56, "Volume": "Covalent-triple", "value": 13.856304369132936, "Element": "Ba"}, {"Atomic number": 57, "Volume": "Covalent-triple", "value": 11.24949456098822, "Element": "La"}, {"Atomic number": 58, "Volume": "Covalent-triple", "value": 9.416781560268442, "Element": "Ce"}, {"Atomic number": 59, "Volume": "Covalent-triple", "value": 8.78452975554819, "Element": "Pr"}, {"Atomic number": 60, "Volume": "Covalent-triple", "value": null, "Element": "Nd"}, {"Atomic number": 61, "Volume": "Covalent-triple", "value": null, "Element": "Pm"}, {"Atomic number": 62, "Volume": "Covalent-triple", "value": null, "Element": "Sm"}, {"Atomic number": 63, "Volume": "Covalent-triple", "value": null, "Element": "Eu"}, {"Atomic number": 64, "Volume": "Covalent-triple", "value": 9.634083429722146, "Element": "Gd"}, {"Atomic number": 65, "Volume": "Covalent-triple", "value": null, "Element": "Tb"}, {"Atomic number": 66, "Volume": "Covalent-triple", "value": null, "Element": "Dy"}, {"Atomic number": 67, "Volume": "Covalent-triple", "value": null, "Element": "Ho"}, {"Atomic number": 68, "Volume": "Covalent-triple", "value": null, "Element": "Er"}, {"Atomic number": 69, "Volume": "Covalent-triple", "value": null, "Element": "Tm"}, {"Atomic number": 70, "Volume": "Covalent-triple", "value": null, "Element": "Yb"}, {"Atomic number": 71, "Volume": "Covalent-triple", "value": 9.416781560268442, "Element": "Lu"}, {"Atomic number": 72, "Volume": "Covalent-triple", "value": 7.606206315780957, "Element": "Hf"}, {"Atomic number": 73, "Volume": "Covalent-triple", "value": 7.058777512707628, "Element": "Ta"}, {"Atomic number": 74, "Volume": "Covalent-triple", "value": 6.3706263027045, "Element": "W"}, {"Atomic number": 75, "Volume": "Covalent-triple", "value": 5.575279762570688, "Element": "Re"}, {"Atomic number": 76, "Volume": "Covalent-triple", "value": 5.424604790114316, "Element": "Os"}, {"Atomic number": 77, "Volume": "Covalent-triple", "value": 5.131448118842135, "Element": "Ir"}, {"Atomic number": 78, "Volume": "Covalent-triple", "value": 5.575279762570688, "Element": "Pt"}, {"Atomic number": 79, "Volume": "Covalent-triple", "value": 7.794781462010236, "Element": "Au"}, {"Atomic number": 80, "Volume": "Covalent-triple", "value": null, "Element": "Hg"}, {"Atomic number": 81, "Volume": "Covalent-triple", "value": 14.137166941154067, "Element": "Tl"}, {"Atomic number": 82, "Volume": "Covalent-triple", "value": 10.770858259448103, "Element": "Pb"}, {"Atomic number": 83, "Volume": "Covalent-triple", "value": 10.305994700101317, "Element": "Bi"}, {"Atomic number": 84, "Volume": "Covalent-triple", "value": 8.992029855922693, "Element": "Po"}, {"Atomic number": 85, "Volume": "Covalent-triple", "value": 11.008442251073378, "Element": "At"}, {"Atomic number": 86, "Volume": "Covalent-triple", "value": 9.854702821018043, "Element": "Rn"}, {"Atomic number": 87, "Volume": "Covalent-triple", "value": null, "Element": "Fr"}, {"Atomic number": 88, "Volume": "Covalent-triple", "value": 16.837592021585557, "Element": "Ra"}, {"Atomic number": 89, "Volume": "Covalent-triple", "value": 11.494040321933852, "Element": "Ac"}, {"Atomic number": 90, "Volume": "Covalent-triple", "value": 10.536717453371157, "Element": "Th"}, {"Atomic number": 91, "Volume": "Covalent-triple", "value": 8.992029855922693, "Element": "Pa"}, {"Atomic number": 92, "Volume": "Covalent-triple", "value": 6.882316347750592, "Element": "U"}, {"Atomic number": 93, "Volume": "Covalent-triple", "value": 6.538265875490256, "Element": "Np"}, {"Atomic number": 94, "Volume": "Covalent-triple", "value": null, "Element": "Pu"}, {"Atomic number": 95, "Volume": "Covalent-triple", "value": null, "Element": "Am"}, {"Atomic number": 96, "Volume": "Covalent-triple", "value": null, "Element": "Cm"}, {"Atomic number": 97, "Volume": "Covalent-triple", "value": null, "Element": "Bk"}, {"Atomic number": 98, "Volume": "Covalent-triple", "value": null, "Element": "Cf"}, {"Atomic number": 99, "Volume": "Covalent-triple", "value": null, "Element": "Es"}, {"Atomic number": 100, "Volume": "Covalent-triple", "value": null, "Element": "Fm"}, {"Atomic number": 1, "Volume": "Metallic", "value": null, "Element": "H"}, {"Atomic number": 2, "Volume": "Metallic", "value": null, "Element": "He"}, {"Atomic number": 3, "Volume": "Metallic", "value": 14.710226951490485, "Element": "Li"}, {"Atomic number": 4, "Volume": "Metallic", "value": 5.884948644830136, "Element": "Be"}, {"Atomic number": 5, "Volume": "Metallic", "value": null, "Element": "B"}, {"Atomic number": 6, "Volume": "Metallic", "value": null, "Element": "C"}, {"Atomic number": 7, "Volume": "Metallic", "value": null, "Element": "N"}, {"Atomic number": 8, "Volume": "Metallic", "value": null, "Element": "O"}, {"Atomic number": 9, "Volume": "Metallic", "value": null, "Element": "F"}, {"Atomic number": 10, "Volume": "Metallic", "value": null, "Element": "Ne"}, {"Atomic number": 11, "Volume": "Metallic", "value": 26.95426178201094, "Element": "Na"}, {"Atomic number": 12, "Volume": "Metallic", "value": 17.15728467880506, "Element": "Mg"}, {"Atomic number": 13, "Volume": "Metallic", "value": 12.248889638367794, "Element": "Al"}, {"Atomic number": 14, "Volume": "Metallic", "value": null, "Element": "Si"}, {"Atomic number": 15, "Volume": "Metallic", "value": null, "Element": "P"}, {"Atomic number": 16, "Volume": "Metallic", "value": null, "Element": "S"}, {"Atomic number": 17, "Volume": "Metallic", "value": null, "Element": "Cl"}, {"Atomic number": 18, "Volume": "Metallic", "value": null, "Element": "Ar"}, {"Atomic number": 19, "Volume": "Metallic", "value": 48.996626694973415, "Element": "K"}, {"Atomic number": 20, "Volume": "Metallic", "value": 32.02486353433834, "Element": "Ca"}, {"Atomic number": 21, "Volume": "Metallic", "value": 17.808758841775074, "Element": "Sc"}, {"Atomic number": 22, "Volume": "Metallic", "value": 13.30578842767868, "Element": "Ti"}, {"Atomic number": 23, "Volume": "Metallic", "value": 10.078664866897356, "Element": "V"}, {"Atomic number": 24, "Volume": "Metallic", "value": 8.78452975554819, "Element": "Cr"}, {"Atomic number": 25, "Volume": "Metallic", "value": 8.580246646050963, "Element": "Mn"}, {"Atomic number": 26, "Volume": "Metallic", "value": 8.379155394689782, "Element": "Fe"}, {"Atomic number": 27, "Volume": "Metallic", "value": 8.18123086872342, "Element": "Co"}, {"Atomic number": 28, "Volume": "Metallic", "value": 7.986447935410647, "Element": "Ni"}, {"Atomic number": 29, "Volume": "Metallic", "value": 8.78452975554819, "Element": "Cu"}, {"Atomic number": 30, "Volume": "Metallic", "value": 10.078664866897356, "Element": "Zn"}, {"Atomic number": 31, "Volume": "Metallic", "value": 10.305994700101317, "Element": "Ga"}, {"Atomic number": 32, "Volume": "Metallic", "value": null, "Element": "Ge"}, {"Atomic number": 33, "Volume": "Metallic", "value": null, "Element": "As"}, {"Atomic number": 34, "Volume": "Metallic", "value": null, "Element": "Se"}, {"Atomic number": 35, "Volume": "Metallic", "value": null, "Element": "Br"}, {"Atomic number": 36, "Volume": "Metallic", "value": null, "Element": "Kr"}, {"Atomic number": 37, "Volume": "Metallic", "value": 63.891583483285174, "Element": "Rb"}, {"Atomic number": 38, "Volume": "Metallic", "value": 41.62976785149394, "Element": "Sr"}, {"Atomic number": 39, "Volume": "Metallic", "value": 24.429024474314232, "Element": "Y"}, {"Atomic number": 40, "Volume": "Metallic", "value": 17.15728467880506, "Element": "Zr"}, {"Atomic number": 41, "Volume": "Metallic", "value": 13.036084792763097, "Element": "Nb"}, {"Atomic number": 42, "Volume": "Metallic", "value": 11.24949456098822, "Element": "Mo"}, {"Atomic number": 43, "Volume": "Metallic", "value": 10.536717453371157, "Element": "Tc"}, {"Atomic number": 44, "Volume": "Metallic", "value": 10.078664866897356, "Element": "Ru"}, {"Atomic number": 45, "Volume": "Metallic", "value": 10.078664866897356, "Element": "Rh"}, {"Atomic number": 46, "Volume": "Metallic", "value": 10.770858259448103, "Element": "Pd"}, {"Atomic number": 47, "Volume": "Metallic", "value": 12.507660530848884, "Element": "Ag"}, {"Atomic number": 48, "Volume": "Metallic", "value": 14.421799424359508, "Element": "Cd"}, {"Atomic number": 49, "Volume": "Metallic", "value": 19.50913539355503, "Element": "In"}, {"Atomic number": 50, "Volume": "Metallic", "value": null, "Element": "Sn"}, {"Atomic number": 51, "Volume": "Metallic", "value": null, "Element": "Sb"}, {"Atomic number": 52, "Volume": "Metallic", "value": null, "Element": "Te"}, {"Atomic number": 53, "Volume": "Metallic", "value": null, "Element": "I"}, {"Atomic number": 54, "Volume": "Metallic", "value": null, "Element": "Xe"}, {"Atomic number": 55, "Volume": "Metallic", "value": 77.95181491474793, "Element": "Cs"}, {"Atomic number": 56, "Volume": "Metallic", "value": 45.82975469249774, "Element": "Ba"}, {"Atomic number": 57, "Volume": "Metallic", "value": 27.391349473509784, "Element": "La"}, {"Atomic number": 58, "Volume": "Metallic", "value": 25.16924834491043, "Element": "Ce"}, {"Atomic number": 59, "Volume": "Metallic", "value": 25.41927217217556, "Element": "Pr"}, {"Atomic number": 60, "Volume": "Metallic", "value": 25.003479954974633, "Element": "Nd"}, {"Atomic number": 61, "Volume": "Metallic", "value": 25.839648601376606, "Element": "Pm"}, {"Atomic number": 62, "Volume": "Metallic", "value": 24.592246817032592, "Element": "Sm"}, {"Atomic number": 63, "Volume": "Metallic", "value": 24.592246817032592, "Element": "Eu"}, {"Atomic number": 64, "Volume": "Metallic", "value": 24.592246817032592, "Element": "Gd"}, {"Atomic number": 65, "Volume": "Metallic", "value": 23.346125516532656, "Element": "Tb"}, {"Atomic number": 66, "Volume": "Metallic", "value": 23.66357559600747, "Element": "Dy"}, {"Atomic number": 67, "Volume": "Metallic", "value": 22.914285587479046, "Element": "Ho"}, {"Atomic number": 68, "Volume": "Metallic", "value": 22.875293618105633, "Element": "Er"}, {"Atomic number": 69, "Volume": "Metallic", "value": 22.797442430497988, "Element": "Tm"}, {"Atomic number": 70, "Volume": "Metallic", "value": 22.836345907489527, "Element": "Yb"}, {"Atomic number": 71, "Volume": "Metallic", "value": 21.990642870864715, "Element": "Lu"}, {"Atomic number": 72, "Volume": "Metallic", "value": 16.837592021585557, "Element": "Hf"}, {"Atomic number": 73, "Volume": "Metallic", "value": 13.036084792763097, "Element": "Ta"}, {"Atomic number": 74, "Volume": "Metallic", "value": 11.24949456098822, "Element": "W"}, {"Atomic number": 75, "Volume": "Metallic", "value": 10.770858259448103, "Element": "Re"}, {"Atomic number": 76, "Volume": "Metallic", "value": 10.305994700101317, "Element": "Os"}, {"Atomic number": 77, "Volume": "Metallic", "value": 10.420930390931675, "Element": "Ir"}, {"Atomic number": 78, "Volume": "Metallic", "value": 11.128533295448278, "Element": "Pt"}, {"Atomic number": 79, "Volume": "Metallic", "value": 12.507660530848884, "Element": "Au"}, {"Atomic number": 80, "Volume": "Metallic", "value": 14.421799424359508, "Element": "Hg"}, {"Atomic number": 81, "Volume": "Metallic", "value": 20.579526276115534, "Element": "Tl"}, {"Atomic number": 82, "Volume": "Metallic", "value": null, "Element": "Pb"}, {"Atomic number": 83, "Volume": "Metallic", "value": null, "Element": "Bi"}, {"Atomic number": 84, "Volume": "Metallic", "value": null, "Element": "Po"}, {"Atomic number": 85, "Volume": "Metallic", "value": null, "Element": "At"}, {"Atomic number": 86, "Volume": "Metallic", "value": null, "Element": "Rn"}, {"Atomic number": 87, "Volume": "Metallic", "value": null, "Element": "Fr"}, {"Atomic number": 88, "Volume": "Metallic", "value": null, "Element": "Ra"}, {"Atomic number": 89, "Volume": "Metallic", "value": null, "Element": "Ac"}, {"Atomic number": 90, "Volume": "Metallic", "value": 24.024131824329373, "Element": "Th"}, {"Atomic number": 91, "Volume": "Metallic", "value": 18.14059061300804, "Element": "Pa"}, {"Atomic number": 92, "Volume": "Metallic", "value": 15.90239015409433, "Element": "U"}, {"Atomic number": 93, "Volume": "Metallic", "value": 15.598531123848922, "Element": "Np"}, {"Atomic number": 94, "Volume": "Metallic", "value": 16.837592021585557, "Element": "Pu"}, {"Atomic number": 95, "Volume": "Metallic", "value": 21.688370252755973, "Element": "Am"}, {"Atomic number": 96, "Volume": "Metallic", "value": 22.06664732977962, "Element": "Cm"}, {"Atomic number": 97, "Volume": "Metallic", "value": 20.579526276115534, "Element": "Bk"}, {"Atomic number": 98, "Volume": "Metallic", "value": 26.95426178201094, "Element": "Cf"}, {"Atomic number": 99, "Volume": "Metallic", "value": 26.95426178201094, "Element": "Es"}, {"Atomic number": 100, "Volume": "Metallic", "value": null, "Element": "Fm"}]}}, {"mode": "vega-lite"});
+</script>
+</div>
+</div>
+<p>As you can see, the volumes of Hofmann and Mighell differ significantly from those I derived from the atomic radii.</p>
+<p>Let’s print out some of the statistics describing the data, as well compare the coefficient of variation for each type of volume.</p>
+<div class="cell" data-execution_count="50">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>df.describe()[[<span class="st">"Hofmann"</span>]<span class="op">+</span>radtype]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="50">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Hofmann</th>
+<th data-quarto-table-cell-role="th">Mighell</th>
+<th data-quarto-table-cell-role="th">Empirical</th>
+<th data-quarto-table-cell-role="th">Calculated</th>
+<th data-quarto-table-cell-role="th">vdW</th>
+<th data-quarto-table-cell-role="th">Covalent-single</th>
+<th data-quarto-table-cell-role="th">Covalent-triple</th>
+<th data-quarto-table-cell-role="th">Metallic</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">count</td>
+<td>84.000000</td>
+<td>100.00000</td>
+<td>91.000000</td>
+<td>86.000000</td>
+<td>55.000000</td>
+<td>95.000000</td>
+<td>71.000000</td>
+<td>68.000000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">mean</td>
+<td>39.586310</td>
+<td>42.65840</td>
+<td>17.084519</td>
+<td>23.849111</td>
+<td>37.865054</td>
+<td>13.250696</td>
+<td>6.963913</td>
+<td>19.946436</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">std</td>
+<td>13.460829</td>
+<td>17.12722</td>
+<td>12.248898</td>
+<td>20.652779</td>
+<td>33.870162</td>
+<td>8.900926</td>
+<td>3.301590</td>
+<td>12.541749</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">min</td>
+<td>5.080000</td>
+<td>5.40000</td>
+<td>0.065450</td>
+<td>0.124788</td>
+<td>7.238229</td>
+<td>0.137258</td>
+<td>0.623615</td>
+<td>5.884949</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">25%</td>
+<td>31.000000</td>
+<td>30.87500</td>
+<td>10.305995</td>
+<td>7.377367</td>
+<td>19.870146</td>
+<td>7.329463</td>
+<td>4.988916</td>
+<td>11.039115</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">50%</td>
+<td>39.300000</td>
+<td>41.00000</td>
+<td>12.770051</td>
+<td>19.334951</td>
+<td>27.833137</td>
+<td>11.008442</td>
+<td>6.538266</td>
+<td>17.157285</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">75%</td>
+<td>49.250000</td>
+<td>53.50000</td>
+<td>23.632685</td>
+<td>36.484963</td>
+<td>39.070796</td>
+<td>19.160766</td>
+<td>9.204406</td>
+<td>24.469830</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">max</td>
+<td>74.000000</td>
+<td>85.00000</td>
+<td>77.951815</td>
+<td>110.850435</td>
+<td>176.533179</td>
+<td>52.306127</td>
+<td>16.837592</td>
+<td>77.951815</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div class="cell" data-execution_count="11">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">8</span>,<span class="dv">5</span>))</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>((df.describe().loc[<span class="st">"std"</span>] <span class="op">/</span> df.describe().loc[<span class="st">"mean"</span>])[[<span class="st">"Hofmann"</span>]<span class="op">+</span>radtype]).plot.bar()</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Coefficient of variation"</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<p><img src="2021-11-10-Hofcalc_files/figure-html/cell-4-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>We see a much lower coefficient of variation for Hofmann’s volumes than the others.</p>
+</section>
+<section id="hofcalc---using-the-web-app" class="level1">
+<h1>HofCalc - using the web app</h1>
+<p><a href="http://hofcalc.herokuapp.com">HofCalc</a> makes use of two key python libraries to process chemical formulae (<a href="https://github.com/xnx/pyvalem">pyvalem</a>) and resolve chemical names (<a href="https://github.com/mcs07/PubChemPy">PubChemPy</a>) prior to processing. This allows the app to have a really convenient interface for specifying queries (see below), which enables users to easily mix and match between formulae and names to obtain the information they need.</p>
+<section id="formulae-and-names" class="level2">
+<h2 class="anchored" data-anchor-id="formulae-and-names">Formulae and names</h2>
+<section id="basic-use" class="level3">
+<h3 class="anchored" data-anchor-id="basic-use">Basic use</h3>
+<p>The simplest option is to enter the chemical formula or name of the material of interest. Names are resolved by querying <a href="https://pubchem.ncbi.nlm.nih.gov/">PubChem</a>, so common abbreviations for solvents can often be used e.g.&nbsp;DMF. Note that formulae can be prefixed with a multiple, e.g.&nbsp;2H2O</p>
+<table class="table">
+<thead>
+<tr class="header">
+<th style="text-align: center;">Search term</th>
+<th style="text-align: center;">Type</th>
+<th style="text-align: center;"><span class="math inline">\(V_{Hofmann}\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">ethanol</td>
+<td style="text-align: center;">name</td>
+<td style="text-align: center;">69.61</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">CH3CH2OH</td>
+<td style="text-align: center;">formula</td>
+<td style="text-align: center;">69.61</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">water</td>
+<td style="text-align: center;">name</td>
+<td style="text-align: center;">21.55</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">2H2O</td>
+<td style="text-align: center;">formula</td>
+<td style="text-align: center;">43.10</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="multiple-search-terms" class="level3">
+<h3 class="anchored" data-anchor-id="multiple-search-terms">Multiple search terms</h3>
+<p>It is also possible to search for multiple items simultaneously, and mix and match name and formulae by separating individual components with a semicolon. This means that for example, ‘amodiaquine dihydrochloride dihydrate’ can also be entered as ‘amodiaquine; 2HCl; 2H2O’.</p>
+<table class="table">
+<thead>
+<tr class="header">
+<th style="text-align: center;">Search term</th>
+<th style="text-align: center;">Total <span class="math inline">\(V_{Hofmann}\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">carbamazepine; L-glutamic acid</td>
+<td style="text-align: center;">497.98</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">zopiclone; 2H2O</td>
+<td style="text-align: center;">496.02</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">C15H12N2O; CH3CH2COO-; Na+</td>
+<td style="text-align: center;">419.79</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">sodium salicylate; water</td>
+<td style="text-align: center;">204.21</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">amodiaquine dihydrochloride dihydrate</td>
+<td style="text-align: center;">566.61</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">amodiaquine; 2HCl; 2H2O</td>
+<td style="text-align: center;">566.61</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="more-complex-examples---hemihydrates" class="level3">
+<h3 class="anchored" data-anchor-id="more-complex-examples---hemihydrates">More complex examples - hemihydrates</h3>
+<p>In cases where fractional multiples of search components are required, such as with hemihydrates, care should be taken to check the evaluated chemical formula for consistency with the expected formula.</p>
+<table class="table">
+<colgroup>
+<col style="width: 46%">
+<col style="width: 16%">
+<col style="width: 14%">
+<col style="width: 8%">
+<col style="width: 13%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: center;">Search term</th>
+<th style="text-align: center;">Evaluated as</th>
+<th style="text-align: center;"><span class="math inline">\(V_{Hofmann}\)</span></th>
+<th style="text-align: center;">Divide by</th>
+<th style="text-align: center;">Expected Volume</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">Calcium sulfate hemihydrate</td>
+<td style="text-align: center;">Ca2 H2 O9 S2</td>
+<td style="text-align: center;">253.07</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">126.53</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">calcium; calcium; sulfate; sulfate; water</td>
+<td style="text-align: center;">Ca2 H2 O9 S2</td>
+<td style="text-align: center;">253.07</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">126.53</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">calcium; sulfate; 0.5H2O</td>
+<td style="text-align: center;">Ca1 H1.0 O4.5 S1</td>
+<td style="text-align: center;">126.53</td>
+<td style="text-align: center;">-</td>
+<td style="text-align: center;">126.53</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">Codeine phosphate hemihydrate</td>
+<td style="text-align: center;">C36 H50 N2 O15 P2</td>
+<td style="text-align: center;">1006.77</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">503.38</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">codeine; codeine; phosphoric acid; phosphoric acid; water</td>
+<td style="text-align: center;">C36 H50 N2 O15 P2</td>
+<td style="text-align: center;">1006.77</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">503.38</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">codeine; phosphoric acid; 0.5H2O</td>
+<td style="text-align: center;">C18 H25.0 N1 O7.5 P1</td>
+<td style="text-align: center;">503.38</td>
+<td style="text-align: center;">-</td>
+<td style="text-align: center;">503.38</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="charged-species-in-formulae" class="level3">
+<h3 class="anchored" data-anchor-id="charged-species-in-formulae">Charged species in formulae</h3>
+<p>Charges could potentially interfere with the parsing of chemical formulae. For example, two ways of representing an oxide ion:</p>
+<table class="table">
+<thead>
+<tr class="header">
+<th style="text-align: center;">Search term</th>
+<th style="text-align: center;">Evaluated as</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">O-2</td>
+<td style="text-align: center;">1 x O</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">O2-</td>
+<td style="text-align: center;">2 x O</td>
+</tr>
+</tbody>
+</table>
+<p>Whilst is is recommended that charges be omitted from HofCalc queries, if including charges in your queries, ensure that the correct number of atoms has been determined in the displayed atom counts or the downloadable summary file. For more information on formatting formulae, see the <a href="https://github.com/xnx/pyvalem">pyvalem documentation</a>.</p>
+</section>
+</section>
+<section id="temperature" class="level2">
+<h2 class="anchored" data-anchor-id="temperature">Temperature</h2>
+<p>The temperature, <span class="math inline">\(T\)</span> (in kelvin) is automatically included in the volume calculation via the following equation:</p>
+<p><span class="math display">\[V = \sum{n_{i}v_{i}}(1 +  \alpha(T - 298))\]</span></p>
+<p>Where <span class="math inline">\(n_{i}\)</span> and <span class="math inline">\(v_{i}\)</span> are the number and Hofmann volume (at 298 K) of the <span class="math inline">\(i\)</span>th element in the chemical formula, and <span class="math inline">\(\alpha = 0.95 \times 10^{-4} K^{-1}\)</span>.</p>
+</section>
+<section id="unit-cell-volume" class="level2">
+<h2 class="anchored" data-anchor-id="unit-cell-volume">Unit cell volume</h2>
+<p>If the volume of a unit cell is supplied, then the unit cell volume divided by the estimated molecular volume will also be shown.</p>
+<table class="table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 21%">
+<col style="width: 19%">
+<col style="width: 38%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: center;">Search term</th>
+<th style="text-align: center;"><span class="math inline">\(V_{cell}\)</span></th>
+<th style="text-align: center;"><span class="math inline">\(V_{Hofmann}\)</span></th>
+<th style="text-align: center;"><span class="math inline">\(\frac{V_{cell}}{V_{Hofmann}}\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">zopiclone, 2H2O</td>
+<td style="text-align: center;">1874.61</td>
+<td style="text-align: center;">496.02</td>
+<td style="text-align: center;">3.78</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">verapamil, HCl</td>
+<td style="text-align: center;">1382.06</td>
+<td style="text-align: center;">667.57</td>
+<td style="text-align: center;">2.07</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="summary-files" class="level2">
+<h2 class="anchored" data-anchor-id="summary-files">Summary Files</h2>
+<p>Each time HofCalc is used, a downloadable summary file is produced. It is designed to serve both as a record of the query for future reference and also as a method to sense-check the interpretation of the entered terms, with links to the PubChem entries where relevant. An example of the contents of the summary file for the following search terms is given below.</p>
+<p>Search term = <code>carbamazepine; indomethacin</code></p>
+<p>T = 293 K</p>
+<p>Unit cell volume = 2921.6 Å³</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode json code-with-copy"><code class="sourceCode json"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"combined"</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"C"</span><span class="fu">:</span> <span class="dv">34</span><span class="fu">,</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"H"</span><span class="fu">:</span> <span class="dv">28</span><span class="fu">,</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"N"</span><span class="fu">:</span> <span class="dv">3</span><span class="fu">,</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"O"</span><span class="fu">:</span> <span class="dv">5</span><span class="fu">,</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"Cl"</span><span class="fu">:</span> <span class="dv">1</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">},</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"individual"</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"carbamazepine"</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>            <span class="dt">"C"</span><span class="fu">:</span> <span class="dv">15</span><span class="fu">,</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>            <span class="dt">"H"</span><span class="fu">:</span> <span class="dv">12</span><span class="fu">,</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>            <span class="dt">"N"</span><span class="fu">:</span> <span class="dv">2</span><span class="fu">,</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>            <span class="dt">"O"</span><span class="fu">:</span> <span class="dv">1</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>        <span class="fu">},</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"indomethacin"</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>            <span class="dt">"C"</span><span class="fu">:</span> <span class="dv">19</span><span class="fu">,</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>            <span class="dt">"H"</span><span class="fu">:</span> <span class="dv">16</span><span class="fu">,</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>            <span class="dt">"Cl"</span><span class="fu">:</span> <span class="dv">1</span><span class="fu">,</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>            <span class="dt">"N"</span><span class="fu">:</span> <span class="dv">1</span><span class="fu">,</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>            <span class="dt">"O"</span><span class="fu">:</span> <span class="dv">4</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>        <span class="fu">}</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">},</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"user_input"</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>        <span class="st">"carbamazepine"</span><span class="ot">,</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>        <span class="st">"indomethacin"</span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>    <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"PubChem CIDs"</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"carbamazepine"</span><span class="fu">:</span> <span class="dv">2554</span><span class="fu">,</span></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"indomethacin"</span><span class="fu">:</span> <span class="dv">3715</span></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>    <span class="fu">},</span></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"PubChem URLs"</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"carbamazepine"</span><span class="fu">:</span> <span class="st">"https://pubchem.ncbi.nlm.nih.gov/compound/2554"</span><span class="fu">,</span></span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"indomethacin"</span><span class="fu">:</span> <span class="st">"https://pubchem.ncbi.nlm.nih.gov/compound/3715"</span></span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>    <span class="fu">},</span></span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"individual_volumes"</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"carbamazepine"</span><span class="fu">:</span> <span class="fl">303.86</span><span class="fu">,</span></span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"indomethacin"</span><span class="fu">:</span> <span class="fl">427.77</span></span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>    <span class="fu">},</span></span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"V_Cell / V_Hofmann"</span><span class="fu">:</span> <span class="fl">3.99</span><span class="fu">,</span></span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"Temperature"</span><span class="fu">:</span> <span class="dv">293</span><span class="fu">,</span></span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"Hofmann Volume"</span><span class="fu">:</span> <span class="fl">731.62</span><span class="fu">,</span></span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"Hofmann Density"</span><span class="fu">:</span> <span class="fl">1.35</span></span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+</section>
+<section id="case-study-ct-dmf2" class="level1">
+<h1>Case study: CT-DMF2</h1>
+<p>The crystal structure of chlorothiazide N,N-dimethylformamide, a.k.a <a href="https://doi.org/10.1002/jps.20942">CT-DMF2</a>, was solved from laboratory powder diffraction data back in 2007. I decided to try re-indexing the diffraction data to see if HofCalc would be of use.</p>
+<p>Using the <em>DASH</em> interface to <em>DICVOL</em>, the following unit cells are suggested:</p>
+<p><img src="images/DASH-indexing.png" class="img-fluid"></p>
+<p>Both monoclinic and triclinic cells are obtained with very different unit cell volumes. Whilst the figures of merit certainly push towards accepting the conclusion of a monoclinic unit cell, it’s worth checking to see if this makes sense given the expected composition of the material. In addition, there may be more than one dimethylformamide molecule crystallising with the chlorothiazide - HofCalc may be able to shed some light there too.</p>
+<p>The <a href="https://doi.org/10.1002/jps.20942">paper</a> states that the solvate was formed by recrystallisation of chlorothiazide from DMF solvent, so it seems logical to try the following permutations: 1. chlorothiazide alone 2. chlorothiazide + 1 DMF 3. chlorothiazide + 2 DMF (etc)</p>
+<table class="table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 15%">
+<col style="width: 20%">
+<col style="width: 32%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: center;">HofCalc query</th>
+<th style="text-align: center;"><span class="math inline">\(V_{Hofmann}\)</span></th>
+<th style="text-align: center;"><span class="math inline">\(V_{cell}\)</span></th>
+<th style="text-align: center;"><span class="math inline">\(\frac{V_{cell}}{V_{Hofmann}}\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">chlorothiazide</td>
+<td style="text-align: center;">284.73</td>
+<td style="text-align: center;">2422 (triclinic)</td>
+<td style="text-align: center;">8.51</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">chlorothiazide</td>
+<td style="text-align: center;">284.73</td>
+<td style="text-align: center;">3950 (monoclinic)</td>
+<td style="text-align: center;">13.87</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">chlorothiazide; DMF</td>
+<td style="text-align: center;">385.09</td>
+<td style="text-align: center;">2422 (triclinic)</td>
+<td style="text-align: center;">6.29</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">chlorothiazide; DMF</td>
+<td style="text-align: center;">385.09</td>
+<td style="text-align: center;">3950 (monoclinic)</td>
+<td style="text-align: center;">10.26</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">chlorothiazide; DMF; DMF</td>
+<td style="text-align: center;">485.45</td>
+<td style="text-align: center;">2422 (triclinic)</td>
+<td style="text-align: center;">4.99</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">chlorothiazide; DMF; DMF</td>
+<td style="text-align: center;">485.45</td>
+<td style="text-align: center;">3950 (monoclinic)</td>
+<td style="text-align: center;">8.14</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">chlorothiazide; DMF; DMF; DMF</td>
+<td style="text-align: center;">585.81</td>
+<td style="text-align: center;">2422 (triclinic)</td>
+<td style="text-align: center;">4.13</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">chlorothiazide; DMF; DMF; DMF</td>
+<td style="text-align: center;">585.81</td>
+<td style="text-align: center;">3950 (monoclinic)</td>
+<td style="text-align: center;">6.74</td>
+</tr>
+</tbody>
+</table>
+<p>If we exclude those results with <span class="math inline">\(\frac{V_{cell}}{V_{mol}}\)</span> ratios &gt; 0.25 away from a (crystallographically sensible) whole number, we can see from the table that the most favourable compositions are CT + 2xDMF (monoclinic) and CT + 3xDMF (triclinic). Given the higher figure of merit for the monoclinic unit cell, it seems reasonable to take this forward and attempt space-group determination. Doing this in <em>DASH</em> identifies the most probable space group as <span class="math inline">\(P2_1/c\)</span>, which then implies <span class="math inline">\(Z'=2\)</span>. This is indeed the correct result.</p>
+<p>If we compare this to the commonly used 18 Å³ rule, we end up with the following results:</p>
+<table class="table">
+<colgroup>
+<col style="width: 34%">
+<col style="width: 15%">
+<col style="width: 20%">
+<col style="width: 29%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: center;">Possible composition</th>
+<th style="text-align: center;"><span class="math inline">\(V_{18Å^{3}}\)</span></th>
+<th style="text-align: center;"><span class="math inline">\(V_{cell}\)</span></th>
+<th style="text-align: center;"><span class="math inline">\(\frac{V_{cell}}{V_{18Å^{3}}}\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">chlorothiazide</td>
+<td style="text-align: center;">306</td>
+<td style="text-align: center;">2422 (triclinic)</td>
+<td style="text-align: center;">7.92</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">chlorothiazide</td>
+<td style="text-align: center;">306</td>
+<td style="text-align: center;">3950 (monoclinic)</td>
+<td style="text-align: center;">12.91</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">chlorothiazide; DMF</td>
+<td style="text-align: center;">396</td>
+<td style="text-align: center;">2422 (triclinic)</td>
+<td style="text-align: center;">6.12</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">chlorothiazide; DMF</td>
+<td style="text-align: center;">396</td>
+<td style="text-align: center;">3950 (monoclinic)</td>
+<td style="text-align: center;">9.97</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">chlorothiazide; DMF; DMF</td>
+<td style="text-align: center;">486</td>
+<td style="text-align: center;">2422 (triclinic)</td>
+<td style="text-align: center;">4.98</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">chlorothiazide; DMF; DMF</td>
+<td style="text-align: center;">486</td>
+<td style="text-align: center;">3950 (monoclinic)</td>
+<td style="text-align: center;">8.13</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">chlorothiazide; DMF; DMF; DMF</td>
+<td style="text-align: center;">576</td>
+<td style="text-align: center;">2422 (triclinic)</td>
+<td style="text-align: center;">4.20</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">chlorothiazide; DMF; DMF; DMF</td>
+<td style="text-align: center;">576</td>
+<td style="text-align: center;">3950 (monoclinic)</td>
+<td style="text-align: center;">6.86</td>
+</tr>
+</tbody>
+</table>
+<p>Again, CT + 2xDMF is in the candidates to check, however, using the 18 Å³ rule, a triclinic pure chlorothiazide unit cell also becomes a viable possibility. Had there been a less clear distinction in the indexing figure-of-merit, this may have resulted in time being wasted on testing this additional possibility.</p>
+</section>
+<section id="conclusions" class="level1">
+<h1>Conclusions</h1>
+<p>Hofmann’s volumes give more accurate estimates of molecular volumes in crystals, and should be used in preference to the 18 Å³ rule where possible.</p>
+<p>To make this easier for people, the <a href="https://hofcalc.onrender.com">HofCalc web-app</a> can be used to very rapidly and conveniently obtain these estimates.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

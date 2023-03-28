@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.290">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Mark Spillman">
+<meta name="dcterms.date" content="2022-01-08">
+<meta name="description" content="With CPU-based code, intensity \chi^2 is more efficient, but does this hold for GPU-based code?">
+
+<title>Mark Spillman - Solving crystal structures with GALLOP and profile \(\chi^2\)</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Mark Spillman</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html" rel="" target="">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/mspillman" rel="" target=""><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com/mspillman" rel="" target=""><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+            <div class="quarto-navbar-tools">
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Solving crystal structures with GALLOP and profile <span class="math inline">\(\chi^2\)</span></h1>
+                  <div>
+        <div class="description">
+          With CPU-based code, intensity <span class="math inline">\(\chi^2\)</span> is more efficient, but does this hold for GPU-based code?
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">PXRD</div>
+                <div class="quarto-category">GALLOP</div>
+                <div class="quarto-category">Profile</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Mark Spillman </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">January 8, 2022</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#dash-pawley-output-files" id="toc-dash-pawley-output-files" class="nav-link" data-scroll-target="#dash-pawley-output-files"><em>DASH</em> Pawley output files</a>
+  <ul class="collapse">
+  <li><a href="#pik-file" id="toc-pik-file" class="nav-link" data-scroll-target="#pik-file">PIK file</a></li>
+  </ul></li>
+  <li><a href="#optimising-against-the-profile-chi2" id="toc-optimising-against-the-profile-chi2" class="nav-link" data-scroll-target="#optimising-against-the-profile-chi2">Optimising against the profile <span class="math inline">\(\chi^2\)</span></a>
+  <ul class="collapse">
+  <li><a href="#performance-comparison-to-intensity-chi2" id="toc-performance-comparison-to-intensity-chi2" class="nav-link" data-scroll-target="#performance-comparison-to-intensity-chi2">Performance comparison to intensity <span class="math inline">\(\chi^2\)</span></a></li>
+  </ul></li>
+  <li><a href="#conclusions" id="toc-conclusions" class="nav-link" data-scroll-target="#conclusions">Conclusions</a>
+  <ul class="collapse">
+  <li><a href="#extending-this-work" id="toc-extending-this-work" class="nav-link" data-scroll-target="#extending-this-work">Extending this work</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<p>The <a href="https://scripts.iucr.org/cgi-bin/paper?ks5013">correlated integrated intensity <span class="math inline">\(\chi^2\)</span> figure of merit</a> has been shown to be equivalent to the profile <span class="math inline">\(\chi^2\)</span>, but is more efficient to calculate in CPU-based code. This is due to the sparsity of the inverse covariance matrix (typically only 1-5% of the elements will be non-zero if using <em>DASH</em>’s 20% correlation cut-off), which means that only a small number of non-zero elements need to be multiplied and summed. Code that exploits this property can therefore obtain very high performance - this is the approach embodied in the <a href="https://github.com/ccdc-opensource/dash">fortran code used in <em>DASH</em>.</a></p>
+<p>The intensity <span class="math inline">\(\chi^2\)</span> figure of merit in <em>GALLOP</em> does not exploit the sparsity of the inverse covariance matrix; instead the matrix is treated as dense and a full matrix multiplication is performed. This is because very fast matrix multiplication routines which make effective use of the parallel processing capabilities of GPUs are available in <a href="https://docs.nvidia.com/cuda/cublas/index.html">cuBLAS</a>. Sparse matrices are currently less well supported, and though there has been a lot of progress, performance remains generally worse.</p>
+<p>This got me thinking: given that we aren’t currently able to make best use of the sparsity of the inverse covariance matrix in <em>GALLOP</em> and instead treat it as a dense matrix, can the profile <span class="math inline">\(\chi^2\)</span> also be implemented in a manner that is amenable to GPU acceleration, and if so, how does the performance compare to the intensity <span class="math inline">\(\chi^2\)</span> figure of merit that is currently used?</p>
+<p>To tackle this, we’ll take a look at the output files produced by <em>DASH</em> during its Pawley fitting procedure, and work out how the full profile can be (rapidly) reconstructed.</p>
+</section>
+<section id="dash-pawley-output-files" class="level1">
+<h1><em>DASH</em> Pawley output files</h1>
+<p>Following Pawley refinement in <em>DASH</em>, several files are produced: - <code>.dsl</code> - wavelength, peak shapes and Pawley refinement settings - <code>.hcv</code> - hkl indices, intensities and (inverse) esds as well as the off-diagonal elements of the inverse <em>correlation</em> matrix, from which the inverse <em>covariance</em> matrix is constructed. - <code>.pik</code> - the (background subtracted) profile, unit intensity peaks, esds (we’ll look at this in more detail below) - <code>.sdi</code> - unit cell, space group, Pawley profile <span class="math inline">\(\chi^2\)</span> figure of merit - <code>.tic</code> - hkl, twotheta</p>
+<p><em>GALLOP</em> contains functions that read these files, which can be found <a href="https://github.com/mspillman/gallop/blob/main/gallop/files/dash.py">here</a>.</p>
+<p>To calculate the profle <span class="math inline">\(\chi^2\)</span>, we’ll need to take a closer look at the PIK file.</p>
+<section id="pik-file" class="level2">
+<h2 class="anchored" data-anchor-id="pik-file">PIK file</h2>
+<p>This file contains all of the information we’ll need to calculate the profile <span class="math inline">\(\chi^2\)</span>.</p>
+<p>In general, the lines follow the following structure:</p>
+<pre><code>    twotheta      intensity       ESD        Number of peaks contributing to this point</code></pre>
+<p>If the number of peaks contributing to a particular point is zero, then this is just background noise, and the next line will have the same format. Here’s an example of a section of background intensity from the <a href="https://github.com/mspillman/gallop/blob/main/gallop/example_data/Verap.pik">PIK file for verapamil hydrochloride</a>:</p>
+<pre><code>   5.016000      -323.4935       202.1800               0
+   5.031000      -382.2603       201.2000               0
+   5.045000      -315.5720       201.4600               0
+   5.060000      -250.9787       201.7000               0</code></pre>
+<p>However, if the number of peaks that contribute to a point is greater than 0, then the next line(s) contain information about the contributing peaks. If there are N peaks that contribute intensity to a particular point, then the next line(s) will have the following structure:</p>
+<pre><code>    twotheta      intensity       ESD        Number of peaks contributing to this point
+       N x [peak number         intensity for peak number]</code></pre>
+<p>where “peak number” is the position of the particular peak in a sorted list of all of the peak <span class="math inline">\(2\theta\)</span> positions (i.e.&nbsp;peak number 3 is the peak with the third lowest <span class="math inline">\(2\theta\)</span> value.) The peak number and intensity information may break over multiple lines, and continues until the intensity and peak number of all N peaks contributing to a particular point have been recorded.</p>
+<p>For example, here’s section where there is 1 contributing peak (which happens to be the first peak in the data):</p>
+<pre><code>   4.350000       744.3560       232.3900               1
+           1   4.513631
+   4.364000       639.3544       230.9700               1
+           1   5.134259
+   4.379000       1007.128       234.2900               1
+           1   5.837606</code></pre>
+<p>Here’s a section with two contributing peaks (which are the second and third peaks in the data):</p>
+<pre><code>   8.653000       5611.787       179.4200               2
+           2   22.49174               3  0.1523584
+   8.668000       6297.480       185.9700               2
+           2   26.03695               3  0.1624220
+   8.682000       5904.059       181.7700               2
+           2   24.64359               3  0.1726878</code></pre>
+<p>And here’s a section with four contributing peaks (which are the 59th, 60th, 61st and 62nd peaks in the data):</p>
+<pre><code>  25.09800       883.4489       79.31000               4
+          59  0.9365445              60  0.1982842              61
+  0.1636752              62  2.1087736E-02
+   25.11300       1260.722       81.62000               4
+          59   1.462635              60  0.3181552              61
+  0.2449987              62  2.4525421E-02
+   25.12700       1757.970       84.58000               4
+          59   2.065944              60  0.5192419              61
+  0.3785602              62  2.8390534E-02</code></pre>
+<p>Using the <a href="https://github.com/mspillman/gallop/blob/2fc8f1ea2c157c2d070005abcf8db2af873405ed/gallop/files/dash.py#L231">read_DASH_pik</a> function in <em>GALLOP</em>, we can parse a .pik file, and examine the individual peaks and the full diffraction profile.</p>
+<div class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> gallop <span class="im">import</span> files</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>profile, baseline_peaks, n_contributing_peaks <span class="op">=</span> files.dash.read_DASH_pik(<span class="st">"Verap.pik"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The <code>profile</code> numpy array contains three columns: twotheta, intensity and ESD.</p>
+<div class="cell" data-execution_count="2">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Twotheta    Intensity   ESD"</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(profile)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">12</span>,<span class="dv">8</span>))</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>plt.plot(profile[:,<span class="dv">0</span>], profile[:,<span class="dv">1</span>])</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"$2</span><span class="ch">\\</span><span class="st">theta$"</span>)</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Intensity"</span>)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Twotheta    Intensity   ESD
+[[   4.35     744.356    232.39   ]
+ [   4.364    639.3544   230.97   ]
+ [   4.379   1007.128    234.29   ]
+ ...
+ [  40.167    104.9547    45.65   ]
+ [  40.181    -19.50696   44.27   ]
+ [  40.196     42.59625   44.96   ]]</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="2022-01-08-Profile-Chi-Squared-Optimisation_files/figure-html/cell-3-output-2.png" class="quarto-discovered-preview-image img-fluid"></p>
+</div>
+</div>
+<p>The <code>baseline_peaks</code> numpy array has shape (n-peaks, n-points) where n-points is the number of points in the profile and where the Nth row contains the intensity associated with contributing peak N. Let’s plot them all on the same axes:</p>
+<div class="cell" data-execution_count="3">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Baseline peaks array shape:"</span>,baseline_peaks.shape)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(baseline_peaks)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">12</span>,<span class="dv">8</span>))</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(baseline_peaks.shape[<span class="dv">0</span>]):</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    plt.plot(profile[:,<span class="dv">0</span>],baseline_peaks[i])</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"$2</span><span class="ch">\\</span><span class="st">theta$"</span>)</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Intensity"</span>)</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Baseline peaks array shape: (252, 2475)
+[[4.513631   5.134259   5.837606   ... 0.         0.         0.        ]
+ [0.         0.         0.         ... 0.         0.         0.        ]
+ [0.         0.         0.         ... 0.         0.         0.        ]
+ ...
+ [0.         0.         0.         ... 0.01736796 0.01483574 0.01280165]
+ [0.         0.         0.         ... 0.01911421 0.0161166  0.01376026]
+ [0.         0.         0.         ... 0.01852708 0.01551832 0.01318077]]</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="2022-01-08-Profile-Chi-Squared-Optimisation_files/figure-html/cell-4-output-2.png" class="img-fluid"></p>
+</div>
+</div>
+<p>This doesn’t look like the observed data!</p>
+<p>However, this is intentional. The intensities in the <code>baseline_peaks</code> array have been scaled to correct for peak multiplicity, Lorentz polarisation factor and form-factor fall off and then divided by their Pawley extracted intensity.</p>
+<p>This then allows the calculated profile to be rapidly reconstructed by multiplying each of the rows in the <code>baseline_peaks</code> array by the corresponding intensity (<em>i.e.</em> intensities calculated during SDPD or the Pawley extracted intensities), then summing each column in the array to account for intensity contribution from multiple peaks. The profile <span class="math inline">\(\chi^2\)</span> can then be calculated from the reconstructed profile.</p>
+<p>Let’s have a go at reconstructing the profile from the Pawley-refined intensities:</p>
+<div class="cell" data-execution_count="4">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> gallop.structure <span class="im">import</span> Structure</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>mystructure <span class="op">=</span> Structure(name<span class="op">=</span><span class="st">"verapamil_hydrochloride"</span>)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>mystructure.add_data(<span class="st">"verap.sdi"</span>, source<span class="op">=</span><span class="st">"DASH"</span>)</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Here we reconstruct the profile by multiplying by the Pawley intensities, then summing each column</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>calc_profile <span class="op">=</span> (mystructure.intensities.reshape(<span class="op">-</span><span class="dv">1</span>,<span class="dv">1</span>) <span class="op">*</span> baseline_peaks).<span class="bu">sum</span>(axis<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">12</span>,<span class="dv">8</span>))</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>plt.plot(profile[:,<span class="dv">0</span>], profile[:,<span class="dv">1</span>])</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>plt.plot(profile[:,<span class="dv">0</span>], calc_profile)</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>plt.legend([<span class="st">"Obs"</span>, <span class="st">"Calc"</span>])</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"$2</span><span class="ch">\\</span><span class="st">theta$"</span>)</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Intensity"</span>)</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<p><img src="2022-01-08-Profile-Chi-Squared-Optimisation_files/figure-html/cell-5-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>If we use intensities calculated during SDPD with GALLOP then we will need to scale the calculated pattern in order to properly calculate the <span class="math inline">\(\chi^2\)</span> value. We calculate the scaling factor using the equation below:</p>
+<p><span class="math display">\[ c = \frac{\sum{y_i^{obs}}}{\sum{y_i^{calc}}} \]</span></p>
+<p>This will then allow us calculate the profile <span class="math inline">\(\chi^2\)</span> value, via:</p>
+<p><span class="math display">\[ \chi^2_{profile} = \frac{\sum{\frac{(cy^{calc}_i - y^{obs}_i)^2}{(\sigma_i^{obs})^2}}}{N - P + C} \]</span></p>
+<p>where <span class="math inline">\(N\)</span> = the total number of observations (i.e.&nbsp;points in the profile), <span class="math inline">\(P\)</span> = the number of parameters refined and <span class="math inline">\(C\)</span> is the number of constraints used in the refinement. For the <span class="math inline">\(\chi^2\)</span> calculation, we will by default consider only the points which have at least one Bragg peak contributing to the intensity of that point as <a href="https://nvlpubs.nist.gov/nistpubs/jres/109/1/j91dav.pdf">recommended here (pdf)</a>.</p>
+<div class="cell" data-execution_count="5">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate a mask that selects only the points containing contributions from at least one Bragg peak</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>subset <span class="op">=</span> n_contributing_peaks <span class="op">&gt;</span> <span class="dv">0</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate the calculated pattern scaling factor</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>scale <span class="op">=</span> profile[:,<span class="dv">1</span>][subset].<span class="bu">sum</span>() <span class="op">/</span> calc_profile[subset].<span class="bu">sum</span>()</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="co"># The "-2" in the denominator is because DASH refines two background terms during the Pawley refinement by default</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>prof_chisquared <span class="op">=</span> ((scale<span class="op">*</span>calc_profile[subset] <span class="op">-</span> profile[:,<span class="dv">1</span>][subset])<span class="op">**</span><span class="dv">2</span> <span class="op">/</span> profile[:,<span class="dv">2</span>][subset]<span class="op">**</span><span class="dv">2</span>).<span class="bu">sum</span>() <span class="op">/</span> (calc_profile[subset].shape[<span class="dv">0</span>] <span class="op">-</span> <span class="dv">2</span>)</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Profile chi-squared ="</span>,prof_chisquared)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Profile chi-squared = 3.5833747277018166</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="optimising-against-the-profile-chi2" class="level1">
+<h1>Optimising against the profile <span class="math inline">\(\chi^2\)</span></h1>
+<p>Now that we know how to calculate the profile <span class="math inline">\(\chi^2\)</span>, we should be able to write a function to replace the intensity <span class="math inline">\(\chi^2\)</span> figure of merit used during the local optimisation code in <em>GALLOP</em>.</p>
+<p>Following on from the theme of my previous posts, we’ll stick with verapamil hydrochloride as our test structure. All the data required to replicate this work can be downloaded <a href="https://github.com/mspillman/blog/blob/master/_notebooks/files/verapamil_hydrochloride.zip">here</a>.</p>
+<p>First, let’s create our structure object and add the data and Z-matrices to it.</p>
+<div class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> gallop.structure <span class="im">import</span> Structure</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> gallop.optim <span class="im">import</span> local</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> gallop.optim <span class="im">import</span> Swarm</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>mystructure <span class="op">=</span> Structure(name<span class="op">=</span><span class="st">"VerapamilHCl"</span>, ignore_H_atoms<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>mystructure.add_data(<span class="st">"files/Verap.sdi"</span>, source<span class="op">=</span><span class="st">"DASH"</span>)</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>mystructure.add_zmatrix(<span class="st">"files/CURHOM_1.zmatrix"</span>)</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>mystructure.add_zmatrix(<span class="st">"files/CURHOM_2.zmatrix"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Added Z-matrix with Filename: files/CURHOM_1.zmatrix
+Non-H atoms: 1
+refinable torsions: 0
+Degrees of freedom: 3
+Added Z-matrix with Filename: files/CURHOM_2.zmatrix
+Non-H atoms: 33
+refinable torsions: 13
+Degrees of freedom: 20 (7 + 13)</code></pre>
+</div>
+</div>
+<p>Let’s now write a function that calculates the profile <span class="math inline">\(\chi^2\)</span>. We can then use a pytorch <a href="https://pytorch.org/docs/stable/jit.html">just-in-time</a> compilation decorator to hopefully boost performance a bit.</p>
+<p>We’ll be calculating many profiles at the same time, so let’s check the logic involved. We will have two pytorch tensors, which will need multiplication then subsequent summation. The <code>calculated_intensities</code> pytorch tensor has shape (n_particles, n_intensities) and the <code>baseline_peaks</code> array has shape (n_intensities, n_points). For each particle, what we want to do is multiply each row of the baseline_peaks by the corresponding calculated intensity, then sum each of the columns to calculate the profile. This is a straightforward matrix multiplication, which can be expressed in torch using the <code>@</code> operator. The end result will be a pytorch tensor with shape (n_particles, n_points).</p>
+<div class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="at">@torch.jit.script</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_prof_chisquared(calculated_intensities, baseline_peaks, scale_numerator, weights, profile):</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="co">    Calculates profile chisquared from a set of calculated intensities, and baseline peaks derived</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="co">    from a DASH Pawley PIK file.</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="co">        calculated_intensities (PyTorch Tensor): Intensities calculated during SDPD with GALLOP</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="co">                                                 Shape (n_particles, n_intensities)</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a><span class="co">        baseline_peaks (PyTorch Tensor):         Baseline peaks extracted from the DASH PIK file</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a><span class="co">                                                 Shape (n_intensities, n_points)</span></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a><span class="co">        scale_numerator (PyTorch Tensor):        Sum of the observed intensities for all points</span></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a><span class="co">                                                 Shape (1,)</span></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a><span class="co">        weights (PyTorch Tensor):                Tensor of (1/esd)**2 values, Precalculated to</span></span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a><span class="co">                                                 save time. Shape (n_points,).</span></span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a><span class="co">        profile (PyTorch Tensor):                Tensor of the PIK profile, Shape (n_points, 3)</span></span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a><span class="co">        PyTorch Tensor: A tensor with shape (n_particles,) containing the profile</span></span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a><span class="co">                        chi-square values</span></span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Calculate the profiles by matrix multiplication</span></span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a>    calc_profiles <span class="op">=</span> calculated_intensities <span class="op">@</span> baseline_peaks</span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Calculate the scaling factors for the calculated profiles</span></span>
+<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a>    scale_denominator <span class="op">=</span> calc_profiles.<span class="bu">sum</span>(dim<span class="op">=</span><span class="dv">1</span>).unsqueeze(<span class="dv">1</span>)</span>
+<span id="cb17-27"><a href="#cb17-27" aria-hidden="true" tabindex="-1"></a>    scale <span class="op">=</span> scale_numerator <span class="op">/</span> scale_denominator</span>
+<span id="cb17-28"><a href="#cb17-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-29"><a href="#cb17-29" aria-hidden="true" tabindex="-1"></a>    <span class="co"># The "-2" in the denominator is because DASH refines two background terms</span></span>
+<span id="cb17-30"><a href="#cb17-30" aria-hidden="true" tabindex="-1"></a>    <span class="co"># during the Pawley refinement by default</span></span>
+<span id="cb17-31"><a href="#cb17-31" aria-hidden="true" tabindex="-1"></a>    prof_chisquared <span class="op">=</span> ((weights<span class="op">*</span>((scale<span class="op">*</span>calc_profiles <span class="op">-</span> profile[:,<span class="dv">1</span>])<span class="op">**</span><span class="dv">2</span>)</span>
+<span id="cb17-32"><a href="#cb17-32" aria-hidden="true" tabindex="-1"></a>                    ).<span class="bu">sum</span>(dim<span class="op">=</span><span class="dv">1</span>).reshape(<span class="op">-</span><span class="dv">1</span>,<span class="dv">1</span>) <span class="op">/</span> (profile.shape[<span class="dv">0</span>]<span class="op">-</span><span class="dv">2</span>)).squeeze(<span class="dv">1</span>)</span>
+<span id="cb17-33"><a href="#cb17-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> prof_chisquared</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We’ll now need to write our function for the GALLOP loop. One thing that’s worth adding is the ability to reduce the number of points in the profile. This may be useful to help boost performance if the profile has been collected with a very small step-size. This is visualised in the plot below, which shows the first peak in the verapamil hydrochloride data, plotted with different step sizes along the profile.</p>
+<div class="cell" data-execution_count="8">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>position <span class="op">=</span> profile[:,<span class="dv">0</span>][baseline_peaks[<span class="dv">0</span>] <span class="op">&gt;</span> <span class="dv">0</span>]</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>first_peak <span class="op">=</span> baseline_peaks[<span class="dv">0</span>][baseline_peaks[<span class="dv">0</span>] <span class="op">&gt;</span> <span class="dv">0</span>]</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">4</span>, figsize<span class="op">=</span>(<span class="dv">10</span>,<span class="dv">10</span>))</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>colour <span class="op">=</span> [<span class="st">"b"</span>, <span class="st">"r"</span>, <span class="st">"g"</span>, <span class="st">"k"</span>]</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">4</span>):</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>    ax[i].scatter(position[::<span class="dv">2</span><span class="op">**</span>i],first_peak[::<span class="dv">2</span><span class="op">**</span>i], c<span class="op">=</span>colour[i])</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>    ax[i].plot(position[::<span class="dv">2</span><span class="op">**</span>i],first_peak[::<span class="dv">2</span><span class="op">**</span>i], c<span class="op">=</span>colour[i])</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>    ax[i].legend([<span class="ss">f"step = </span><span class="sc">{</span><span class="dv">2</span><span class="op">**</span>i<span class="sc">}</span><span class="ss">"</span>])</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>    ax[i].set_ylabel(<span class="st">"Intensity"</span>)</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>    ax[i].set_xlim(position.<span class="bu">min</span>(), position.<span class="bu">max</span>())</span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>ax[i].set_xlabel(<span class="st">"$2</span><span class="ch">\\</span><span class="st">theta$"</span>)</span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<p><img src="2022-01-08-Profile-Chi-Squared-Optimisation_files/figure-html/cell-9-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>This plot shows that significantly reducing the number of points in the profile, even at the lowest angle (where peaks are likely to be sharper) still retains the peak shape, so may allow us to cut the number of points we need to evaluate without reducing the accuracy of our results. This approach gives a consistent step size over the whole profile - there are probably more sophisticated ways of sampling from the profile that might work even better, perhaps non-uniform sampling that is guided by increasing peak-width with <span class="math inline">\(2\theta\)</span>.</p>
+<p>Now we’ll write our <em>GALLOP</em> loop - effectively, this is a slightly modified version of what is on the <a href="https://github.com/mspillman/gallop/#run-gallop-via-python-scripts--jupyter-notebooks"><em>GALLOP</em> github repository</a>, wrapped in a function to allow easy comparison of the profile and intensity <span class="math inline">\(\chi^2\)</span> functions with the same code.</p>
+<div class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> tqdm</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> time</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> gallop <span class="im">import</span> zm_to_cart</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> gallop <span class="im">import</span> intensities</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> gallop <span class="im">import</span> tensor_prep</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> gallop <span class="im">import</span> chi2</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> gallop_solve(mystructure, n_particles, n_swarms, learning_rate, gallop_iters,</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>            local_iterations, step<span class="op">=</span><span class="dv">1</span>, use_profile_chisquared<span class="op">=</span><span class="va">True</span>, seed<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a><span class="co">    Solve structures with GALLOP, and easily toggle between profile chisquared</span></span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a><span class="co">    and intensity chisquared.</span></span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a><span class="co">        mystructure (Structure): GALLOP structure object</span></span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a><span class="co">        n_particles (int): number of particles</span></span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a><span class="co">        n_swarms (int): number of swarms</span></span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a><span class="co">        learning_rate (float): Learning rate</span></span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a><span class="co">        gallop_iters (int): Number of GALLOP iterations</span></span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a><span class="co">        local_iterations (int): Number of local iterations per GALLOP iteration</span></span>
+<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a><span class="co">        step (int, optional): Slicing of the profile array to select fractions</span></span>
+<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a><span class="co">            of the data. Step = 2 would select every other point in the profile.</span></span>
+<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a><span class="co">            Defaults to 1 (i.e. all points in the profile)</span></span>
+<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a><span class="co">        use_profile_chisquared (bool, optional): Toggle between profile and</span></span>
+<span id="cb19-25"><a href="#cb19-25" aria-hidden="true" tabindex="-1"></a><span class="co">            intensity chisquared. Defaults to True.</span></span>
+<span id="cb19-26"><a href="#cb19-26" aria-hidden="true" tabindex="-1"></a><span class="co">        seed (int): Defaults to None. Random seed to use for numpy.</span></span>
+<span id="cb19-27"><a href="#cb19-27" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb19-28"><a href="#cb19-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> seed <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="cb19-29"><a href="#cb19-29" aria-hidden="true" tabindex="-1"></a>        np.random.seed(seed)</span>
+<span id="cb19-30"><a href="#cb19-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-31"><a href="#cb19-31" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Let's first create our swarm object and generate the random starting</span></span>
+<span id="cb19-32"><a href="#cb19-32" aria-hidden="true" tabindex="-1"></a>    <span class="co"># positions</span></span>
+<span id="cb19-33"><a href="#cb19-33" aria-hidden="true" tabindex="-1"></a>    swarm <span class="op">=</span> Swarm(mystructure, n_particles<span class="op">=</span>n_particles, n_swarms<span class="op">=</span>n_swarms)</span>
+<span id="cb19-34"><a href="#cb19-34" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Generating start positions"</span>)</span>
+<span id="cb19-35"><a href="#cb19-35" aria-hidden="true" tabindex="-1"></a>    external, internal <span class="op">=</span> swarm.get_initial_positions()</span>
+<span id="cb19-36"><a href="#cb19-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-37"><a href="#cb19-37" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Get the Torch tensors we'll need for calculating the profile chisquared</span></span>
+<span id="cb19-38"><a href="#cb19-38" aria-hidden="true" tabindex="-1"></a>    subset <span class="op">=</span> mystructure.n_contributing_peaks <span class="op">&gt;</span> <span class="dv">0</span></span>
+<span id="cb19-39"><a href="#cb19-39" aria-hidden="true" tabindex="-1"></a>    baseline_peaks <span class="op">=</span> torch.from_numpy(</span>
+<span id="cb19-40"><a href="#cb19-40" aria-hidden="true" tabindex="-1"></a>                            mystructure.baseline_peaks[:,subset][:,::step]</span>
+<span id="cb19-41"><a href="#cb19-41" aria-hidden="true" tabindex="-1"></a>                        ).<span class="bu">type</span>(torch.float32).cuda()</span>
+<span id="cb19-42"><a href="#cb19-42" aria-hidden="true" tabindex="-1"></a>    profile <span class="op">=</span> torch.from_numpy(</span>
+<span id="cb19-43"><a href="#cb19-43" aria-hidden="true" tabindex="-1"></a>                    mystructure.profile[subset][::step]</span>
+<span id="cb19-44"><a href="#cb19-44" aria-hidden="true" tabindex="-1"></a>                ).<span class="bu">type</span>(torch.float32).cuda()</span>
+<span id="cb19-45"><a href="#cb19-45" aria-hidden="true" tabindex="-1"></a>    scale_numerator <span class="op">=</span> profile[:,<span class="dv">1</span>].<span class="bu">sum</span>()</span>
+<span id="cb19-46"><a href="#cb19-46" aria-hidden="true" tabindex="-1"></a>    weights <span class="op">=</span> profile[:,<span class="dv">2</span>]<span class="op">**</span>(<span class="op">-</span><span class="dv">2</span>)</span>
+<span id="cb19-47"><a href="#cb19-47" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Running GALLOP"</span>)</span>
+<span id="cb19-48"><a href="#cb19-48" aria-hidden="true" tabindex="-1"></a>    <span class="co"># The main GALLOP loop</span></span>
+<span id="cb19-49"><a href="#cb19-49" aria-hidden="true" tabindex="-1"></a>    start_time <span class="op">=</span> time.time()</span>
+<span id="cb19-50"><a href="#cb19-50" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(gallop_iters):</span>
+<span id="cb19-51"><a href="#cb19-51" aria-hidden="true" tabindex="-1"></a>        tensors <span class="op">=</span> tensor_prep.get_all_required_tensors(mystructure,</span>
+<span id="cb19-52"><a href="#cb19-52" aria-hidden="true" tabindex="-1"></a>                                external<span class="op">=</span>external, internal<span class="op">=</span>internal)</span>
+<span id="cb19-53"><a href="#cb19-53" aria-hidden="true" tabindex="-1"></a>        optimizer <span class="op">=</span> torch.optim.Adam([tensors[<span class="st">"zm"</span>][<span class="st">"external"</span>],</span>
+<span id="cb19-54"><a href="#cb19-54" aria-hidden="true" tabindex="-1"></a>                                    tensors[<span class="st">"zm"</span>][<span class="st">"internal"</span>]],</span>
+<span id="cb19-55"><a href="#cb19-55" aria-hidden="true" tabindex="-1"></a>                                    lr<span class="op">=</span>learning_rate,</span>
+<span id="cb19-56"><a href="#cb19-56" aria-hidden="true" tabindex="-1"></a>                                    betas<span class="op">=</span>[<span class="fl">0.9</span>,<span class="fl">0.9</span>])</span>
+<span id="cb19-57"><a href="#cb19-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-58"><a href="#cb19-58" aria-hidden="true" tabindex="-1"></a>        local_iters <span class="op">=</span> tqdm.trange(local_iterations)</span>
+<span id="cb19-59"><a href="#cb19-59" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> j <span class="kw">in</span> local_iters:</span>
+<span id="cb19-60"><a href="#cb19-60" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Zero the gradients before each iteration otherwise they accumulate</span></span>
+<span id="cb19-61"><a href="#cb19-61" aria-hidden="true" tabindex="-1"></a>            optimizer.zero_grad()</span>
+<span id="cb19-62"><a href="#cb19-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-63"><a href="#cb19-63" aria-hidden="true" tabindex="-1"></a>            asymmetric_frac_coords <span class="op">=</span> zm_to_cart.get_asymmetric_coords(<span class="op">**</span>tensors[<span class="st">"zm"</span>])</span>
+<span id="cb19-64"><a href="#cb19-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-65"><a href="#cb19-65" aria-hidden="true" tabindex="-1"></a>            calculated_intensities <span class="op">=</span> intensities.calculate_intensities(</span>
+<span id="cb19-66"><a href="#cb19-66" aria-hidden="true" tabindex="-1"></a>                                    asymmetric_frac_coords, <span class="op">**</span>tensors[<span class="st">"int_tensors"</span>])</span>
+<span id="cb19-67"><a href="#cb19-67" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> use_profile_chisquared:</span>
+<span id="cb19-68"><a href="#cb19-68" aria-hidden="true" tabindex="-1"></a>                chisquared <span class="op">=</span> get_prof_chisquared(calculated_intensities, baseline_peaks,</span>
+<span id="cb19-69"><a href="#cb19-69" aria-hidden="true" tabindex="-1"></a>                                                scale_numerator, weights, profile)</span>
+<span id="cb19-70"><a href="#cb19-70" aria-hidden="true" tabindex="-1"></a>            <span class="cf">else</span>:</span>
+<span id="cb19-71"><a href="#cb19-71" aria-hidden="true" tabindex="-1"></a>                chisquared <span class="op">=</span> chi2.calc_chisqd(calculated_intensities,</span>
+<span id="cb19-72"><a href="#cb19-72" aria-hidden="true" tabindex="-1"></a>                                            <span class="op">**</span>tensors[<span class="st">"chisqd_tensors"</span>])</span>
+<span id="cb19-73"><a href="#cb19-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-74"><a href="#cb19-74" aria-hidden="true" tabindex="-1"></a>            <span class="co"># pytorch needs a scalar from which to calculate the gradients, here use</span></span>
+<span id="cb19-75"><a href="#cb19-75" aria-hidden="true" tabindex="-1"></a>            <span class="co"># the sum of all values - as all of the chi-squared values are independent,</span></span>
+<span id="cb19-76"><a href="#cb19-76" aria-hidden="true" tabindex="-1"></a>            <span class="co"># the gradients will be correctly propagated to the relevant DoFs.</span></span>
+<span id="cb19-77"><a href="#cb19-77" aria-hidden="true" tabindex="-1"></a>            L <span class="op">=</span> torch.<span class="bu">sum</span>(chisquared)</span>
+<span id="cb19-78"><a href="#cb19-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-79"><a href="#cb19-79" aria-hidden="true" tabindex="-1"></a>            <span class="co"># For the last iteration, don't step the optimiser, otherwise the chi2</span></span>
+<span id="cb19-80"><a href="#cb19-80" aria-hidden="true" tabindex="-1"></a>            <span class="co"># value won't correspond to the DoFs</span></span>
+<span id="cb19-81"><a href="#cb19-81" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> j <span class="op">!=</span> local_iterations <span class="op">-</span> <span class="dv">1</span>:</span>
+<span id="cb19-82"><a href="#cb19-82" aria-hidden="true" tabindex="-1"></a>                <span class="co"># Backwards pass through computational graph gives the gradients</span></span>
+<span id="cb19-83"><a href="#cb19-83" aria-hidden="true" tabindex="-1"></a>                L.backward()</span>
+<span id="cb19-84"><a href="#cb19-84" aria-hidden="true" tabindex="-1"></a>                optimizer.step()</span>
+<span id="cb19-85"><a href="#cb19-85" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Print out some info during the runs</span></span>
+<span id="cb19-86"><a href="#cb19-86" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> j <span class="op">==</span> <span class="dv">0</span> <span class="kw">or</span> (j<span class="op">+</span><span class="dv">1</span>) <span class="op">%</span> <span class="dv">10</span> <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb19-87"><a href="#cb19-87" aria-hidden="true" tabindex="-1"></a>                local_iters.set_description(</span>
+<span id="cb19-88"><a href="#cb19-88" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"GALLOP iter </span><span class="sc">{:04d}</span><span class="st"> LO iter </span><span class="sc">{:04d}</span><span class="st"> min chi2 </span><span class="sc">{:.1f}</span><span class="st">"</span>.<span class="bu">format</span>(</span>
+<span id="cb19-89"><a href="#cb19-89" aria-hidden="true" tabindex="-1"></a>                        i<span class="op">+</span><span class="dv">1</span>, j<span class="op">+</span><span class="dv">1</span>, chisquared.<span class="bu">min</span>().item()))</span>
+<span id="cb19-90"><a href="#cb19-90" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Save the results in a dictionary which is expected by the files and swarm</span></span>
+<span id="cb19-91"><a href="#cb19-91" aria-hidden="true" tabindex="-1"></a>        <span class="co"># functions. The tensors should be converted to CPU-based numpy arrays.</span></span>
+<span id="cb19-92"><a href="#cb19-92" aria-hidden="true" tabindex="-1"></a>        result <span class="op">=</span> {</span>
+<span id="cb19-93"><a href="#cb19-93" aria-hidden="true" tabindex="-1"></a>            <span class="st">"external"</span>     : tensors[<span class="st">"zm"</span>][<span class="st">"external"</span>].detach().cpu().numpy(),</span>
+<span id="cb19-94"><a href="#cb19-94" aria-hidden="true" tabindex="-1"></a>            <span class="st">"internal"</span>     : tensors[<span class="st">"zm"</span>][<span class="st">"internal"</span>].detach().cpu().numpy(),</span>
+<span id="cb19-95"><a href="#cb19-95" aria-hidden="true" tabindex="-1"></a>            <span class="st">"chi_2"</span>        : chisquared.detach().cpu().numpy(),</span>
+<span id="cb19-96"><a href="#cb19-96" aria-hidden="true" tabindex="-1"></a>            <span class="st">"GALLOP Iter"</span>  : i</span>
+<span id="cb19-97"><a href="#cb19-97" aria-hidden="true" tabindex="-1"></a>            }</span>
+<span id="cb19-98"><a href="#cb19-98" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Output a CIF of the best result</span></span>
+<span id="cb19-99"><a href="#cb19-99" aria-hidden="true" tabindex="-1"></a>        files.save_CIF_of_best_result(mystructure, result, start_time)</span>
+<span id="cb19-100"><a href="#cb19-100" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Swarm update step</span></span>
+<span id="cb19-101"><a href="#cb19-101" aria-hidden="true" tabindex="-1"></a>        external, internal <span class="op">=</span> swarm.update_position(result<span class="op">=</span>result, verbose<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb19-102"><a href="#cb19-102" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> time.time() <span class="op">-</span> start_time</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Let’s give this a go! In the first instance, we’ll use the full profile (i.e.&nbsp;step = 1), then have a go at increasing the step size. I’ll be running this on a machine with an Nvidia RTX2060 GPU, and a fairly old i5 CPU.</p>
+<div class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>n_particles <span class="op">=</span> <span class="dv">20000</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>n_swarms <span class="op">=</span> <span class="dv">20</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>learning_rate <span class="op">=</span> <span class="fl">3e-2</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>gallop_iters <span class="op">=</span> <span class="dv">10</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>local_iterations <span class="op">=</span> <span class="dv">500</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>step <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>use_profile_chisquared <span class="op">=</span> <span class="va">True</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>total_time_prof_1 <span class="op">=</span> gallop_solve(mystructure, n_particles, n_swarms, learning_rate, gallop_iters, local_iterations,</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>            step<span class="op">=</span>step, use_profile_chisquared<span class="op">=</span>use_profile_chisquared)</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Total time (profile, step 1):"</span>,np.around(total_time_prof_1 <span class="op">/</span> <span class="dv">60</span>, <span class="dv">2</span>),<span class="st">"min"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Generating start positions
+Total degrees of freedom: 23
+Total external degrees of freedom: 10 (pos: 6 rot: 4 )
+Total internal degrees of freedom: 13</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>100%|██████████| 20/20 [00:00&lt;00:00, 689.69it/s]</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Running GALLOP</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>GALLOP iter 0001 LO iter 0500 min chi2 114.1: 100%|██████████| 500/500 [01:00&lt;00:00,  8.22it/s]
+GALLOP iter 0002 LO iter 0500 min chi2 44.3: 100%|██████████| 500/500 [00:59&lt;00:00,  8.35it/s]
+GALLOP iter 0003 LO iter 0500 min chi2 20.1: 100%|██████████| 500/500 [00:59&lt;00:00,  8.41it/s]
+GALLOP iter 0004 LO iter 0500 min chi2 19.6: 100%|██████████| 500/500 [00:59&lt;00:00,  8.40it/s]
+GALLOP iter 0005 LO iter 0500 min chi2 19.2: 100%|██████████| 500/500 [00:59&lt;00:00,  8.40it/s]
+GALLOP iter 0006 LO iter 0500 min chi2 19.3: 100%|██████████| 500/500 [00:59&lt;00:00,  8.40it/s]
+GALLOP iter 0007 LO iter 0500 min chi2 19.4: 100%|██████████| 500/500 [00:59&lt;00:00,  8.39it/s]
+GALLOP iter 0008 LO iter 0500 min chi2 19.1: 100%|██████████| 500/500 [00:59&lt;00:00,  8.40it/s]
+GALLOP iter 0009 LO iter 0500 min chi2 19.1: 100%|██████████| 500/500 [01:01&lt;00:00,  8.19it/s]
+GALLOP iter 0010 LO iter 0500 min chi2 19.1: 100%|██████████| 500/500 [00:59&lt;00:00,  8.40it/s]</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Total time (profile, step 1): 10.04 min</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>step <span class="op">=</span> <span class="dv">2</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>total_time_prof_2 <span class="op">=</span> gallop_solve(mystructure, n_particles, n_swarms, learning_rate, gallop_iters, local_iterations,</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>            step<span class="op">=</span>step, use_profile_chisquared<span class="op">=</span>use_profile_chisquared)</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Total time (profile, step 2):"</span>,np.around(total_time_prof_2 <span class="op">/</span> <span class="dv">60</span>, <span class="dv">2</span>),<span class="st">"min"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Generating start positions</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>100%|██████████| 20/20 [00:00&lt;00:00, 800.13it/s]</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Running GALLOP</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>GALLOP iter 0001 LO iter 0500 min chi2 110.5: 100%|██████████| 500/500 [00:54&lt;00:00,  9.09it/s]
+GALLOP iter 0002 LO iter 0500 min chi2 77.8: 100%|██████████| 500/500 [00:55&lt;00:00,  8.96it/s] 
+GALLOP iter 0003 LO iter 0500 min chi2 71.7: 100%|██████████| 500/500 [00:55&lt;00:00,  8.98it/s]
+GALLOP iter 0004 LO iter 0500 min chi2 70.9: 100%|██████████| 500/500 [00:55&lt;00:00,  8.99it/s]
+GALLOP iter 0005 LO iter 0500 min chi2 34.7: 100%|██████████| 500/500 [00:55&lt;00:00,  9.00it/s]
+GALLOP iter 0006 LO iter 0500 min chi2 19.6: 100%|██████████| 500/500 [00:55&lt;00:00,  8.98it/s]
+GALLOP iter 0007 LO iter 0500 min chi2 19.3: 100%|██████████| 500/500 [00:55&lt;00:00,  8.99it/s]
+GALLOP iter 0008 LO iter 0500 min chi2 19.4: 100%|██████████| 500/500 [00:55&lt;00:00,  8.99it/s]
+GALLOP iter 0009 LO iter 0500 min chi2 19.1: 100%|██████████| 500/500 [00:55&lt;00:00,  8.99it/s]
+GALLOP iter 0010 LO iter 0500 min chi2 19.2: 100%|██████████| 500/500 [00:55&lt;00:00,  9.00it/s]</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Total time (profile, step 2): 9.32 min</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="12">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>step <span class="op">=</span> <span class="dv">4</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>total_time_prof_4 <span class="op">=</span> gallop_solve(mystructure, n_particles, n_swarms, learning_rate, gallop_iters, local_iterations,</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>            step<span class="op">=</span>step, use_profile_chisquared<span class="op">=</span>use_profile_chisquared)</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Total time (profile, step 4):"</span>,np.around(total_time_prof_4 <span class="op">/</span> <span class="dv">60</span>, <span class="dv">2</span>),<span class="st">"min"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Generating start positions</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>100%|██████████| 20/20 [00:00&lt;00:00, 740.83it/s]</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Running GALLOP</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>GALLOP iter 0001 LO iter 0500 min chi2 109.1: 100%|██████████| 500/500 [00:52&lt;00:00,  9.49it/s]
+GALLOP iter 0002 LO iter 0500 min chi2 40.2: 100%|██████████| 500/500 [00:52&lt;00:00,  9.48it/s]
+GALLOP iter 0003 LO iter 0500 min chi2 40.5: 100%|██████████| 500/500 [00:52&lt;00:00,  9.45it/s]
+GALLOP iter 0004 LO iter 0500 min chi2 39.3: 100%|██████████| 500/500 [00:53&lt;00:00,  9.31it/s]
+GALLOP iter 0005 LO iter 0500 min chi2 27.5: 100%|██████████| 500/500 [00:52&lt;00:00,  9.61it/s]
+GALLOP iter 0006 LO iter 0500 min chi2 20.0: 100%|██████████| 500/500 [00:49&lt;00:00, 10.02it/s]
+GALLOP iter 0007 LO iter 0500 min chi2 19.6: 100%|██████████| 500/500 [00:49&lt;00:00, 10.08it/s]
+GALLOP iter 0008 LO iter 0500 min chi2 19.4: 100%|██████████| 500/500 [00:49&lt;00:00, 10.04it/s]
+GALLOP iter 0009 LO iter 0500 min chi2 19.4: 100%|██████████| 500/500 [00:50&lt;00:00,  9.99it/s]
+GALLOP iter 0010 LO iter 0500 min chi2 19.4: 100%|██████████| 500/500 [00:49&lt;00:00, 10.10it/s]</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Total time (profile, step 4): 8.6 min</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>step <span class="op">=</span> <span class="dv">8</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>total_time_prof_8 <span class="op">=</span> gallop_solve(mystructure, n_particles, n_swarms, learning_rate, gallop_iters, local_iterations,</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>            step<span class="op">=</span>step, use_profile_chisquared<span class="op">=</span>use_profile_chisquared)</span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Total time (profile, step 8):"</span>,np.around(total_time_prof_8 <span class="op">/</span> <span class="dv">60</span>, <span class="dv">2</span>),<span class="st">"min"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Generating start positions</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>100%|██████████| 20/20 [00:00&lt;00:00, 800.10it/s]</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Running GALLOP</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>GALLOP iter 0001 LO iter 0500 min chi2 100.4: 100%|██████████| 500/500 [00:48&lt;00:00, 10.39it/s]
+GALLOP iter 0002 LO iter 0500 min chi2 40.6: 100%|██████████| 500/500 [00:48&lt;00:00, 10.41it/s]
+GALLOP iter 0003 LO iter 0500 min chi2 40.8: 100%|██████████| 500/500 [00:49&lt;00:00, 10.12it/s]
+GALLOP iter 0004 LO iter 0500 min chi2 21.5: 100%|██████████| 500/500 [00:48&lt;00:00, 10.29it/s]
+GALLOP iter 0005 LO iter 0500 min chi2 21.2: 100%|██████████| 500/500 [00:48&lt;00:00, 10.24it/s]
+GALLOP iter 0006 LO iter 0500 min chi2 21.2: 100%|██████████| 500/500 [00:51&lt;00:00,  9.79it/s]
+GALLOP iter 0007 LO iter 0500 min chi2 21.2: 100%|██████████| 500/500 [00:52&lt;00:00,  9.53it/s]
+GALLOP iter 0008 LO iter 0500 min chi2 21.0: 100%|██████████| 500/500 [00:52&lt;00:00,  9.51it/s]
+GALLOP iter 0009 LO iter 0500 min chi2 21.1: 100%|██████████| 500/500 [00:54&lt;00:00,  9.11it/s]
+GALLOP iter 0010 LO iter 0500 min chi2 21.0: 100%|██████████| 500/500 [00:54&lt;00:00,  9.19it/s]</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Total time (profile, step 8): 8.54 min</code></pre>
+</div>
+</div>
+<p>As expected, when we see a decrease in time taken when we increase the step size.</p>
+<section id="performance-comparison-to-intensity-chi2" class="level2">
+<h2 class="anchored" data-anchor-id="performance-comparison-to-intensity-chi2">Performance comparison to intensity <span class="math inline">\(\chi^2\)</span></h2>
+<p>Let’s now run it again, using the standard intensity <span class="math inline">\(\chi^2\)</span> figure of merit, and plot the run times for easy comparison.</p>
+<div class="cell" data-execution_count="15">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>step <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>use_profile_chisquared <span class="op">=</span> <span class="va">False</span></span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>total_time_int <span class="op">=</span> gallop_solve(mystructure, n_particles, n_swarms, learning_rate, gallop_iters, local_iterations,</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>            step<span class="op">=</span>step, use_profile_chisquared<span class="op">=</span>use_profile_chisquared)</span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Total time (intensity):"</span>,np.around(total_time_int <span class="op">/</span> <span class="dv">60</span>, <span class="dv">2</span>),<span class="st">"min"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Generating start positions</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>100%|██████████| 20/20 [00:00&lt;00:00, 606.07it/s]</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Running GALLOP</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>GALLOP iter 0001 LO iter 0500 min chi2 422.9: 100%|██████████| 500/500 [00:54&lt;00:00,  9.15it/s]
+GALLOP iter 0002 LO iter 0500 min chi2 247.6: 100%|██████████| 500/500 [00:55&lt;00:00,  9.06it/s]
+GALLOP iter 0003 LO iter 0500 min chi2 212.9: 100%|██████████| 500/500 [00:55&lt;00:00,  9.04it/s]
+GALLOP iter 0004 LO iter 0500 min chi2 166.9: 100%|██████████| 500/500 [00:55&lt;00:00,  9.03it/s]
+GALLOP iter 0005 LO iter 0500 min chi2 83.3: 100%|██████████| 500/500 [00:55&lt;00:00,  9.01it/s] 
+GALLOP iter 0006 LO iter 0500 min chi2 58.0: 100%|██████████| 500/500 [00:55&lt;00:00,  9.02it/s]
+GALLOP iter 0007 LO iter 0500 min chi2 57.9: 100%|██████████| 500/500 [00:55&lt;00:00,  9.03it/s]
+GALLOP iter 0008 LO iter 0500 min chi2 56.7: 100%|██████████| 500/500 [00:55&lt;00:00,  9.03it/s]
+GALLOP iter 0009 LO iter 0500 min chi2 56.7: 100%|██████████| 500/500 [00:55&lt;00:00,  9.02it/s]
+GALLOP iter 0010 LO iter 0500 min chi2 57.1: 100%|██████████| 500/500 [00:55&lt;00:00,  9.01it/s]</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Total time (intensity): 9.27 min</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="21">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>plt.plot([<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">4</span>,<span class="dv">8</span>],[total_time_prof_1, total_time_prof_2, total_time_prof_4, total_time_prof_8])</span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>plt.plot([<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">4</span>,<span class="dv">8</span>],[total_time_int,total_time_int,total_time_int,total_time_int])</span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Profile step"</span>)</span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Time (seconds)"</span>)</span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a>plt.legend([<span class="st">"Profile $</span><span class="ch">\\</span><span class="st">chi^2$"</span>,<span class="st">"Intensity $</span><span class="ch">\\</span><span class="st">chi^2$"</span>])</span>
+<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<p><img src="2022-01-08-Profile-Chi-Squared-Optimisation_files/figure-html/cell-16-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>We see that using the implementation of profile <span class="math inline">\(\chi^2\)</span> in this notebook with the full profile incurs an approximately 10 % performance penalty relative to the intensity <span class="math inline">\(\chi^2\)</span>. However, as we decrease the number of points in the profile, we see the time decrease to the extent that it ends up being about 10 % <em>faster</em> than the intensity <span class="math inline">\(\chi^2\)</span> figure of merit!</p>
+<p>However, given that the y-axis as plotted starts around 510 seconds, the time saving overall is not huge. This is because the biggest performance bottleneck in the <em>GALLOP</em> code is the internal to Cartesian coordinate conversion. So even if the figure of merit calculation follows the exponential decay function seen in the graph, then at most, we can expect around a 10 % reduction in time.</p>
+<p>In terms of the quality of the results obtained, I checked the 15 molecule RMSD using Mercury - results have been plotted below. There’s not much difference between them - only at the hundredths of ångströms level.</p>
+<div class="cell" data-execution_count="26">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>profile_fifteen_mol_rmsd <span class="op">=</span> [<span class="fl">0.105</span>, <span class="fl">0.108</span>, <span class="fl">0.108</span>, <span class="fl">0.113</span>]</span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>intensity_fifteen_mol_rmsd <span class="op">=</span> [<span class="fl">0.112</span>]</span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>all_data <span class="op">=</span> profile_fifteen_mol_rmsd <span class="op">+</span> intensity_fifteen_mol_rmsd</span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a>labels <span class="op">=</span> [<span class="st">"prof_1"</span>, <span class="st">"prof_2"</span>, <span class="st">"prof_4"</span>, <span class="st">"prof_8"</span>, <span class="st">"int"</span>]</span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a>plt.bar(labels, all_data)</span>
+<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"15 molecule RMSD / Å"</span>)</span>
+<span id="cb51-7"><a href="#cb51-7" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<p><img src="2022-01-08-Profile-Chi-Squared-Optimisation_files/figure-html/cell-17-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>One final consideration is the memory use - in my testing, I did not see an appreciable difference between the profile <span class="math inline">\(\chi^2\)</span> with different step sizes and the intensity <span class="math inline">\(\chi^2\)</span>. I suspect this is because much like with the speed of the code, the internal to Cartesian coordinate conversion process contributes signficantly more to the memory use. I will look into this more in the future though!</p>
+</section>
+</section>
+<section id="conclusions" class="level1">
+<h1>Conclusions</h1>
+<p>We’ve seen in this post that it’s relatively easy to understand the PIK file produced by <em>DASH</em> after its Pawley fitting procedure, and use it to rapidly calculate full diffraction profiles. Using these reconstructed profiles, we can then calculate the profile <span class="math inline">\(\chi^2\)</span> and use this figure of merit in the optimisation of crystal structures. As it turns out, the performance of this is pretty good! The 10 % reduction in speed relative to the intensity <span class="math inline">\(\chi^2\)</span> we saw in the example we looked at here is not huge, but may still merit an update to <em>GALLOP</em> to include it as an option.</p>
+<section id="extending-this-work" class="level2">
+<h2 class="anchored" data-anchor-id="extending-this-work">Extending this work</h2>
+<p>One obvious thing to do would be to see if this can also be done easily with <em>GSAS-II</em> output files, or indeed other programs that are capable of Le Bail fits.</p>
+<p>Another interesting possibility would be to have a go using the <a href="http://objcryst.sourceforge.net/ZKrist219_847.pdf">integrated profile strategy employed by FOX (pdf)</a> which should afford improved performance.</p>
+<p>One other thing which I really should get round to looking into is how the 20 % correlation threshold used in <em>DASH</em> for the intensity <span class="math inline">\(\chi^2\)</span> calculation influences the optimisation behaviour. Given that there is no performance penalty with setting this threshold in <em>GALLOP</em> to zero, it might be interesting to run some large-scale experiments to see if there’s anything to be gained by including such lower-level correlations into the figure of merit.</p>
+<p>Anyone interested in trying that for themselves can do so in <em>GALLOP</em> python mode easily. When reading in the data, add the <code>percentage_cutoff</code> argument, which defaults to 20 in order to match <em>DASH</em>.</p>
+<div class="sourceCode" id="cb52"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>mystructure.add_data(<span class="st">"filename.sdi"</span>, source<span class="op">=</span><span class="st">"DASH"</span>, percentage_cutoff<span class="op">=</span><span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This also applies to <em>GSAS-II</em> and <em>TOPAS</em> derived data files.</p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

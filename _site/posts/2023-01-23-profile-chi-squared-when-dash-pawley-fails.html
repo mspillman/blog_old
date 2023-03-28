@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.290">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Mark Spillman">
+<meta name="dcterms.date" content="2023-01-23">
+<meta name="description" content="Pawley refinement in DASH at too high a resolution can result in a covariance matrix with ill conditioning. Using the profile \chi^2, can we still solve the structure?">
+
+<title>Mark Spillman - Solving crystal structures with GALLOP after ill conditioning errors in DASH</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Mark Spillman</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html" rel="" target="">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/mspillman" rel="" target=""><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com/mspillman" rel="" target=""><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+            <div class="quarto-navbar-tools">
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Solving crystal structures with GALLOP after ill conditioning errors in DASH</h1>
+                  <div>
+        <div class="description">
+          Pawley refinement in DASH at too high a resolution can result in a covariance matrix with ill conditioning. Using the profile <span class="math inline">\(\chi^2\)</span>, can we still solve the structure?
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">PXRD</div>
+                <div class="quarto-category">GALLOP</div>
+                <div class="quarto-category">Profile</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Mark Spillman </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">January 23, 2023</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a>
+  <ul class="collapse">
+  <li><a href="#this-post" id="toc-this-post" class="nav-link" data-scroll-target="#this-post">This post</a></li>
+  </ul></li>
+  <li><a href="#pawley-refinement-in-dash" id="toc-pawley-refinement-in-dash" class="nav-link" data-scroll-target="#pawley-refinement-in-dash">Pawley refinement in DASH</a></li>
+  <li><a href="#solving-despite-an-ill-conditioned-pawley-covariance-matrix" id="toc-solving-despite-an-ill-conditioned-pawley-covariance-matrix" class="nav-link" data-scroll-target="#solving-despite-an-ill-conditioned-pawley-covariance-matrix">Solving despite an ill conditioned Pawley covariance matrix</a></li>
+  <li><a href="#results" id="toc-results" class="nav-link" data-scroll-target="#results">Results</a></li>
+  <li><a href="#conclusions" id="toc-conclusions" class="nav-link" data-scroll-target="#conclusions">Conclusions</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<p>It’s been a long time since I updated this blog! I’m hoping to be able to update it at least a few more times this year, as I have some ideas for posts which I think some people may find useful. One post will (finally!) cover how to use TPUs with <em>GALLOP</em>. It’s taken this long because the free TPU resources available online up to this point have been extremely limited. Fortunately, Kaggle have given their users a generous TPU quota and importantly, access to a powerful enough VM to make the most of the performance of the TPU using pytorch, which is the library <em>GALLOP</em> uses for all of its calculations. I am also working on some stuff unrelated to <em>GALLOP</em> which I’m quite excited about, with a focus on PXRD indexing. I’m hoping to get it written up as a paper before the end of the year. If I manage that (and it’s a big if), there will be an accompanying blog post giving an informal summary of the work.</p>
+<section id="this-post" class="level2">
+<h2 class="anchored" data-anchor-id="this-post">This post</h2>
+<p>This is a very brief follow up <a href="https://mspillman.github.io/blog/pxrd/gallop/profile/2022/01/08/Profile-Chi-Squared-Optimisation.html">to a previous post</a> in which we looked at using <em>GALLOP</em> to optimise using the profile rather than intensity <span class="math inline">\(\chi^2\)</span> figure of merit. In that post, we showed that doing this potentially provides a small level of benefit in terms of the speed with which the runs are completed, though the number of solutions and frequency with which they are obtained is not significantly affected. As the bulk of the time spent by <em>GALLOP</em> is used for conversion of internal coordinates to Cartesian coordinates, the potential performance benefits are somewhat limited. Despite this, I’ve added the functionality to the latest version of <em>GALLOP</em> so you can try it for yourself. At the moment, this functionality is limited to data that has been fitted using <em>DASH</em>.</p>
+<p>In this post, I want to talk about an idea I had recently on a situation in which this added capability in <em>GALLOP</em> may be useful.</p>
+</section>
+</section>
+<section id="pawley-refinement-in-dash" class="level1">
+<h1>Pawley refinement in DASH</h1>
+<p>The user interface for preparing a dataset for crystal structure determination in DASH is very user friendly and intuitive. The wizard guides the user through trimming the data, background subtraction, indexing, space group determination and finally intensity extraction. However, despite the user friendly wizard, the Pawley refinement process is not without its quirks.</p>
+<p>Quite often, if you have not trimmed the data down to a low enough resolution, you will run across the following error message:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="./images/DASH_ill_conditioning_message.png" class="quarto-discovered-preview-image img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">DASH ill conditioning error message</figcaption><p></p>
+</figure>
+</div>
+<p>As you can see, the recommended course of action is to either trim the data to a lower resolution or increase the overlap criterion. This might be despite what looks like a good fit to the data:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="./images/DASH_ill_conditioned_good_fit.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">DASH Pawley fit with ill conditioning but visually a good fit</figcaption><p></p>
+</figure>
+</div>
+<p>The question then is, can we still solve the crystal structure despite this issue?</p>
+</section>
+<section id="solving-despite-an-ill-conditioned-pawley-covariance-matrix" class="level1">
+<h1>Solving despite an ill conditioned Pawley covariance matrix</h1>
+<p>I used verapamil hydrochloride (yet again!) as the test case for this particular idea. The example data supplied with <em>GALLOP</em> has been fitted with <em>DASH</em> to about 2.24 Å (equivalent to 40.2° <span class="math inline">\(2\theta\)</span> with Cu <span class="math inline">\(K_{\alpha_{1}}\)</span> radiation). I chose to refit the data, this time out to 1.75 Å (which is equivalent to 52.2° <span class="math inline">\(2\theta\)</span> with Cu <span class="math inline">\(K_{\alpha_{1}}\)</span>) using <em>DASH</em>.</p>
+<p>Unsurprisingly, given the much better resolution, there is a significant increase in the number of reflections for which intensities are extracted: 252 in the lower resolution data, 531 in the higher resolution data. As a result, the <em>DASH</em> Pawley routine gives the ill conditioning error message seen in the previous section. Despite the error, I chose to “accept” the result of the refinement during each iteration, saving the Pawley files and proceeding with <em>GALLOP</em> as normal.</p>
+<p>Using <em>GALLOP</em>, I attempted to solve the crystal structure using 20 swarms of 1000 particles both with the intensity <span class="math inline">\(\chi^2\)</span> and profile <span class="math inline">\(\chi^2\)</span> figures of merit. On the supplied example data in <em>GALLOP</em>, this number of swarms and particles is usually sufficient to solve the structure multiple times within 10 iterations, and generally gives a very low RMSD to the published crystal structure.</p>
+</section>
+<section id="results" class="level1">
+<h1>Results</h1>
+<p>Despite running for over 15 iterations, no solutions were obtained using the intensity <span class="math inline">\(\chi^2\)</span> figure of merit. However, using the profile <span class="math inline">\(\chi^2\)</span>, I was able to obtain a solution in 4 <em>GALLOP</em> iterations, which is in line with performance obtained with data that does not suffer from ill conditioning. The RMSD obtained with Mercury is also excellent - just 0.098 Å!</p>
+</section>
+<section id="conclusions" class="level1">
+<h1>Conclusions</h1>
+<p>If we are using <em>DASH</em> to do our Pawley refinements, sometimes we are forced to reduce the resolution of the data we are working with or modify other parameters such as the peak overlap criterion in an effort to avoid ill conditioning of the Pawley covariance matrix. Ill conditioning prevents the intensity <span class="math inline">\(\chi^2\)</span> figure of merit from providing an accurate assessment of the agreement between the observed and calculated intensities, and hence in <em>DASH</em> this provides an impediment to solving the crystal structure.</p>
+<p>In this blog post, we’ve seen that even when this occurs, it is still possible to solve the crystal structure using the profile <span class="math inline">\(\chi^2\)</span> figure of merit, which is not affected by the covariance matrix obtained during the Pawley refinement.</p>
+<p>As such, if you are limited to using <em>DASH</em> for intensity extraction and a dataset is proving difficult to manage, it may be possible to solve the structure despite ill conditioning. However, in addition to the strategy presented in this post, I would also recommend trying alternative refinement software such as <a href="https://subversion.xray.aps.anl.gov/trac/pyGSAS"><em>GSAS-II</em></a>, which may work more reliably on the dataset you are using than <em>DASH</em>.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

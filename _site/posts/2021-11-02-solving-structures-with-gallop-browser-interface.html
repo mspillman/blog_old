@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.290">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Mark Spillman">
+<meta name="dcterms.date" content="2021-11-02">
+<meta name="description" content="A walkthrough for using the GALLOP browser interface to solve the crystal structures of small molecules">
+
+<title>Mark Spillman - Solving structures with the GALLOP browser interface</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Mark Spillman</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html" rel="" target="">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/mspillman" rel="" target=""><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com/mspillman" rel="" target=""><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+            <div class="quarto-navbar-tools">
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Solving structures with the GALLOP browser interface</h1>
+                  <div>
+        <div class="description">
+          A walkthrough for using the GALLOP browser interface to solve the crystal structures of small molecules
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">GALLOP</div>
+                <div class="quarto-category">PXRD</div>
+                <div class="quarto-category">Python</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Mark Spillman </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">November 2, 2021</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#fitting-pxrd-data" id="toc-fitting-pxrd-data" class="nav-link" data-scroll-target="#fitting-pxrd-data">Fitting PXRD data</a>
+  <ul class="collapse">
+  <li><a href="#fitting-data-with-dash" id="toc-fitting-data-with-dash" class="nav-link" data-scroll-target="#fitting-data-with-dash">Fitting data with <em>DASH</em></a></li>
+  <li><a href="#fitting-data-with-gsas-ii" id="toc-fitting-data-with-gsas-ii" class="nav-link" data-scroll-target="#fitting-data-with-gsas-ii">Fitting data with <em>GSAS-II</em></a></li>
+  </ul></li>
+  <li><a href="#solving-structures-with-the-browser-interface" id="toc-solving-structures-with-the-browser-interface" class="nav-link" data-scroll-target="#solving-structures-with-the-browser-interface">Solving structures with the browser interface</a>
+  <ul class="collapse">
+  <li><a href="#upload-files" id="toc-upload-files" class="nav-link" data-scroll-target="#upload-files">1. Upload files</a></li>
+  <li><a href="#modify-gallop-parameters" id="toc-modify-gallop-parameters" class="nav-link" data-scroll-target="#modify-gallop-parameters">2. Modify <em>GALLOP</em> parameters</a></li>
+  <li><a href="#solve-the-structure" id="toc-solve-the-structure" class="nav-link" data-scroll-target="#solve-the-structure">3. Solve the structure</a></li>
+  <li><a href="#download-solutions-and-close-gallop" id="toc-download-solutions-and-close-gallop" class="nav-link" data-scroll-target="#download-solutions-and-close-gallop">4. Download solutions and close <em>GALLOP</em></a></li>
+  </ul></li>
+  <li><a href="#conclusions" id="toc-conclusions" class="nav-link" data-scroll-target="#conclusions">Conclusions</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<p>In my <a href="https://mspillman.github.io/blog/gallop/pxrd/python/2021/10/30/Introduction-to-GALLOP.html">previous post</a>, I went over the rationale behind <em>GALLOP</em> and some details about the algorithm.</p>
+<p>In this post, I’ll go over how to use <em>GALLOP</em> to solve the crystal structure of verapamil hydrochloride, a calcium channel blocker used in the treatment of arryhythmias. If you want to have a go yourself, you can download the diffraction data in xye format <a href="https://github.com/mspillman/blog/blob/master/_notebooks/files/Verap.xye">here</a> or my complete set of fit files in a zip archive <a href="https://github.com/mspillman/blog/blob/master/_notebooks/files/verapamil_hydrochloride.zip">here</a>. If you don’t have access to <em>DASH</em>, I recommend downloading the full set of fit files so you have access to the Z-matrices which may otherwise be tedious to generate by hand.</p>
+<p>Whilst not relevant for verapamil hydrochloride which crystallises in <span class="math inline">\(P\bar{1}\)</span>, note that currently <em>GALLOP</em> requires the space group to be in the standard setting so if you have a known unit cell in a particular non-standard space group, you should transform it to the standard setting before fitting your diffraction data for <em>GALLOP</em>.</p>
+</section>
+<section id="fitting-pxrd-data" class="level1">
+<h1>Fitting PXRD data</h1>
+<section id="fitting-data-with-dash" class="level3">
+<h3 class="anchored" data-anchor-id="fitting-data-with-dash">Fitting data with <em>DASH</em></h3>
+<p>Follow the procedure laid out in the <a href="https://www.ccdc.cam.ac.uk/support-and-resources/ccdcresources/dash.pdf"><em>DASH</em> user guide tutorial section [pdf]</a> to fit the diffraction data. You should also use DASH to generate your Z-matrices if you do not have them already. To do this, you will need a 3D molecular representation of verapamil hydrochloride which can be read in by <em>DASH</em> and converted to a Z-matrix (ZM). If you don’t want to generate one yourself, I recommend using the CSD reference code CURHOM as the basis for your ZMs.</p>
+<p>Once the Pawley refinement has finished, save the files as normal, and ensure you have access to the resultant <code>.sdi, .dsl, .hcv, .pik</code> and <code>.tic</code> files. If you do not want to include <a href="">Mogul Distribution Bias</a> to bias the starting points for the torsion angles, and you already have ZMs available, you can close <em>DASH</em> at this stage.</p>
+<p>If you wish to make use of MDB information and/or need to generate ZMs, continue on through the wizard to the settings for solving the structure with simulated annealing. Read in your molecule file to generate ZMs if required. If you wish to use MDB in your SDPD attempt, follow the instructions in section 10.3.4 in the <em>DASH</em> user guide (linked above). You will then need to generate a single <em>DASH</em> batch file using the Create batch file option highlighted in the figure below:</p>
+<p><img src="images/dbf_write.png" class="quarto-discovered-preview-image img-fluid"></p>
+<p>The resultant <code>.dbf</code> file should be made available along with the Pawley fit files produced earlier and ZMs ready for use in <em>GALLOP</em>.</p>
+</section>
+<section id="fitting-data-with-gsas-ii" class="level3">
+<h3 class="anchored" data-anchor-id="fitting-data-with-gsas-ii">Fitting data with <em>GSAS-II</em></h3>
+<p>As mentioned in the introduction, I recommend having the <em>DASH</em> produced Z-matrices (ZMs) available to save time generating one in the correct format from scratch. Eventually, I’d like to include the ability to generate ZMs natively in <em>GALLOP</em>, but that’s a few updates down the line at the moment!</p>
+<p>For a reference of the format expected if you do want to have a go at making your own, please see <a href="https://github.com/mspillman/gallop#z-matrices">here</a> for an overview.</p>
+<p><a href="https://subversion.xray.aps.anl.gov/pyGSAS/trunk/help/Tutorials.html">The <em>GSAS-II</em> tutorials</a> should be used as a guide for how to proceed with <a href="https://subversion.xray.aps.anl.gov/pyGSAS/Tutorials/FitPeaks/Fit%20Peaks.htm">indexing data</a> and subsequent <a href="https://subversion.xray.aps.anl.gov/pyGSAS/Tutorials/FitPeaks/Fit%20Peaks.htm">Pawley refinement - follow to end of Step 2</a></p>
+<p>GSAS-II by default uses the <em>Analytic Hessian</em> optimisation method. According to the documentation: <em>“It uses a custom-developed least-squares minimizer that uses singular-value decomposition (SVD) to reduce the errors caused by correlated variables and the Levenberg-Marquardt algorithm to up-weight diagonal Hessian terms when refinements fail to lower <span class="math inline">\(\chi^{2}\)</span>”</em>. The alterations to the Pawley covariance matrix this introduces causes errors when used in <em>GALLOP</em> (for example, the covariance matrix cannot be inverted or the inverse covariance matrix is not positive-definite, resulting in the potential for negative values of <span class="math inline">\(\chi^2\)</span>). To fix this issue, I suggest the following procedure:</p>
+<ol type="1">
+<li>Pawley fit the data as directed in the GSAS-II Tutorials - the analytic Hessian method can be used for this.</li>
+<li>One happy with the fit, set <strong>all</strong> refined parameters apart from peak intensities (e.g.&nbsp;peak shape, background etc) as unrefineable.</li>
+<li>See figure below: i. Reset all intensities using Pawley create, ii. The intensities will be set back to 100, but not flagged for refinement. iii. Set all intensities to refine (highlight column by clicking the refine column heading, then press Y on your keyboard), iii. Go to Controls and select <em>Analytic Jacobian</em> from the drop-down menu.</li>
+<li>Refine</li>
+<li>Once refinement is complete, save the project file, and ensure that the .gpx GSAS-II project file and the ZMs are available for use in <em>GALLOP</em>.</li>
+</ol>
+<p><img src="images/gsas_pawley.png" class="img-fluid"></p>
+</section>
+</section>
+<section id="solving-structures-with-the-browser-interface" class="level1">
+<h1>Solving structures with the browser interface</h1>
+<p>Below is a video <a href="https://youtu.be/n0aovGUS4JU">(direct link)</a> showing the browser interface being used to solve the structure of CT-DMF2, which has 42 degrees of freedom:</p>
+<div class="quarto-video ratio ratio-16x9"><iframe data-external="1" src="https://www.youtube.com/embed/n0aovGUS4JU" title="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe></div>
+<p>The video covers a few of the main features we’ll be looking at.</p>
+<p>If you have <a href="https://github.com/mspillman/gallop#local-installation">installed <em>GALLOP</em> locally</a>, then to open the program interface, open a command prompt and type the following commands:</p>
+<pre><code>C:\Users\Username&gt; conda activate gallop
+(gallop) C:\Users\Username&gt; gallop</code></pre>
+<p>Your web browser will automatically open and the following interface should appear:</p>
+<p><img src="images/gallop_main_screen.png" class="img-fluid"></p>
+<p>If you are running GALLOP on a cloud environment, then follow the general procedure laid out in the notebooks linked <a href="https://github.com/mspillman/gallop#try-gallop-on-a-free-cloud-gpu">here</a>.</p>
+<p>I will write another blog post in the future showing how to deploy GALLOP on the Google Compute Engine cloud environment.</p>
+<p>Once GALLOP is running, we will be using the following steps to solve the crystal structure of verapamil hydrochloride: 1. Upload files 2. Modify <em>GALLOP</em> parameters 3. Solve the structure 4. Download solutions and close <em>GALLOP</em></p>
+<section id="upload-files" class="level2">
+<h2 class="anchored" data-anchor-id="upload-files">1. Upload files</h2>
+<p>The radio button in the above screen shot already has “Upload files” selected, which then has an additional context menu to choose the Pawley refinement program you have used.</p>
+<p>Select the program you used to fit the diffraction data, and then either drag and drop your <em>DASH</em> or <em>GSAS-II</em> fit files and Z-matrices (ZMs) onto the uploader widget, or select “Browse files” and navigate to the folder containing your fit files and ZMs and select them all for upload. If you wish to use MDB to bias the initial torsion angles used in <em>GALLOP</em>, you should also upload the <code>.dbf</code> file produce earlier. Note that this will only be used to set the MDB torsion angle biasing, and none of the other settings included in the MDB will be used by <em>GALLOP</em>.</p>
+<p>You should end up with something that looks like this:</p>
+<p><img src="images/gallop_files_uploaded.png" class="img-fluid"></p>
+</section>
+<section id="modify-gallop-parameters" class="level2">
+<h2 class="anchored" data-anchor-id="modify-gallop-parameters">2. Modify <em>GALLOP</em> parameters</h2>
+<p>With only 23 degrees of freedom, verapamil hydrochloride is a relatively simple crystal structure for <em>GALLOP</em> and the default settings should be sufficient to solve it. However, we will make a small change to increase our chance of success.</p>
+<p>Click on the Particle Swarm menu in the side bar to expand it. We will then increase the number of swarms from 10 to 20 either by using the + symbol to increment the number, or by deleting the 10 and typing in 20:</p>
+<p><img src="images/gallop_particle_swarm_20.png" class="img-fluid"></p>
+<p>We should also decrease the number of iterations <em>GALLOP</em> will do - 10 should be sufficient. Open the General menu in the side bar, and change the Total number of iterations per run to 10.</p>
+<p><img src="images/gallop_particle_general_10.png" class="img-fluid"></p>
+<p>Once we’ve done this, then we should be ready to solve the structure.</p>
+</section>
+<section id="solve-the-structure" class="level2">
+<h2 class="anchored" data-anchor-id="solve-the-structure">3. Solve the structure</h2>
+<p>Once you are happy that all the files needed have been uploaded, and you are satisified with the settings for <em>GALLOP</em> to use, press the Solve button. Note that from this point forward, changing any of the settings whilst <em>GALLOP</em> is running will stop the run. You can still open the expandable menus to view settings or extra information provided by <em>GALLOP</em>.</p>
+<p>A number of expandable data menus will appear, and a progress bar will appear that tracks the progress of the <em>learning rate finder</em> discussed in my previous post. Once this has finished, the main <em>GALLOP</em> iterations will begin, with their own progress bar to track their progress. Once the first iteration has finished, some additional items will appear on screen. Two expandable boxes (discussed below) will appear, followed by a download link with the text “CIFs for run 1”. Lastly, a table of results for each iteration is displayed, as is an interactive figure showing the <span class="math inline">\(\chi^2\)</span> value found by each of the particles in each of the swarms. You can use your scroll wheel to zoom in, and click to drag to explore this plot without interrupting <em>GALLOP</em>.</p>
+<p><img src="images/gallop_solving.png" class="img-fluid"></p>
+<p>The Show structure expandable item allows you to view an interactive plot of the structure found during the last iteration. Click and drag to rotate, and use your scroll wheel to zoom in and out. This figure will automatically update after each iteration, and plots the best structure found <em>during the last iteration</em> - note that this is not necessarily the best structure found so far.</p>
+<p><img src="images/gallop_show_structure.png" class="img-fluid"></p>
+<p>If you are using <em>DASH</em> for Pawley fitting, the Show profile expandable item will also be visible. This allows you to see the fit to the diffraction data obtained in the last iteration.</p>
+<p><img src="images/gallop_show_profile.png" class="img-fluid"></p>
+<p>For the data fit files I have provided, a solution has <span class="math inline">\(\chi^{2}_{int}\)</span> &lt; 60. If you fitted your own data, this will differ.</p>
+</section>
+<section id="download-solutions-and-close-gallop" class="level2">
+<h2 class="anchored" data-anchor-id="download-solutions-and-close-gallop">4. Download solutions and close <em>GALLOP</em></h2>
+<p>You can download CIFs at any time using the link. If you wish to stop <em>GALLOP</em> at any point, you can press the Stop button that appears in the top right corner of the browser window when <em>GALLOP</em> is running.</p>
+<p>The link will give you a zip archive containing a CIF of the best solution found after each iteration, and a <code>.json</code> file which gives details of the settings used for the <em>GALLOP</em> run.</p>
+<p>Once you are finished, you can safely close the browser window. If running on your local machine, you can then close down the command line window you opened earlier. If running on a cloud notebook, you may wish to shut down the notebook (if using Colab or Kaggle) to conserve your useage quota, or if using a paid service, you may wish to shut down your VM in order to reduce costs.</p>
+</section>
+</section>
+<section id="conclusions" class="level1">
+<h1>Conclusions</h1>
+<p>We’ve covered the general process of how to use <em>GALLOP</em> to solve crystal structures. There are many more settings that can be adjusted to tweak how <em>GALLOP</em> runs. I encourage you to have a poke about the side-bar menus to see if anything jumps out at you. In future blog posts, I’ll highlight some of the advanced settings that can be used, which can provide performance improvements for certain types of crystal structure.</p>
+<p>In my next post, I will cover how to use the Python API to solve crystal structures. Whilst this requires a bit of Python knowledge, it gives more flexibility than the browser interface and can be used to do some cool stuff!</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

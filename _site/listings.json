@@ -1,0 +1,16 @@
+[
+  {
+    "listing": "/index.html",
+    "items": [
+      "/posts/2023-01-23-profile-chi-squared-when-dash-pawley-fails.html",
+      "/posts/2022-05-30-restraints-for-rings-and-stereochemistry.html",
+      "/posts/2022-01-08-profile-chi-squared-optimisation.html",
+      "/posts/2021-11-18-google-cloud.html",
+      "/posts/2021-11-10-hofcalc.html",
+      "/posts/2021-11-07-slices-of-hypersurfaces.html",
+      "/posts/2021-11-03-solving-structures-with-gallop-python-api.html",
+      "/posts/2021-11-02-solving-structures-with-gallop-browser-interface.html",
+      "/posts/2021-10-30-introduction-to-gallop.html"
+    ]
+  }
+]
